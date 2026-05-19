@@ -103,6 +103,24 @@ npm run build
 
 Or connect your GitHub repo to Vercel for automatic deployments.
 
+### GitHub Actions Auto-Deploy
+
+This repository is configured with GitHub Actions to automatically deploy to Vercel on push to `main` and on pull requests.
+
+To set this up, add the following **Repository Secrets** in GitHub (Settings > Secrets and variables > Actions):
+
+| Secret Name | Where to get it |
+|-------------|-----------------|
+| `VERCEL_TOKEN` | [vercel.com/account/tokens](https://vercel.com/account/tokens) |
+| `VERCEL_ORG_ID` | Vercel Project Settings > General |
+| `VERCEL_PROJECT_ID` | Vercel Project Settings > General |
+| `REACT_APP_FIREBASE_API_KEY` | Firebase Console |
+| `REACT_APP_FIREBASE_AUTH_DOMAIN` | Firebase Console |
+| `REACT_APP_FIREBASE_PROJECT_ID` | Firebase Console |
+| `REACT_APP_FIREBASE_STORAGE_BUCKET` | Firebase Console |
+| `REACT_APP_FIREBASE_MESSAGING_SENDER_ID` | Firebase Console |
+| `REACT_APP_FIREBASE_APP_ID` | Firebase Console |
+
 ---
 
 ## 📄 License
