@@ -59,7 +59,7 @@ src/
 
 ### 1. Clone the repo
 ```bash
-git clone https://github.com/your-username/codearena.git
+git clone https://github.com/balajiynspk-alt/Code-Arena.git
 cd codearena
 ```
 
