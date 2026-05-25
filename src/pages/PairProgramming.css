@@ -1,0 +1,295 @@
+/* ── LIVE COLLABORATIVE PAIR PROGRAMMING ROOMS ── */
+.cp-pair-page {
+  display: flex;
+  height: calc(100vh - 64px);
+  background: #0A0A0F;
+  font-family: 'Share Tech Mono', monospace;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Collab layout structure */
+.cp-pair-workspace {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+}
+
+.cp-pair-topbar {
+  height: 48px;
+  background: #0E0D15;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  z-index: 10;
+}
+
+.cp-pair-title-meta {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 1.5px;
+  color: #FFAA00;
+}
+
+.cp-pair-body {
+  flex: 1;
+  display: flex;
+  height: calc(100% - 48px);
+}
+
+/* Left panel split: problem details + editors */
+.cp-pair-editor-block {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  position: relative;
+}
+
+/* Problem description banner */
+.cp-pair-problem-overlay {
+  background: rgba(14, 13, 21, 0.95);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 16px 20px;
+  max-height: 140px;
+  overflow-y: auto;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: #A8A8C0;
+}
+
+.cp-pair-problem-title {
+  font-family: 'Orbitron', sans-serif;
+  color: #E8E8FF;
+  margin: 0 0 6px 0;
+  font-size: 0.9rem;
+}
+
+/* Monaco container */
+.cp-pair-editor-wrapper {
+  flex: 1;
+  position: relative;
+}
+
+/* Driver / Navigator Lock overlay */
+.cp-pair-lock-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(10, 10, 15, 0.82);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+
+.cp-pair-lock-card {
+  background: #0E0D15;
+  border: 1px solid #FF2D78;
+  border-radius: 8px;
+  padding: 24px 32px;
+  text-align: center;
+  max-width: 320px;
+  box-shadow: 0 0 25px rgba(255, 45, 120, 0.2);
+}
+
+.cp-pair-lock-icon {
+  font-size: 2.2rem;
+  margin-bottom: 12px;
+}
+
+.cp-pair-lock-title {
+  font-family: 'Orbitron', sans-serif;
+  color: #FF2D78;
+  font-size: 0.95rem;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+
+.cp-pair-lock-desc {
+  font-size: 0.76rem;
+  color: #8888AA;
+  line-height: 1.45;
+  margin-bottom: 16px;
+}
+
+/* Partner Sidebar Panel (30% width) */
+.cp-pair-sidebar {
+  width: 320px;
+  height: 100%;
+  background: #0E0D15;
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+}
+
+.cp-pair-sidebar-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  color: #A8A8C0;
+}
+
+.cp-pair-partner-card {
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cp-pair-partner-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00FF88, #00A2FF);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: #0A0A0F;
+  font-size: 0.9rem;
+}
+
+.cp-pair-partner-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cp-pair-partner-name {
+  font-size: 0.82rem;
+  color: #E8E8FF;
+  font-weight: bold;
+}
+
+.cp-pair-partner-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.68rem;
+  color: #8888AA;
+}
+
+.cp-pair-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #00FF88;
+}
+
+/* Speech Waveform speaking animation */
+.cp-pair-voice-wave {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 12px;
+}
+
+.cp-pair-wave-bar {
+  width: 2px;
+  height: 4px;
+  background: #00FF88;
+  animation: wavePulse 0.6s ease-in-out infinite alternate;
+}
+
+.cp-pair-wave-bar:nth-child(2) { animation-delay: 0.15s; }
+.cp-pair-wave-bar:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes wavePulse {
+  0% { height: 4px; }
+  100% { height: 12px; }
+}
+
+/* Collab messages chat drawer */
+.cp-pair-chat-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  overflow: hidden;
+}
+
+.cp-pair-chat-history {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 10px;
+}
+
+.cp-pair-msg-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cp-pair-msg-header {
+  font-size: 0.65rem;
+  color: #666688;
+}
+
+.cp-pair-msg-bubble {
+  background: #14131C;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 0.76rem;
+  color: #C8C8EE;
+  width: max-content;
+  max-width: 240px;
+  word-break: break-word;
+}
+
+.cp-pair-chat-input-bar {
+  display: flex;
+  gap: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 12px;
+}
+
+.cp-pair-chat-input {
+  flex: 1;
+  background: #14131C;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  color: #E8E8FF;
+  padding: 8px 12px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.76rem;
+}
+
+.cp-pair-chat-input:focus {
+  border-color: #FFAA00;
+  outline: none;
+}
+
+/* Cursors styling inside Monaco */
+.cp-pair-cursor-host {
+  border-left: 2px solid #FF2D78;
+  box-shadow: 0 0 8px #FF2D78;
+  animation: cursorBlink 1s infinite alternate;
+}
+
+.cp-pair-cursor-guest {
+  border-left: 2px solid #00FF88;
+  box-shadow: 0 0 8px #00FF88;
+  animation: cursorBlink 1s infinite alternate;
+}
+
+@keyframes cursorBlink {
+  0% { opacity: 0.1; }
+  100% { opacity: 1; }
+}

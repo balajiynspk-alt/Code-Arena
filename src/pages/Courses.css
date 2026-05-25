@@ -1,0 +1,119 @@
+.courses-container {
+  padding: 32px 48px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.courses-header {
+  margin-bottom: 32px;
+}
+
+.courses-header h1 {
+  font-size: 2rem;
+  margin-bottom: 8px;
+  color: var(--text-main);
+}
+
+.track-tabs {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 32px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 16px;
+}
+
+.track-tab {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  transition: var(--transition);
+}
+
+.track-tab:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-main);
+}
+
+.track-tab.active {
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--accent);
+}
+
+.courses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.course-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+}
+
+.course-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+  border-color: var(--accent);
+}
+
+.course-thumbnail {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  background: var(--bg-dark);
+}
+
+.course-content {
+  padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.course-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.course-title {
+  margin: 0 0 8px 0;
+  font-size: 1.25rem;
+  color: var(--text-main);
+}
+
+.course-description {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 20px;
+  flex: 1;
+}
+
+.course-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+}
+
+.lesson-count {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}

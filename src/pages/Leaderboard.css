@@ -1,0 +1,221 @@
+/* Standings styles */
+
+.cp-leader-page {
+  min-height: 100%;
+  background: #0A0A0F;
+  padding: 36px 48px 60px;
+  font-family: 'Share Tech Mono', monospace;
+  position: relative;
+  overflow: hidden;
+}
+
+.cp-leader-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 10;
+}
+
+/* Header */
+.cp-leader-header {
+  margin-bottom: 36px;
+}
+
+.cp-leader-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  margin: 0 0 6px;
+}
+
+.cp-t-orange { color: #FFAA00; text-shadow: 0 0 14px #FFAA0088; }
+
+.cp-leader-sub {
+  font-size: 0.82rem;
+  color: #8888AA;
+  margin: 0;
+}
+
+/* Highlighted podium layout */
+.cp-podium-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr 1fr;
+  gap: 20px;
+  align-items: flex-end;
+  margin-bottom: 36px;
+}
+
+.cp-podium-card {
+  background: #0F0F1A;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 32px 24px;
+  border-radius: 4px;
+  text-align: center;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cp-podium-card--first {
+  border-color: #FFAA00;
+  box-shadow: 0 8px 30px rgba(255, 170, 0, 0.15);
+  padding-top: 50px;
+  padding-bottom: 50px;
+}
+
+.cp-podium-card--second {
+  border-color: #A8A8C066;
+}
+
+.cp-podium-card--third {
+  border-color: #A8664466;
+}
+
+.cp-podium-champion-badge {
+  position: absolute;
+  top: -12px;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.58rem;
+  font-weight: bold;
+  letter-spacing: 1.5px;
+  background: #FFAA00;
+  color: #0A0A0F;
+  padding: 4px 12px;
+  border-radius: 2px;
+}
+
+.cp-podium-rank {
+  font-family: 'Orbitron', monospace;
+  font-size: 2.2rem;
+  font-weight: bold;
+  color: #555566;
+  margin-bottom: 12px;
+}
+
+.cp-podium-card--first .cp-podium-rank { color: #FFAA00; text-shadow: 0 0 10px rgba(255, 170, 0, 0.4); }
+.cp-podium-card--second .cp-podium-rank { color: #D8D8EE; }
+.cp-podium-card--third .cp-podium-rank { color: #A86644; }
+
+.cp-podium-emblem {
+  font-size: 2.8rem;
+  margin-bottom: 16px;
+}
+
+.cp-podium-name {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  color: #E8E8FF;
+  margin: 0 0 8px 0;
+  text-align: center;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cp-podium-pts {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.15rem;
+  font-weight: bold;
+  color: #00FF88;
+  margin-bottom: 4px;
+}
+
+.cp-podium-members {
+  font-size: 0.72rem;
+  color: #8888AA;
+}
+
+/* Global leaderboards list section */
+.cp-leader-section {
+  background: #0F0F1A;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  margin-bottom: 36px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.cp-leader-section-header {
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.cp-leader-section-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 2px;
+  color: #8888AA;
+  margin: 0;
+}
+
+.cp-leader-table-wrap {
+  overflow-x: auto;
+}
+
+.cp-leader-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.cp-leader-rank-badge {
+  display: inline-block;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.82rem;
+  color: #8888AA;
+  width: 32px;
+}
+
+.cp-leader-rank-badge.top {
+  color: #FFAA00;
+  font-weight: bold;
+}
+
+.cp-leader-emblem-inline {
+  font-size: 1.45rem;
+  margin-right: 12px;
+  vertical-align: middle;
+}
+
+.cp-leader-guild-name {
+  color: #E8E8FF;
+  font-size: 0.88rem;
+  vertical-align: middle;
+}
+
+/* Seasonal rewards details card */
+.cp-leader-reward-card {
+  position: relative;
+  background: #0F0F1A;
+  border: 1px solid #FFAA0044;
+  padding: 28px 32px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.cp-leader-reward-accent {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: #FFAA00;
+  box-shadow: 0 0 10px #FFAA00;
+}
+
+.cp-leader-reward-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.95rem;
+  letter-spacing: 1.5px;
+  color: #FFAA00;
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+.cp-leader-reward-desc {
+  font-size: 0.82rem;
+  color: #8888AA;
+  line-height: 1.5;
+  margin: 0;
+}

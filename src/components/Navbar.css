@@ -1,0 +1,241 @@
+/* ── Cyberpunk Navbar ─────────────────────────────────── */
+.cp-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  height: 64px;
+  padding: 0 32px;
+  background: #0F0F1A;
+  border-bottom: 2px solid #FF2D78;
+  box-shadow: 0 0 24px #FF2D7844;
+}
+
+/* ── Logo ──────────────────────────────────────────────── */
+.cp-logo {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  font-family: 'Orbitron', monospace;
+  font-weight: 700;
+  font-size: 1.35rem;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.cp-logo-code {
+  color: #FF2D78;
+  text-shadow: 0 0 12px #FF2D78aa;
+}
+
+.cp-logo-arena {
+  color: #00FF88;
+  text-shadow: 0 0 12px #00FF88aa;
+}
+
+/* ── Nav Links ─────────────────────────────────────────── */
+.cp-nav-links {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 4px;
+}
+
+.cp-nav-link {
+  display: inline-block;
+  padding: 6px 18px;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8888AA;
+  text-decoration: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  transition: color 0.18s, border-color 0.18s, box-shadow 0.18s;
+}
+
+.cp-nav-link:hover,
+.cp-nav-link.active {
+  color: #00FF88;
+  border-color: #00FF8844;
+  box-shadow: 0 0 10px #00FF8822;
+  text-shadow: 0 0 8px #00FF8888;
+}
+
+/* ── Right section ─────────────────────────────────────── */
+.cp-nav-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Streak pill */
+.cp-streak,
+.cp-coins {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.cp-streak {
+  background: rgba(255, 140, 0, 0.08);
+  border: 1px solid rgba(255, 140, 0, 0.3);
+  color: #FFA040;
+}
+
+.cp-coins {
+  background: rgba(255, 200, 0, 0.08);
+  border: 1px solid rgba(255, 200, 0, 0.3);
+  color: #FFD700;
+}
+
+/* Profile avatar button */
+.cp-profile-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FF2D78, #8B1042);
+  color: #fff;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 0 12px #FF2D7866;
+  transition: box-shadow 0.2s;
+}
+
+.cp-profile-btn:hover {
+  box-shadow: 0 0 20px #FF2D78aa;
+}
+
+/* ── Login button ─────────────────────────────────────── */
+.cp-login-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 28px;
+  background: #FF2D78;
+  color: #0A0A0F;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-decoration: none;
+  text-transform: uppercase;
+  /* angled clip-path shape */
+  clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+  transition: background 0.18s, box-shadow 0.18s;
+  box-shadow: 0 0 16px #FF2D7866;
+}
+
+.cp-login-btn:hover {
+  background: #ff5599;
+  box-shadow: 0 0 28px #FF2D78aa;
+}
+
+/* Incoming 1v1 Battle Notification Alert */
+.cp-battle-notification-overlay {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 380px;
+  background: rgba(15, 15, 26, 0.95);
+  border: 2px solid #FFAA00;
+  box-shadow: 0 0 30px rgba(255, 170, 0, 0.4);
+  border-radius: 8px;
+  padding: 16px 20px;
+  z-index: 10000;
+  backdrop-filter: blur(15px);
+  animation: cp-notification-slide 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@keyframes cp-notification-slide {
+  from { transform: translateY(100px) scale(0.9); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.cp-battle-notification-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cp-battle-notification-icon {
+  font-size: 1.5rem;
+  animation: cp-blink 1s infinite alternate;
+}
+
+.cp-battle-notification-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #FFAA00;
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+.cp-battle-notification-body {
+  font-size: 0.8rem;
+  color: #C8C8EE;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.cp-battle-notification-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.cp-battle-notification-btn {
+  flex: 1;
+  padding: 10px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.72rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cp-battle-notification-btn--accept {
+  background: #00FF88;
+  color: #0A0A0F;
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+}
+
+.cp-battle-notification-btn--accept:hover {
+  background: #33ff9e;
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.6);
+}
+
+.cp-battle-notification-btn--decline {
+  background: #FF2D78;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(255, 45, 120, 0.3);
+}
+
+.cp-battle-notification-btn--decline:hover {
+  background: #ff5599;
+  box-shadow: 0 0 20px rgba(255, 45, 120, 0.6);
+}
+

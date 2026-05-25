@@ -1,0 +1,93 @@
+:root {
+  --cp-pink: #FF2D78;
+  --cp-pink-dim: #8B1042;
+  --cp-pink-glow: #FF2D7844;
+  --cp-green: #00FF88;
+  --cp-green-dim: #00A855;
+  --cp-green-glow: #00FF8833;
+  --cp-bg: #0A0A0F;
+  --cp-surface: #0F0F1A;
+  --cp-surface2: #151525;
+  --cp-border-pink: #FF2D7844;
+  --cp-border-green: #00FF8844;
+  --cp-text: #E8E8FF;
+  --cp-text-dim: #8888AA;
+  --font-cyber: 'Orbitron', monospace;
+  --font-mono: 'Share Tech Mono', monospace;
+}
+
+body {
+  background: var(--cp-bg);
+  color: var(--cp-text);
+  font-family: var(--font-mono);
+}
+
+/* ── Global Utility Classes ──────────────────────────── */
+
+.cyber-card {
+  background: #0F0F1A;
+  border: 1px solid #FF2D7844;
+  position: relative;
+}
+
+.cyber-card-green {
+  background: #0F0F1A;
+  border: 1px solid #00FF8844;
+}
+
+.cyber-heading {
+  font-family: 'Orbitron', monospace;
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: #FF2D78;
+  text-transform: uppercase;
+}
+
+.cyber-heading-green {
+  font-family: 'Orbitron', monospace;
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: #00FF88;
+  text-transform: uppercase;
+}
+
+.cyber-btn-pink {
+  background: #FF2D78;
+  color: white;
+  font-family: 'Orbitron', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border: none;
+  padding: 8px 18px;
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  cursor: pointer;
+}
+
+.cyber-btn-green {
+  background: transparent;
+  color: #00FF88;
+  font-family: 'Orbitron', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border: 1px solid #00FF88;
+  padding: 8px 18px;
+  cursor: pointer;
+}
+
+.cyber-input {
+  background: #151525;
+  border: 1px solid #00FF8844;
+  color: #E8E8FF;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  padding: 8px 12px;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.cyber-input:focus {
+  border-color: #00FF88;
+}

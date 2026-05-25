@@ -1,0 +1,490 @@
+/* ═══════════════════════════════════════════════════════
+   CodeDNA — Premium Cyberpunk Visualizer Styles
+   ═══════════════════════════════════════════════════════ */
+
+.cp-dna-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  background: #0A0A0F;
+  color: #C8C8EE;
+  font-family: 'Share Tech Mono', monospace;
+  padding: 4px 0 20px;
+}
+
+/* ── Section Title ────────────────────────────────────── */
+.cp-dna-header {
+  border-bottom: 1px dashed #FF2D7833;
+  padding-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cp-dna-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #FF2D78;
+  letter-spacing: 2px;
+  text-shadow: 0 0 10px #FF2D7866;
+  margin: 0;
+}
+
+.cp-dna-subtitle {
+  font-size: 0.72rem;
+  color: #00FF88;
+  letter-spacing: 1px;
+  text-shadow: 0 0 6px #00FF8833;
+}
+
+/* ── Canvas Box ───────────────────────────────────────── */
+.cp-dna-canvas-wrapper {
+  position: relative;
+  width: 100%;
+  background: rgba(10, 10, 15, 0.6);
+  border: 1px solid #FFFFFF06;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8), 0 4px 20px rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.cp-dna-canvas-wrapper::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+  background-size: 100% 4px, 6px 100%;
+  pointer-events: none;
+}
+
+.cp-dna-canvas {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Hover hint text overlay */
+.cp-dna-hover-hint {
+  position: absolute;
+  bottom: 8px;
+  right: 12px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.52rem;
+  color: #8888AA;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  pointer-events: none;
+  opacity: 0.5;
+  transition: opacity 0.3s;
+}
+
+.cp-dna-canvas-wrapper:hover .cp-dna-hover-hint {
+  opacity: 1;
+  color: #00FF88;
+  text-shadow: 0 0 4px #00FF88;
+}
+
+/* ── Mutation Status Card ─────────────────────────────── */
+.cp-dna-status-card {
+  border-radius: 6px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Genomes aligned */
+.cp-dna-status--aligned {
+  background: rgba(0, 255, 136, 0.03);
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  box-shadow: inset 0 0 15px rgba(0, 255, 136, 0.02);
+}
+
+.cp-dna-status--aligned .status-title {
+  color: #00FF88;
+  text-shadow: 0 0 8px rgba(0, 255, 136, 0.4);
+}
+
+/* Mutation detected */
+.cp-dna-status--mutated {
+  background: rgba(255, 45, 120, 0.04);
+  border: 1px solid rgba(255, 45, 120, 0.3);
+  box-shadow: inset 0 0 15px rgba(255, 45, 120, 0.02);
+  animation: cp-card-pulse 3s infinite alternate;
+}
+
+.cp-dna-status--mutated .status-title {
+  color: #FF2D78;
+  text-shadow: 0 0 8px rgba(255, 45, 120, 0.4);
+}
+
+.status-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.cp-dna-status--aligned .status-indicator {
+  background: #00FF88;
+  box-shadow: 0 0 8px #00FF88;
+}
+
+.cp-dna-status--mutated .status-indicator {
+  background: #FF2D78;
+  box-shadow: 0 0 8px #FF2D78;
+  animation: cp-blink 1s step-end infinite;
+}
+
+.status-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 3px;
+  margin: 0;
+}
+
+.status-desc {
+  font-size: 0.78rem;
+  color: #8888AA;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.mutation-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.mutation-badge {
+  font-size: 0.68rem;
+  padding: 2px 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #C8C8EE;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mutation-badge.active-badge {
+  border-color: #FF2D7866;
+  background: rgba(255, 45, 120, 0.08);
+  color: #FF2D78;
+  box-shadow: 0 0 6px #FF2D7822;
+}
+
+.mutation-badge-delta {
+  font-weight: bold;
+  color: #00FF88;
+}
+
+/* ── Trait mini bar charts ────────────────────────────── */
+.cp-dna-traits-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cp-dna-trait-card {
+  background: #11111A;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 4px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.cp-dna-trait-card:hover {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.cp-dna-trait-card.trait-mutated {
+  border-color: rgba(255, 45, 120, 0.3);
+  box-shadow: 0 0 10px rgba(255, 45, 120, 0.05);
+  animation: cp-trait-glow 2s infinite alternate;
+}
+
+.trait-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.trait-label-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.trait-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.trait-name {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #8888AA;
+}
+
+.trait-mutated .trait-name {
+  color: #E8E8FF;
+}
+
+.trait-value-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.trait-value {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #E8E8FF;
+}
+
+.trait-delta {
+  font-size: 0.72rem;
+  font-weight: bold;
+}
+
+.trait-delta--up {
+  color: #FF2D78;
+}
+
+.trait-delta--down {
+  color: #00FF88;
+}
+
+/* Progress bar container */
+.trait-bar-bg {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+
+.trait-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.8s cubic-bezier(0.1, 0.8, 0.2, 1);
+  position: relative;
+}
+
+.trait-mutated .trait-bar-fill {
+  box-shadow: 0 0 8px var(--glow-color);
+}
+
+/* ── DNA Evolution Timeline ───────────────────────────── */
+.cp-dna-evolution {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cp-dna-evolution-heading {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  color: #FF2D78;
+  text-shadow: 0 0 6px #FF2D7833;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.evolution-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-left: 8px;
+  position: relative;
+}
+
+/* Vertical line */
+.evolution-timeline::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 12px;
+  width: 1px;
+  background: linear-gradient(to bottom, #FF2D7866 0%, #00FF8866 100%);
+  opacity: 0.5;
+}
+
+.timeline-item {
+  display: flex;
+  gap: 16px;
+  padding: 10px 0 10px 4px;
+  position: relative;
+}
+
+.timeline-node {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #0A0A0F;
+  border: 2px solid #8888AA;
+  position: relative;
+  z-index: 2;
+  margin-top: 4px;
+  margin-left: 4px;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+  transition: all 0.2s;
+}
+
+.timeline-item--latest .timeline-node {
+  border-color: #FF2D78;
+  background: #FF2D78;
+  box-shadow: 0 0 10px #FF2D78;
+}
+
+.timeline-item--previous .timeline-node {
+  border-color: #00FF88;
+}
+
+.timeline-content {
+  flex: 1;
+  background: #11111A;
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  border-radius: 4px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.timeline-item--latest .timeline-content {
+  border-color: rgba(255, 45, 120, 0.15);
+  box-shadow: 0 4px 12px rgba(255, 45, 120, 0.02);
+}
+
+.timeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.timeline-version {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #FF2D78;
+}
+
+.timeline-item--latest .timeline-version {
+  text-shadow: 0 0 4px #FF2D7855;
+}
+
+.timeline-time {
+  font-size: 0.72rem;
+  color: #8888AA;
+}
+
+.timeline-summary {
+  font-size: 0.75rem;
+  color: #C8C8EE;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 2px;
+}
+
+.timeline-lang {
+  color: #00FF88;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.timeline-traits {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+  font-size: 0.68rem;
+  color: #8888AA;
+}
+
+.timeline-trait-micro {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 1px 6px;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.timeline-trait-micro--val {
+  color: #E8E8FF;
+  font-weight: bold;
+}
+
+.timeline-empty {
+  font-size: 0.8rem;
+  color: #8888AA;
+  padding: 16px 8px;
+  border: 1px dashed rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  text-align: center;
+}
+
+/* ── Animations ───────────────────────────────────────── */
+@keyframes cp-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.2; }
+}
+
+@keyframes cp-card-pulse {
+  0% {
+    border-color: rgba(255, 45, 120, 0.25);
+    box-shadow: inset 0 0 10px rgba(255, 45, 120, 0.02);
+  }
+  100% {
+    border-color: rgba(255, 45, 120, 0.45);
+    box-shadow: inset 0 0 20px rgba(255, 45, 120, 0.06), 0 0 15px rgba(255, 45, 120, 0.02);
+  }
+}
+
+@keyframes cp-trait-glow {
+  0% {
+    box-shadow: 0 0 4px rgba(255, 45, 120, 0.02);
+    border-color: rgba(255, 45, 120, 0.2);
+  }
+  100% {
+    box-shadow: 0 0 12px rgba(255, 45, 120, 0.08);
+    border-color: rgba(255, 45, 120, 0.45);
+  }
+}

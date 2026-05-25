@@ -1,0 +1,208 @@
+/* AI Whiteboard workspace styling */
+
+.cp-whiteboard-page {
+  min-height: 100%;
+  background: #0A0A0F;
+  padding: 36px 48px 60px;
+  font-family: 'Share Tech Mono', monospace;
+  position: relative;
+  overflow: hidden;
+}
+
+.cp-whiteboard-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 10;
+}
+
+/* Header HUD */
+.cp-whiteboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #0F0F1A;
+  border: 1px solid #00DDFF44;
+  padding: 20px 32px;
+  border-radius: 4px;
+  margin-bottom: 24px;
+}
+
+.cp-whiteboard-title-logo {
+  font-size: 2.2rem;
+  background: rgba(0, 221, 255, 0.05);
+  padding: 8px 12px;
+  border: 1px solid rgba(0, 221, 255, 0.15);
+  border-radius: 4px;
+}
+
+.cp-whiteboard-title-input {
+  background: transparent;
+  border: none;
+  font-family: 'Orbitron', monospace;
+  font-size: 1.3rem;
+  letter-spacing: 2px;
+  color: #FFF;
+  outline: none;
+  width: 320px;
+}
+
+.cp-whiteboard-title-input:focus {
+  border-bottom: 1px solid #00DDFF;
+}
+
+.cp-whiteboard-meta {
+  font-size: 0.65rem;
+  color: #8888AA;
+  margin: 4px 0 0 0;
+  letter-spacing: 1px;
+}
+
+/* Toggle labels and dropdowns */
+.cp-whiteboard-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.72rem;
+  color: #8888AA;
+  cursor: pointer;
+}
+
+.cp-whiteboard-toggle-label input {
+  cursor: pointer;
+  accent-color: #00DDFF;
+}
+
+.cp-whiteboard-lang-select {
+  background: #141322;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #FFF;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.78rem;
+  padding: 8px 16px;
+  outline: none;
+  cursor: pointer;
+}
+
+/* Split Pane Workspace */
+.cp-whiteboard-workspace {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 24px;
+}
+
+.cp-whiteboard-canvas-wrap {
+  display: flex;
+  flex-direction: column;
+  background: #0F0F1A;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 4px;
+  padding: 16px;
+  overflow: hidden;
+}
+
+/* Drawing Toolbar */
+.cp-whiteboard-toolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  background: #0A0A0F;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.cp-toolbar-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: #8888AA;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.72rem;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cp-toolbar-btn:hover {
+  color: #FFF;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.cp-toolbar-btn.active {
+  color: #050508;
+  background: #00DDFF;
+  border-color: #00DDFF;
+  font-weight: bold;
+  box-shadow: 0 0 10px rgba(0, 221, 255, 0.4);
+}
+
+/* Dark flow Canvas */
+.cp-whiteboard-canvas {
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  cursor: crosshair;
+  background: #050508;
+  width: 100%;
+  display: block;
+}
+
+.cp-whiteboard-instructions {
+  font-size: 0.68rem;
+  color: #666688;
+  margin: 12px 0 0 0;
+  line-height: 1.4;
+}
+
+/* Right Panel Editor */
+.cp-whiteboard-editor-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.cp-whiteboard-editor-header {
+  background: #0F0F1A;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 16px 20px;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cp-whiteboard-editor-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 1.5px;
+  color: #8888AA;
+}
+
+.cp-whiteboard-editor-container {
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  overflow: hidden;
+  background: #1E1E1E;
+}
+
+/* AI Diagnostics Card */
+.cp-whiteboard-explanation-card {
+  background: #0F0F1A;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 20px;
+  border-radius: 4px;
+}
+
+.cp-whiteboard-exp-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 1.5px;
+  color: #FF2D78;
+  text-transform: uppercase;
+}
+
+.cp-whiteboard-exp-text {
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: #D8D8EE;
+  margin: 8px 0 0 0;
+}

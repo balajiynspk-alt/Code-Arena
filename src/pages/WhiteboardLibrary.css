@@ -1,0 +1,143 @@
+/* Whiteboard Library Page Styles */
+
+.cp-lib-page {
+  min-height: 100%;
+  background: #0A0A0F;
+  padding: 36px 48px 60px;
+  font-family: 'Share Tech Mono', monospace;
+  position: relative;
+  overflow: hidden;
+}
+
+.cp-lib-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 10;
+}
+
+/* Header */
+.cp-lib-header {
+  margin-bottom: 36px;
+}
+
+.cp-lib-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.75rem;
+  letter-spacing: 3px;
+  margin: 0 0 8px 0;
+}
+
+.cp-t-pink { color: #FF2D78; text-shadow: 0 0 12px rgba(255, 45, 120, 0.4); }
+.cp-t-cyan { color: #00DDFF; text-shadow: 0 0 12px rgba(0, 221, 255, 0.4); }
+
+.cp-lib-sub {
+  font-size: 0.8rem;
+  color: #8888AA;
+  margin: 0;
+}
+
+/* Diagram gallery grid */
+.cp-lib-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.cp-lib-card {
+  background: #0F0F1A;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 170px;
+  transition: all 0.3s ease;
+}
+
+.cp-lib-card:hover {
+  border-color: #00DDFF44;
+  box-shadow: 0 5px 25px rgba(0, 221, 255, 0.05);
+  transform: translateY(-2px);
+}
+
+.cp-lib-card-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  color: #E8E8FF;
+  margin: 0;
+}
+
+.cp-lib-upvote-btn {
+  background: rgba(255, 45, 120, 0.08);
+  border: 1px solid rgba(255, 45, 120, 0.2);
+  color: #FF2D78;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.cp-lib-upvote-btn:hover {
+  background: rgba(255, 45, 120, 0.2);
+}
+
+.cp-lib-card-meta {
+  font-size: 0.72rem;
+  color: #666688;
+  margin: 12px 0;
+}
+
+/* Playback step modal splits */
+.cp-lib-player-modal {
+  padding-bottom: 24px !important;
+}
+
+.cp-lib-player-split {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 24px;
+  margin-top: 16px;
+  align-items: start;
+}
+
+.cp-lib-player-canvas {
+  background: #050508;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  width: 100%;
+}
+
+.cp-lib-player-code-wrap {
+  background: #0F0F1A;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+}
+
+.cp-lib-player-step-desc {
+  padding: 16px;
+  background: #0A0A0F;
+  min-height: 240px;
+}
+
+.cp-lib-player-pre {
+  background: #141322;
+  border: 1px solid rgba(255,255,255,0.03);
+  padding: 12px;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: #00FF88;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  margin: 0;
+  max-height: 220px;
+  overflow-y: auto;
+}

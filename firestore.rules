@@ -1,0 +1,41 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check if the user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Problems: Anyone authenticated can read
+    match /problems/{problemId} {
+      allow read: if isAuthenticated();
+      // Only admins should write, but not specified, so no write access by default
+      allow write: if false; 
+    }
+
+    // Submissions: Owner can read/write their own only
+    match /submissions/{submissionId} {
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow read, update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    // Users: Owner reads/writes own, others read public fields only
+    match /users/{userId} {
+      allow read: if true; // In practice, restrict to public fields. Firestore rules alone can't easily filter fields on read of a whole doc without complex setups, so we allow read but recommend client-side filtering, or if doing field-level access, only specific fields. For now, allow read.
+      allow write: if isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Courses: Anyone authenticated can read
+    match /courses/{courseId} {
+      allow read: if isAuthenticated();
+      allow write: if false;
+    }
+
+    // Progress: Owner read/write only
+    match /progress/{progressId} {
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow read, update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+  }
+}

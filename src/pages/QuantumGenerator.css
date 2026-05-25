@@ -1,0 +1,473 @@
+/* Quantum Generator styling */
+
+.cp-quantum-page {
+  min-height: 100%;
+  background: #0A0A0F;
+  color: #E8E8FF;
+  font-family: 'Share Tech Mono', monospace;
+  position: relative;
+  overflow: hidden;
+  padding: 36px 48px;
+}
+
+.cp-quantum-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 10;
+}
+
+/* Header */
+.cp-quantum-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.cp-quantum-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.55rem;
+  letter-spacing: 2px;
+  margin: 0 0 6px 0;
+}
+
+.cp-quantum-sub {
+  font-size: 0.78rem;
+  color: #8888AA;
+  margin: 0;
+}
+
+.cp-quantum-btn {
+  background: #FF2D78;
+  color: #000;
+  border: none;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.72rem;
+  font-weight: bold;
+  padding: 10px 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  box-shadow: 0 0 15px rgba(255, 45, 120, 0.4);
+  transition: all 0.2s;
+}
+
+.cp-quantum-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 25px rgba(255, 45, 120, 0.6);
+}
+
+/* 🌌 MATRIX LOADING SCREEN OVERLAY 🌌 */
+.cp-quantum-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #0A0A0F;
+  z-index: 120000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cp-matrix-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.25;
+}
+
+.cp-loading-content {
+  position: relative;
+  z-index: 130000;
+  text-align: center;
+  width: 500px;
+  max-width: 90%;
+  padding: 30px;
+  background: rgba(15, 15, 26, 0.95);
+  border: 1px solid rgba(0, 255, 136, 0.15);
+  border-radius: 4px;
+  box-shadow: 0 0 40px rgba(0, 255, 136, 0.05);
+}
+
+.cp-loading-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.1rem;
+  letter-spacing: 2px;
+  color: #00FF88;
+  margin: 16px 0 8px 0;
+}
+
+.cp-loading-step {
+  font-size: 0.78rem;
+  color: #8888AA;
+  margin-bottom: 20px;
+}
+
+.cp-loading-bar-wrap {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.cp-loading-bar-fill {
+  height: 100%;
+  background: #00FF88;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 10px #00FF88;
+}
+
+/* Grid Layout */
+.cp-quantum-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 1000px) {
+  .cp-quantum-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Sidebar weak profile card */
+.cp-quantum-sidebar {
+  display: flex;
+  flex-direction: column;
+}
+
+.cp-q-card {
+  background: #0F0F1A;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 4px;
+  padding: 16px;
+}
+
+.cp-q-h {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.72rem;
+  color: #8888AA;
+  margin: 0 0 16px 0;
+  letter-spacing: 1px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  padding-bottom: 8px;
+}
+
+.cp-q-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cp-q-topics {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cp-q-lbl-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  color: #8888AA;
+  font-weight: bold;
+}
+
+.cp-q-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  padding: 6px 8px;
+  border-radius: 2px;
+}
+
+.cp-q-row.weak {
+  background: rgba(255, 85, 85, 0.03);
+  border-left: 2px solid #FF5555;
+}
+
+.cp-q-row.strong {
+  background: rgba(0, 255, 136, 0.02);
+  border-left: 2px solid #00FF88;
+}
+
+.cp-q-val {
+  font-weight: bold;
+}
+
+.cp-q-vectors {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cp-q-sh {
+  font-size: 0.65rem;
+  color: #8888AA;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.cp-q-vector-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.cp-q-v-badge {
+  background: rgba(255, 45, 120, 0.05);
+  border: 1px solid rgba(255, 45, 120, 0.15);
+  font-size: 0.65rem;
+  padding: 3px 6px;
+  border-radius: 2px;
+  color: #FF2D78;
+}
+
+.cp-q-rec {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  padding-top: 12px;
+}
+
+.cp-q-rec-lbl { color: #8888AA; }
+.cp-q-rec-val {
+  color: #FFAA00;
+  font-weight: bold;
+}
+
+/* History bank list */
+.cp-q-bank-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cp-bank-item {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.01);
+  padding: 8px 12px;
+  border-radius: 3px;
+}
+
+.cp-bank-title {
+  font-size: 0.72rem;
+  font-weight: bold;
+  margin-bottom: 2px;
+}
+
+.cp-bank-meta {
+  font-size: 0.62rem;
+  color: #8888AA;
+}
+
+.cp-q-placeholder {
+  font-size: 0.68rem;
+  color: #8888AA;
+  text-align: center;
+  margin: 0;
+}
+
+/* RIGHT: Result problem statement styles */
+.cp-quantum-workspace {
+  background: #0F0F1A;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 4px;
+  min-height: 480px;
+}
+
+.cp-q-workspace-card {
+  padding: 24px;
+}
+
+.cp-quantum-pill-banner {
+  background: rgba(255, 170, 0, 0.05);
+  border: 1px solid #FFAA00;
+  border-radius: 3px;
+  color: #FFAA00;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.65rem;
+  font-weight: bold;
+  padding: 8px 14px;
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+}
+
+.cp-q-p-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.35rem;
+  letter-spacing: 1px;
+  margin: 0 0 16px 0;
+}
+
+.cp-q-p-story {
+  font-size: 0.78rem;
+  color: #8888AA;
+  line-height: 1.6;
+  border-left: 2px solid rgba(255, 255, 255, 0.1);
+  padding-left: 14px;
+  margin-bottom: 20px;
+  font-style: italic;
+}
+
+.cp-story-quote {
+  font-size: 1.5rem;
+  color: #FF2D78;
+  vertical-align: middle;
+  line-height: 0;
+}
+
+.cp-q-p-h {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.72rem;
+  color: #8888AA;
+  margin: 20px 0 8px 0;
+  letter-spacing: 1px;
+}
+
+.cp-q-p-desc {
+  font-size: 0.78rem;
+  color: #E8E8FF;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.cp-q-p-constraints {
+  font-size: 0.75rem;
+  color: #8888AA;
+  padding-left: 16px;
+  margin: 0;
+}
+
+.cp-q-hints {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cp-q-hint-row {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  padding: 8px 12px;
+  border-radius: 3px;
+  display: flex;
+  gap: 12px;
+  font-size: 0.75rem;
+}
+
+.cp-hint-idx {
+  color: #FF2D78;
+  font-weight: bold;
+}
+
+.cp-hint-text {
+  color: #E8E8FF;
+}
+
+/* Feedback adjusters */
+.cp-q-feedback-panel {
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  margin-top: 24px;
+  padding-top: 16px;
+}
+
+.cp-q-feedback-h {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.65rem;
+  color: #8888AA;
+  margin: 0 0 10px 0;
+}
+
+.cp-feedback-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.cp-feedback-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: #8888AA;
+  font-size: 0.62rem;
+  padding: 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cp-feedback-btn:hover,
+.cp-feedback-btn.active {
+  border-color: #FFAA0055;
+  color: #FFAA00;
+  background: rgba(255, 170, 0, 0.02);
+}
+
+.cp-q-launch-wrap {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.cp-q-launch-btn {
+  background: #00FF88;
+  color: #000;
+  border: none;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 10px 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+  transition: all 0.2s;
+}
+
+.cp-q-launch-btn:hover {
+  box-shadow: 0 0 25px rgba(0, 255, 136, 0.6);
+}
+
+/* Empty workspace placeholder */
+.cp-q-empty-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 60px 40px;
+  height: 100%;
+}
+
+.cp-empty-ico {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  animation: cp-empty-spin 6s linear infinite;
+  display: inline-block;
+}
+
+@keyframes cp-empty-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.cp-q-empty-card h3 {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.95rem;
+  letter-spacing: 1px;
+  margin: 0 0 8px 0;
+}
+
+.cp-q-empty-card p {
+  font-size: 0.75rem;
+  color: #8888AA;
+  line-height: 1.6;
+  max-width: 440px;
+  margin: 0;
+}

@@ -1,0 +1,133 @@
+/* Emotional Coding Engine HUD Styles */
+
+.cp-emotion-badge-wrap {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 10000;
+  font-family: 'Share Tech Mono', monospace;
+}
+
+/* Subtle trigger pill */
+.cp-emotion-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(15, 15, 26, 0.95);
+  border: 1px solid #FF2D78;
+  border-radius: 20px;
+  padding: 8px 16px;
+  cursor: pointer;
+  opacity: 0.35;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+}
+
+.cp-emotion-trigger:hover {
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+.cp-em-icon {
+  font-size: 1.1rem;
+}
+
+.cp-em-state-lbl {
+  font-size: 0.72rem;
+  letter-spacing: 1px;
+  font-weight: bold;
+}
+
+/* Interactive Biometric Drawer */
+.cp-emotion-drawer {
+  position: absolute;
+  bottom: 50px;
+  right: 0;
+  width: 290px;
+  background: rgba(15, 15, 26, 0.98);
+  border: 1px solid #FF2D78;
+  border-radius: 4px;
+  padding: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(15px);
+  animation: cp-drawer-slide 0.3s ease-out;
+}
+
+@keyframes cp-drawer-slide {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.cp-em-drawer-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 1px;
+}
+
+.cp-em-close {
+  background: transparent;
+  border: none;
+  color: #666688;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.cp-em-close:hover {
+  color: #FFF;
+}
+
+.cp-em-diag-p {
+  font-size: 0.68rem;
+  color: #8888AA;
+  margin: 6px 0 12px 0;
+  line-height: 1.4;
+}
+
+.cp-em-metrics-card {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 12px;
+  border-radius: 3px;
+  font-size: 0.75rem;
+}
+
+.cp-em-diag-desc {
+  font-size: 0.68rem;
+  color: #8888AA;
+  margin: 6px 0 0 0;
+  line-height: 1.4;
+}
+
+/* Override overrides list */
+.cp-em-override-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  margin-top: 8px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.cp-em-override-btn {
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: #8888AA;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.7rem;
+  padding: 6px 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-radius: 3px;
+}
+
+.cp-em-override-btn:hover {
+  background: rgba(255,255,255,0.03);
+  color: #FFF;
+}
+
+.cp-em-override-btn.active {
+  background: rgba(255, 255, 255, 0.04);
+  color: #FFF;
+  font-weight: bold;
+}

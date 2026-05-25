@@ -1,0 +1,397 @@
+/* ── AlgorithmVisualizer.css ── */
+
+.cp-visualizer {
+  background: #0A0A0F;
+  border: 1px solid #FF2D7844;
+  border-radius: 4px;
+  overflow: hidden;
+  font-family: 'Share Tech Mono', monospace;
+  margin-top: 16px;
+  box-shadow: 0 0 20px rgba(255, 45, 120, 0.05);
+}
+
+/* ── Matrix Rain Header ── */
+.cp-viz-header {
+  position: relative;
+  height: 60px;
+  background: #05050A;
+  border-bottom: 1px solid #FF2D7844;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  overflow: hidden;
+}
+
+.cp-viz-matrix-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+.cp-viz-header-title {
+  position: relative;
+  z-index: 1;
+  font-family: 'Orbitron', monospace;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #00FF88;
+  text-shadow: 0 0 10px #00FF88aa;
+  letter-spacing: 2px;
+}
+
+/* ── Selector Chips ── */
+.cp-viz-selector {
+  display: flex;
+  gap: 10px;
+  padding: 16px 20px;
+  background: #0F0F1A;
+  border-bottom: 1px solid #FFFFFF0A;
+  flex-wrap: wrap;
+}
+
+.cp-viz-chip {
+  background: transparent;
+  border: 1px solid #00FF8844;
+  color: #8888AA;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cp-viz-chip:hover {
+  border-color: #00FF88AA;
+  color: #00FF88;
+}
+
+.cp-viz-chip.active {
+  background: rgba(0, 255, 136, 0.1);
+  border-color: #00FF88;
+  color: #00FF88;
+  text-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.15);
+}
+
+/* ── Control Bar ── */
+.cp-viz-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: #0F0F1A;
+  border-bottom: 1px solid #FFFFFF0A;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.cp-viz-btn-group {
+  display: flex;
+  gap: 8px;
+}
+
+.cp-viz-ctrl-btn {
+  background: transparent;
+  color: #8888AA;
+  border: 1px solid #8888AA44;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cp-viz-ctrl-btn:hover:not(:disabled) {
+  color: #E8E8FF;
+  border-color: #E8E8FF88;
+}
+
+.cp-viz-ctrl-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.cp-viz-ctrl-btn.active-green {
+  border-color: #00FF88;
+  color: #00FF88;
+  text-shadow: 0 0 6px #00FF8888;
+}
+
+.cp-viz-ctrl-btn.active-pink {
+  border-color: #FF2D78;
+  color: #FF2D78;
+  text-shadow: 0 0 6px #FF2D7888;
+}
+
+.cp-viz-slider-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #8888AA;
+  font-size: 0.75rem;
+}
+
+.cp-viz-slider {
+  -webkit-appearance: none;
+  width: 100px;
+  height: 4px;
+  background: #151525;
+  outline: none;
+  border: 1px solid #00FF8822;
+}
+
+.cp-viz-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  background: #00FF88;
+  cursor: pointer;
+  box-shadow: 0 0 6px #00FF88;
+}
+
+/* ── Main Layout Areas ── */
+.cp-viz-body {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  background: #0A0A0F;
+  min-height: 380px;
+}
+
+/* ── Left Side: Visuals & Logs ── */
+.cp-viz-left {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #FFFFFF0A;
+}
+
+/* Visualization Board */
+.cp-viz-board {
+  flex: 1;
+  padding: 24px;
+  position: relative;
+  min-height: 250px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle, #0F0F1A 0%, #0A0A0F 100%);
+  overflow: hidden;
+}
+
+/* Live step logs */
+.cp-viz-logs {
+  height: 80px;
+  background: #05050A;
+  border-top: 1px solid #FFFFFF0A;
+  padding: 10px 16px;
+  overflow-y: auto;
+  font-size: 0.8rem;
+  color: #8888AA;
+  line-height: 1.5;
+}
+
+.cp-viz-log-item {
+  margin-bottom: 4px;
+}
+
+.cp-viz-log-item.active {
+  color: #00FF88;
+  text-shadow: 0 0 4px rgba(0, 255, 136, 0.4);
+}
+
+/* ── Right Side: Pseudocode & Graph ── */
+.cp-viz-right {
+  display: flex;
+  flex-direction: column;
+  background: #0F0F1A;
+}
+
+.cp-viz-panel-header {
+  padding: 8px 16px;
+  background: rgba(255, 45, 120, 0.04);
+  border-bottom: 1px solid #FF2D7833;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #FF2D78;
+}
+
+.cp-viz-pseudocode {
+  flex: 1;
+  padding: 16px;
+  background: #0F0F1A;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: #8888AA;
+  overflow-y: auto;
+}
+
+.cp-viz-code-line {
+  padding: 2px 8px;
+  border-left: 2px solid transparent;
+  white-space: pre;
+}
+
+.cp-viz-code-line.highlight {
+  background: rgba(255, 45, 120, 0.08);
+  border-left-color: #FF2D78;
+  color: #FF2D78;
+  text-shadow: 0 0 6px rgba(255, 45, 120, 0.4);
+}
+
+/* Graph Canvas Panel */
+.cp-viz-graph-panel {
+  height: 120px;
+  border-top: 1px solid #FFFFFF0A;
+  background: #0A0A0F;
+  position: relative;
+}
+
+.cp-viz-graph-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Algorithm-Specific Board Visuals ── */
+
+/* Arrays & Pointers */
+.cp-viz-array {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.cp-viz-bar-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.cp-viz-bar {
+  width: 32px;
+  background: #151525;
+  border: 1px solid #FF2D7844;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.cp-viz-bar.active {
+  background: rgba(255, 45, 120, 0.2);
+  border-color: #FF2D78;
+  box-shadow: 0 0 10px rgba(255, 45, 120, 0.2);
+}
+
+.cp-viz-bar.comparing {
+  background: rgba(0, 255, 136, 0.2);
+  border-color: #00FF88;
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+}
+
+.cp-viz-bar.sorted {
+  background: rgba(0, 255, 136, 0.1);
+  border-color: #00FF88;
+}
+
+.cp-viz-bar-value {
+  color: #E8E8FF;
+  font-size: 0.8rem;
+}
+
+.cp-viz-pointer-label {
+  font-size: 0.65rem;
+  color: #FF2D78;
+  font-weight: bold;
+}
+
+/* Linked List Visualization */
+.cp-viz-list {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.cp-viz-node {
+  width: 50px;
+  height: 50px;
+  border: 1px solid #8888AA44;
+  background: #0F0F1A;
+  color: #8888AA;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.cp-viz-node.active {
+  border-color: #FF2D78;
+  color: #FF2D78;
+  box-shadow: 0 0 12px rgba(255, 45, 120, 0.4);
+  background: rgba(255, 45, 120, 0.05);
+}
+
+.cp-viz-node.visited {
+  border-color: #00FF88;
+  color: #00FF88;
+}
+
+.cp-viz-node.target {
+  background: rgba(0, 255, 136, 0.1);
+  border-color: #00FF88;
+  color: #00FF88;
+}
+
+.cp-viz-node-arrow {
+  color: #FF2D7888;
+  font-size: 1.2rem;
+}
+
+/* Hash Map Table */
+.cp-viz-hash-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  width: 100%;
+  max-width: 500px;
+}
+
+.cp-viz-hash-slot {
+  background: #0F0F1A;
+  border: 1px solid #8888AA44;
+  padding: 10px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.cp-viz-hash-slot.active {
+  border-color: #FF2D78;
+  box-shadow: 0 0 10px rgba(255, 45, 120, 0.3);
+}
+
+.cp-viz-hash-slot.filled {
+  border-color: #00FF88;
+  color: #00FF88;
+}
+
+.cp-viz-hash-slot-num {
+  font-size: 0.6rem;
+  color: #8888AA;
+}
+
+.cp-viz-hash-slot-val {
+  font-size: 0.8rem;
+  margin-top: 4px;
+}

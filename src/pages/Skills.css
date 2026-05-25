@@ -1,0 +1,633 @@
+/* ═══════════════════════════════════════════════════════
+   Skills — Interactive DSA RPG Skill Tree Style
+   ═══════════════════════════════════════════════════════ */
+
+.cp-skills-container {
+  display: flex;
+  height: 100%;
+  background: #0A0A0F;
+  color: #C8C8EE;
+  font-family: 'Share Tech Mono', monospace;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Background grid overlay */
+.cp-skills-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 45, 120, 0.02) 0%, rgba(0, 255, 136, 0.01) 50%, transparent 100%),
+              linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%),
+              linear-gradient(90deg, rgba(255, 255, 255, 0.01) 1px, transparent 1px),
+              linear-gradient(0deg, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 4px, 40px 40px, 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Main Layout Areas ───────────────────────────────── */
+.cp-skills-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* ── Skill Tree Header (RPG level HUD) ────────────────── */
+.cp-skills-hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  background: rgba(15, 15, 26, 0.7);
+  border-bottom: 1px solid rgba(255, 45, 120, 0.15);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.hud-player {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hud-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: #FF2D78;
+  letter-spacing: 2px;
+  text-shadow: 0 0 10px #FF2D7866;
+  margin: 0;
+}
+
+.hud-rank-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hud-level-badge {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #0A0A0F;
+  background: #00FF88;
+  padding: 3px 8px;
+  border-radius: 3px;
+  letter-spacing: 1px;
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
+.hud-rank-title {
+  font-size: 0.85rem;
+  color: #00FF88;
+  letter-spacing: 1px;
+  font-weight: bold;
+}
+
+/* XP Bar HUD style */
+.hud-xp-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 280px;
+}
+
+.hud-xp-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: #8888AA;
+}
+
+.hud-xp-bar-bg {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.hud-xp-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #FF2D78, #FF6D00, #00FF88);
+  border-radius: 4px;
+  box-shadow: 0 0 8px #FF2D78aa;
+  transition: width 0.6s ease;
+}
+
+/* ── Tree Scroll Area ────────────────────────────────── */
+.cp-skills-tree-scroll {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 20px;
+  background: transparent;
+}
+
+.cp-skills-tree-wrapper {
+  position: relative;
+  width: 1000px;
+  height: 760px;
+}
+
+.cp-skills-svg {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 2;
+}
+
+/* Particle explosion canvas */
+.cp-skills-particle-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* ── Animated SVG Connection Paths ──────────────────── */
+.cp-skill-path {
+  stroke-width: 2.5;
+  fill: none;
+  transition: stroke 0.3s, stroke-dashoffset 0.3s;
+}
+
+.cp-skill-path--locked {
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-dasharray: 6 6;
+}
+
+.cp-skill-path--unlocked {
+  stroke: rgba(0, 255, 136, 0.3);
+  stroke-dasharray: 6 6;
+  animation: cp-flow-unlocked 1s linear infinite;
+}
+
+.cp-skill-path--mastered {
+  stroke: #FF2D78;
+  stroke-dasharray: 8 4;
+  animation: cp-flow-mastered 1.2s linear infinite;
+  filter: drop-shadow(0 0 4px rgba(255, 45, 120, 0.5));
+}
+
+@keyframes cp-flow-unlocked {
+  to { stroke-dashoffset: -12; }
+}
+
+@keyframes cp-flow-mastered {
+  to { stroke-dashoffset: -12; }
+}
+
+/* ── Hexagonal Node Styling Groups ────────────────────── */
+.skill-hex-group {
+  cursor: pointer;
+  outline: none;
+}
+
+.skill-hex-bg {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.skill-hex-border {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.skill-node-text {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  pointer-events: none;
+  transition: fill 0.3s;
+}
+
+.skill-node-text-sub {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 8px;
+  pointer-events: none;
+  fill: #8888AA;
+}
+
+/* STATES */
+/* 1. Locked Node */
+.skill-hex-group--locked .skill-hex-bg {
+  fill: #141424;
+}
+.skill-hex-group--locked .skill-hex-border {
+  stroke: #3A3A4E;
+  stroke-width: 2;
+}
+.skill-hex-group--locked .skill-node-text {
+  fill: #5A5A72;
+}
+.skill-hex-group--locked:hover .skill-hex-border {
+  stroke: #5A5A72;
+  stroke-width: 2.5;
+}
+
+/* 2. Unlocked Node */
+.skill-hex-group--unlocked .skill-hex-bg {
+  fill: #0A1B14;
+}
+.skill-hex-group--unlocked .skill-hex-border {
+  stroke: #00FF88;
+  stroke-width: 2;
+}
+.skill-hex-group--unlocked .skill-node-text {
+  fill: #00FF88;
+}
+.skill-hex-group--unlocked:hover .skill-hex-bg {
+  fill: #0E291F;
+}
+.skill-hex-group--unlocked:hover .skill-hex-border {
+  stroke-width: 3;
+  filter: drop-shadow(0 0 8px #00FF8888);
+}
+
+/* 3. Active Node */
+.skill-hex-group--active .skill-hex-bg {
+  fill: #1A0D15;
+}
+.skill-hex-group--active .skill-hex-border {
+  stroke: #FF2D78;
+  stroke-width: 3;
+  animation: cp-node-pulse 2s infinite alternate;
+}
+.skill-hex-group--active .skill-node-text {
+  fill: #FF2D78;
+  text-shadow: 0 0 4px rgba(255, 45, 120, 0.5);
+}
+.skill-hex-group--active:hover .skill-hex-bg {
+  fill: #2B1220;
+}
+.skill-hex-group--active:hover .skill-hex-border {
+  stroke-width: 3.5;
+  filter: drop-shadow(0 0 10px #FF2D78);
+}
+
+/* 4. Mastered Node */
+.skill-hex-group--mastered .skill-hex-bg {
+  fill: #FF2D78;
+}
+.skill-hex-group--mastered .skill-hex-border {
+  stroke: #FF4E8B;
+  stroke-width: 2;
+}
+.skill-hex-group--mastered .skill-node-text {
+  fill: #0A0A0F;
+}
+.skill-hex-group--mastered .skill-node-text-sub {
+  fill: #0A0A0F;
+  opacity: 0.7;
+}
+.skill-hex-group--mastered:hover .skill-hex-bg {
+  fill: #ff4387;
+}
+.skill-hex-group--mastered:hover .skill-hex-border {
+  filter: drop-shadow(0 0 8px #FF2D78aa);
+}
+
+/* Icon styles inside nodes */
+.skill-node-icon {
+  pointer-events: none;
+  font-size: 14px;
+}
+
+/* Selected zoom border style overlay */
+.skill-hex-group--selected .skill-hex-border {
+  stroke-width: 4 !important;
+  stroke: #FFCC00 !important;
+  filter: drop-shadow(0 0 12px #FFCC00) !important;
+}
+
+/* Node XP Mini Bars (drawn directly in SVG) */
+.node-xp-bg {
+  fill: rgba(255, 255, 255, 0.05);
+  stroke: rgba(255, 255, 255, 0.1);
+  stroke-width: 0.5;
+}
+
+.node-xp-fill {
+  transition: width 0.5s ease;
+}
+
+/* ── RPG Talent Details Sidebar ──────────────────────── */
+.cp-skills-sidebar {
+  width: 360px;
+  background: rgba(15, 15, 26, 0.85);
+  border-left: 1px solid rgba(255, 45, 120, 0.15);
+  box-shadow: -4px 0 30px rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(15px);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  z-index: 10;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.cp-skills-sidebar--collapsed {
+  transform: translateX(100%);
+  width: 0;
+  border-left: none;
+}
+
+.sidebar-header {
+  padding: 20px 24px;
+  border-bottom: 1px dashed rgba(255, 45, 120, 0.2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sidebar-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #FF2D78;
+  letter-spacing: 1.5px;
+  margin: 0;
+  text-shadow: 0 0 8px #FF2D7844;
+}
+
+.sidebar-close-btn {
+  background: transparent;
+  border: none;
+  color: #8888AA;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.sidebar-close-btn:hover {
+  color: #FF2D78;
+}
+
+.sidebar-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* State info card */
+.sidebar-status-card {
+  border-radius: 6px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sidebar-status-card--locked {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.sidebar-status-card--unlocked {
+  background: rgba(0, 255, 136, 0.03);
+  border: 1px solid rgba(0, 255, 136, 0.15);
+}
+.sidebar-status-card--active {
+  background: rgba(255, 45, 120, 0.03);
+  border: 1px solid rgba(255, 45, 120, 0.15);
+}
+.sidebar-status-card--mastered {
+  background: rgba(255, 45, 120, 0.1);
+  border: 1px solid #FF2D78;
+  box-shadow: inset 0 0 10px rgba(255, 45, 120, 0.15);
+}
+
+.sidebar-status-badge {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.65rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+.sidebar-status-badge--locked   { color: #8888AA; }
+.sidebar-status-badge--unlocked { color: #00FF88; }
+.sidebar-status-badge--active   { color: #FF2D78; }
+.sidebar-status-badge--mastered { color: #FF2D78; text-shadow: 0 0 4px #FF2D78; }
+
+.sidebar-status-desc {
+  font-size: 0.8rem;
+  color: #8888AA;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Target problem requirements stats */
+.sidebar-stats-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sidebar-section-heading {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #00FF88;
+  margin: 0 0 4px;
+}
+
+.sidebar-stat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #121220;
+  padding: 10px 14px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: #8888AA;
+}
+
+.stat-number {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #E8E8FF;
+}
+
+.stat-number.stat-ok {
+  color: #00FF88;
+}
+
+.stat-number.stat-pending {
+  color: #FFA040;
+}
+
+/* Problems to solve block list */
+.sidebar-problems-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sidebar-problem-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #121220;
+  border-left: 3px solid #8888AA;
+  padding: 10px 12px;
+  border-radius: 0 4px 4px 0;
+  transition: background 0.2s;
+}
+
+.sidebar-problem-item:hover {
+  background: #17172C;
+}
+
+.sidebar-problem-item.diff-easy   { border-left-color: #00FF88; }
+.sidebar-problem-item.diff-medium { border-left-color: #FFA040; }
+.sidebar-problem-item.diff-hard   { border-left-color: #FF2D78; }
+
+.problem-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.problem-item-title {
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: #E8E8FF;
+}
+
+.problem-item-meta {
+  display: flex;
+  gap: 10px;
+  font-size: 0.7rem;
+}
+
+.problem-item-diff {
+  font-weight: bold;
+}
+.problem-item-diff.easy   { color: #00FF88; }
+.problem-item-diff.medium { color: #FFA040; }
+.problem-item-diff.hard   { color: #FF2D78; }
+
+.problem-item-xp {
+  color: #8888AA;
+}
+
+.sidebar-problem-action {
+  padding: 6px 12px;
+  background: #FF2D78;
+  color: #0A0A0F;
+  border: none;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sidebar-problem-action:hover {
+  background: #ff4d8f;
+  box-shadow: 0 0 10px rgba(255, 45, 120, 0.4);
+  transform: translateY(-1px);
+}
+
+/* Big Action button (Activate / Master node) */
+.sidebar-unleash-btn {
+  margin-top: 10px;
+  width: 100%;
+  padding: 12px;
+  background: #FF2D78;
+  color: #0A0A0F;
+  border: none;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.2s;
+  box-shadow: 0 0 15px rgba(255, 45, 120, 0.4);
+}
+
+.sidebar-unleash-btn:hover {
+  background: #ff4d8f;
+  box-shadow: 0 0 25px rgba(255, 45, 120, 0.8);
+  transform: translateY(-1px);
+}
+
+.sidebar-unleash-btn:disabled {
+  background: #1F1F35;
+  color: #5A5A72;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.sidebar-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #8888AA;
+  text-align: center;
+  padding: 40px;
+}
+
+.sidebar-placeholder-icon {
+  font-size: 3rem;
+  color: #FF2D7822;
+  margin-bottom: 16px;
+  animation: cp-pulse-slow 4s infinite alternate;
+}
+
+.sidebar-placeholder-text {
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  line-height: 1.6;
+}
+
+/* ── Custom Animations ───────────────────────────────── */
+@keyframes cp-node-pulse {
+  0% {
+    stroke-width: 2.5;
+    filter: drop-shadow(0 0 4px rgba(255, 45, 120, 0.4));
+  }
+  100% {
+    stroke-width: 3.5;
+    filter: drop-shadow(0 0 12px rgba(255, 45, 120, 0.8));
+  }
+}
+
+@keyframes cp-pulse-slow {
+  0% { opacity: 0.3; transform: scale(0.95); }
+  100% { opacity: 0.8; transform: scale(1.05); }
+}
+
+@keyframes cp-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.2; }
+}

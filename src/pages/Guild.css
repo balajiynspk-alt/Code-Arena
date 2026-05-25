@@ -1,0 +1,374 @@
+/* ── Guild workspace styles ── */
+
+.cp-guild-page {
+  min-height: 100%;
+  background: #0A0A0F;
+  padding: 36px 48px 60px;
+  font-family: 'Share Tech Mono', monospace;
+  position: relative;
+  overflow: hidden;
+}
+
+.cp-guild-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 10;
+}
+
+/* Banner header styling */
+.cp-guild-banner {
+  position: relative;
+  background: #0F0F1A;
+  border: 1px solid #FF2D7844;
+  padding: 32px 40px;
+  border-radius: 4px;
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.cp-guild-banner-accent {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: #FF2D78;
+  box-shadow: 0 0 10px #FF2D78;
+}
+
+.cp-guild-banner-emblem {
+  font-size: 2.8rem;
+  background: rgba(255, 45, 120, 0.08);
+  padding: 12px 18px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 45, 120, 0.2);
+}
+
+.cp-guild-banner-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.6rem;
+  letter-spacing: 2px;
+  color: #E8E8FF;
+  margin: 0 0 8px 0;
+}
+
+.cp-guild-banner-meta {
+  font-size: 0.8rem;
+  color: #8888AA;
+  margin: 0;
+}
+
+/* Warning / Alert bar */
+.cp-guild-alert-bar {
+  background: rgba(255, 170, 0, 0.05);
+  border: 1px solid #FFAA0066;
+  border-radius: 4px;
+  padding: 12px 20px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.82rem;
+  color: #FFAA00;
+}
+
+.cp-guild-alert-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #FFAA00;
+  box-shadow: 0 0 8px #FFAA00;
+  animation: cp-pulse 1.5s infinite;
+}
+
+@keyframes cp-pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.4; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Main layouts */
+.cp-guild-body {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 24px;
+  align-items: start;
+}
+
+.cp-guild-main {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.cp-guild-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* General Guild Cards */
+.cp-guild-card {
+  background: #0F0F1A;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 24px;
+  border-radius: 4px;
+}
+
+.cp-guild-card-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  color: #FF2D78;
+  margin-top: 0;
+  margin-bottom: 18px;
+  text-transform: uppercase;
+}
+
+/* Progress bar ratios */
+.cp-guild-progress-wrap {
+  margin-top: 12px;
+}
+
+.cp-guild-progress-bar {
+  height: 8px;
+  background: #14131C;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.cp-guild-progress-fill {
+  height: 100%;
+  background: #00FF88;
+  box-shadow: 0 0 8px #00FF8888;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+/* Guild chat forum */
+.cp-guild-chat-feed {
+  height: 320px;
+  overflow-y: auto;
+  padding: 20px;
+  background: #0A0A0F;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.cp-guild-chat-placeholder {
+  color: #555577;
+  font-size: 0.75rem;
+  text-align: center;
+  margin-top: 120px;
+  letter-spacing: 1.5px;
+}
+
+.cp-guild-chat-row {
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.cp-guild-chat-user {
+  color: #00FF88;
+  margin-right: 8px;
+  font-weight: bold;
+}
+
+.cp-guild-chat-text {
+  color: #D8D8EE;
+}
+
+.cp-guild-chat-input-bar {
+  display: flex;
+  background: #121222;
+  padding: 8px;
+}
+
+.cp-guild-chat-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #FFF;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.82rem;
+  padding: 0 16px;
+  outline: none;
+}
+
+/* Weekly War Matchup elements */
+.cp-guild-card--war {
+  border-color: #FFAA0044;
+  background: linear-gradient(180deg, #0F0F1A 0%, rgba(255, 170, 0, 0.02) 100%);
+}
+
+.cp-guild-war-badge {
+  display: inline-block;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.58rem;
+  font-weight: bold;
+  letter-spacing: 1.5px;
+  background: rgba(255, 170, 0, 0.08);
+  border: 1px solid #FFAA0066;
+  color: #FFAA00;
+  padding: 3px 10px;
+  border-radius: 2px;
+  margin-bottom: 20px;
+}
+
+.cp-guild-war-matching {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.cp-guild-war-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 40%;
+}
+
+.cp-guild-war-emblem {
+  font-size: 2.2rem;
+  margin-bottom: 8px;
+}
+
+.cp-guild-war-name {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 1px;
+  color: #8888AA;
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.cp-guild-war-pts {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #FFF;
+}
+
+.cp-guild-war-vs {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.85rem;
+  color: #FFAA00;
+  font-weight: bold;
+}
+
+/* War scoring progress bars comparison scales */
+.cp-guild-war-scale {
+  display: flex;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.cp-guild-war-fill {
+  height: 100%;
+}
+
+.cp-guild-war-fill--my {
+  background: #00FF88;
+  box-shadow: 0 0 8px #00FF8888;
+}
+
+.cp-guild-war-fill--opp {
+  background: #FF2D78;
+  box-shadow: 0 0 8px #FF2D7888;
+}
+
+/* Member leaderboard lists */
+.cp-guild-sidebar-leaderboard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cp-guild-member-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  font-size: 0.78rem;
+}
+
+.cp-guild-member-rank {
+  color: #FFAA00;
+  font-weight: bold;
+  width: 32px;
+}
+
+.cp-guild-member-name {
+  flex: 1;
+  color: #E8E8FF;
+}
+
+.cp-guild-member-points {
+  color: #00FF88;
+  font-weight: bold;
+}
+
+/* Seed College Selector cards */
+.cp-guild-selector-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 100px;
+}
+
+.cp-guild-selector-card {
+  max-width: 480px;
+  background: #0F0F1A;
+  border: 1px solid #FF2D7844;
+  padding: 40px;
+  border-radius: 6px;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(255, 45, 120, 0.1);
+}
+
+.cp-guild-selector-emblem {
+  font-size: 3.5rem;
+  margin-bottom: 20px;
+  display: inline-block;
+  background: rgba(255, 45, 120, 0.05);
+  border: 1px solid rgba(255, 45, 120, 0.2);
+  width: 100px;
+  height: 100px;
+  line-height: 94px;
+  border-radius: 50%;
+}
+
+.cp-guild-selector-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.15rem;
+  letter-spacing: 2px;
+  color: #FF2D78;
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+.cp-guild-selector-desc {
+  font-size: 0.78rem;
+  color: #8888AA;
+  line-height: 1.5;
+  margin-bottom: 28px;
+}
+
+.cp-guild-select {
+  width: 100%;
+  background: #141322;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #FFF;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.85rem;
+  padding: 12px 16px;
+  outline: none;
+  cursor: pointer;
+}

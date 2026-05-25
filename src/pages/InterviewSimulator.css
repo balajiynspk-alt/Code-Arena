@@ -1,0 +1,426 @@
+/* ── LIVE INTERVIEW SIMULATOR ── */
+.cp-int-page {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 64px);
+  background: #07060A;
+  color: #E8E8FF;
+  font-family: 'Share Tech Mono', monospace;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Setup Panel Dialog */
+.cp-int-setup-box {
+  max-width: 500px;
+  width: 90%;
+  background: #0E0D15;
+  border: 2px solid #00FF88;
+  border-radius: 8px;
+  padding: 32px;
+  margin: auto;
+  box-shadow: 0 0 25px rgba(0, 255, 136, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.cp-int-setup-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.3rem;
+  color: #00FF88;
+  letter-spacing: 2px;
+  margin: 0;
+  text-align: center;
+  text-shadow: 0 0 10px rgba(0, 255, 136, 0.4);
+}
+
+.cp-int-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cp-int-field label {
+  font-size: 0.8rem;
+  color: #8888AA;
+}
+
+.cp-int-select {
+  background: #151420;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  color: #E8E8FF;
+  padding: 10px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border 0.2s;
+}
+
+.cp-int-select:focus {
+  border-color: #00FF88;
+  outline: none;
+}
+
+/* Top bar with pressure gauges */
+.cp-int-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 32px;
+  background: #0B0A10;
+  border-bottom: 2px solid #00FF88;
+  box-shadow: 0 4px 20px rgba(0, 255, 136, 0.12);
+  z-index: 10;
+}
+
+.cp-int-title-meta {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.05rem;
+  color: #00FF88;
+  letter-spacing: 1.5px;
+  font-weight: bold;
+}
+
+.cp-int-timer-box {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.cp-int-countdown {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #E8E8FF;
+}
+
+/* Pressure Indicator meter */
+.cp-int-pressure-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.72rem;
+  color: #8888AA;
+}
+
+.cp-int-pressure-bar {
+  width: 100px;
+  height: 8px;
+  background: #14131C;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.cp-int-pressure-fill {
+  height: 100%;
+  transition: all 0.3s ease;
+}
+
+.cp-int-pressure-fill.low { background: #00FF88; box-shadow: 0 0 8px #00FF88; }
+.cp-int-pressure-fill.medium { background: #FFAA00; box-shadow: 0 0 8px #FFAA00; }
+.cp-int-pressure-fill.high { background: #FF2D78; box-shadow: 0 0 8px #FF2D78; }
+
+/* Content panels */
+.cp-int-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Left Panel: Chat Panel (40%) */
+.cp-int-chat-panel {
+  flex: 2;
+  background: #09080E;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  height: 100%;
+}
+
+.cp-int-interviewer-card {
+  padding: 12px 20px;
+  background: #0E0D15;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cp-int-avatar-wrap {
+  width: 48px;
+  height: 48px;
+  position: relative;
+  background: rgba(0, 255, 136, 0.05);
+  border: 1px dashed rgba(0, 255, 136, 0.4);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cp-int-avatar-svg {
+  width: 32px;
+  height: 32px;
+}
+
+/* Blinking avatar eyes keyframe */
+@keyframes cp-int-think {
+  0% { transform: scale(1.0); filter: drop-shadow(0 0 2px #00FF88); }
+  50% { transform: scale(1.15); filter: drop-shadow(0 0 8px #00FF88); }
+  100% { transform: scale(1.0); filter: drop-shadow(0 0 2px #00FF88); }
+}
+
+.cp-int-avatar-svg.thinking {
+  animation: cp-int-think 1s infinite alternate;
+}
+
+.cp-int-interviewer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cp-int-interviewer-name {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: #00FF88;
+}
+
+.cp-int-interviewer-status {
+  font-size: 0.68rem;
+  color: #666688;
+}
+
+.cp-int-chat-history {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cp-int-bubble-row {
+  display: flex;
+  width: 100%;
+}
+
+.cp-int-bubble-row.interviewer { justify-content: flex-start; }
+.cp-int-bubble-row.candidate { justify-content: flex-end; }
+
+.cp-int-bubble {
+  max-width: 80%;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.cp-int-bubble.interviewer {
+  background: rgba(0, 255, 136, 0.04);
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  color: #00FF88;
+}
+
+.cp-int-bubble.candidate {
+  background: rgba(255, 45, 120, 0.04);
+  border: 1px solid rgba(255, 45, 120, 0.2);
+  color: #FF2D78;
+}
+
+.cp-int-chat-input-bar {
+  padding: 12px 16px;
+  background: #0B0A10;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  gap: 10px;
+}
+
+.cp-int-chat-input {
+  flex: 1;
+  background: #14131C;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  color: #E8E8FF;
+  padding: 10px 14px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.82rem;
+}
+
+.cp-int-chat-input:focus {
+  border-color: #00FF88;
+  outline: none;
+}
+
+.cp-int-send-btn {
+  background: #00FF88;
+  border: none;
+  border-radius: 4px;
+  color: #07060A;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: bold;
+  font-size: 0.72rem;
+  padding: 0 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 1px;
+}
+
+.cp-int-send-btn:hover {
+  background: #00cc6a;
+  box-shadow: 0 0 8px #00FF88;
+}
+
+/* Right Panel: Editor + Statement (60%) */
+.cp-int-editor-panel {
+  flex: 3;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.cp-int-statement-card {
+  height: 180px;
+  background: #09090F;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 16px 24px;
+  overflow-y: auto;
+}
+
+.cp-int-statement-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.95rem;
+  color: #00FF88;
+  margin: 0 0 8px 0;
+}
+
+.cp-int-statement-body {
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: #A8A8C0;
+}
+
+.cp-int-editor-container {
+  flex: 1;
+  background: #1e1e1e;
+}
+
+.cp-int-editor-footer {
+  padding: 10px 24px;
+  background: #0B0A10;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* Post-interview report card overlays */
+.cp-int-report-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(7, 6, 10, 0.97);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.cp-int-report-card {
+  max-width: 600px;
+  width: 90%;
+  background: #0E0D15;
+  border: 2px solid #00FF88;
+  border-radius: 8px;
+  padding: 32px;
+  box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.cp-int-report-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.4rem;
+  color: #00FF88;
+  text-align: center;
+  letter-spacing: 3px;
+  text-shadow: 0 0 10px rgba(0, 255, 136, 0.4);
+  margin: 0;
+}
+
+.cp-int-report-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+  padding-bottom: 16px;
+}
+
+.cp-int-report-score-box {
+  text-align: center;
+}
+
+.cp-int-report-score-val {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2.8rem;
+  font-weight: 900;
+  color: #00FF88;
+  text-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+}
+
+.cp-int-report-score-label {
+  font-size: 0.72rem;
+  color: #8888AA;
+  letter-spacing: 1px;
+}
+
+.cp-int-report-rating-box {
+  text-align: center;
+}
+
+.cp-int-report-rating-val {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.15rem;
+  font-weight: bold;
+  color: #FFAA00;
+  text-shadow: 0 0 8px rgba(255, 170, 0, 0.4);
+  margin-bottom: 4px;
+}
+
+.cp-int-report-rating-label {
+  font-size: 0.72rem;
+  color: #8888AA;
+  letter-spacing: 1px;
+}
+
+.cp-int-report-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.cp-int-metric-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+}
+
+.cp-int-metric-name { color: #8888AA; }
+.cp-int-metric-val { color: #E8E8FF; font-weight: bold; }
+
+.cp-int-report-feedback {
+  background: rgba(0, 255, 136, 0.03);
+  border: 1px solid rgba(0, 255, 136, 0.12);
+  border-radius: 4px;
+  padding: 12px 16px;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: #C8C8EE;
+}

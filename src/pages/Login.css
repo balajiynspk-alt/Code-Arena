@@ -1,0 +1,307 @@
+/* ── Full-screen page ──────────────────────────────────── */
+.cp-login-page {
+  min-height: 100vh;
+  background: #0A0A0F;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Grid background */
+.cp-login-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 45, 120, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 45, 120, 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+/* Radial glow behind card */
+.cp-login-page::after {
+  content: '';
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, #FF2D7818 0%, transparent 70%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+/* Scanline overlay */
+.cp-scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.15) 2px,
+    rgba(0, 0, 0, 0.15) 4px
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Card ──────────────────────────────────────────────── */
+.cp-login-card {
+  position: relative;
+  z-index: 2;
+  width: 420px;
+  padding: 48px 40px 40px;
+  background: #0F0F1A;
+  border: 1px solid #FF2D7844;
+  box-shadow:
+    0 0 40px #FF2D7820,
+    0 0 80px #FF2D7808,
+    inset 0 0 40px #FF2D7806;
+}
+
+/* ── Corner decorations ────────────────────────────────── */
+.cp-corner {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+}
+
+.cp-corner-tl {
+  top: -1px; left: -1px;
+  border-top: 2px solid #FF2D78;
+  border-left: 2px solid #FF2D78;
+}
+.cp-corner-tr {
+  top: -1px; right: -1px;
+  border-top: 2px solid #FF2D78;
+  border-right: 2px solid #FF2D78;
+}
+.cp-corner-bl {
+  bottom: -1px; left: -1px;
+  border-bottom: 2px solid #FF2D78;
+  border-left: 2px solid #FF2D78;
+}
+.cp-corner-br {
+  bottom: -1px; right: -1px;
+  border-bottom: 2px solid #FF2D78;
+  border-right: 2px solid #FF2D78;
+}
+
+/* ── Header ────────────────────────────────────────────── */
+.cp-login-header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.cp-login-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin: 0 0 10px 0;
+  line-height: 1;
+}
+
+.cp-t-pink {
+  color: #FF2D78;
+  text-shadow: 0 0 16px #FF2D78aa;
+}
+
+.cp-t-green {
+  color: #00FF88;
+  text-shadow: 0 0 16px #00FF88aa;
+}
+
+.cp-login-sub {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.8rem;
+  color: #00FF88;
+  margin: 0;
+  letter-spacing: 0.05em;
+}
+
+/* ── Google button ─────────────────────────────────────── */
+.cp-google-btn {
+  width: 100%;
+  padding: 12px 24px;
+  background: #FF2D78;
+  color: #fff;
+  border: none;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
+  transition: background 0.18s, box-shadow 0.18s;
+  box-shadow: 0 0 20px #FF2D7866;
+  margin-bottom: 24px;
+}
+
+.cp-google-btn:hover:not(:disabled) {
+  background: #ff4d8f;
+  box-shadow: 0 0 32px #FF2D78aa;
+}
+
+.cp-google-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.cp-google-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* ── Divider ───────────────────────────────────────────── */
+.cp-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.cp-divider-line {
+  flex: 1;
+  height: 1px;
+  background: #FF2D7844;
+}
+
+.cp-divider-text {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.75rem;
+  color: #8888AA;
+  letter-spacing: 0.1em;
+}
+
+/* ── Form fields ───────────────────────────────────────── */
+.cp-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.cp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cp-label {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #8888AA;
+  letter-spacing: 0.12em;
+}
+
+.cp-input {
+  width: 100%;
+  padding: 12px 16px;
+  background: #151525;
+  border: 1px solid #00FF8844;
+  color: #E8E8FF;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.18s, box-shadow 0.18s;
+  box-sizing: border-box;
+}
+
+.cp-input::placeholder {
+  color: #8888AA;
+}
+
+.cp-input:focus {
+  border-color: #00FF88;
+  box-shadow: 0 0 12px #00FF8833;
+}
+
+.cp-input:disabled {
+  opacity: 0.6;
+}
+
+/* ── Error ─────────────────────────────────────────────── */
+.cp-error {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.8rem;
+  color: #FF2D78;
+  background: rgba(255, 45, 120, 0.08);
+  border: 1px solid #FF2D7844;
+  padding: 10px 14px;
+  margin: 0;
+}
+
+/* ── Submit button ─────────────────────────────────────── */
+.cp-submit-btn {
+  width: 100%;
+  padding: 13px 24px;
+  background: transparent;
+  color: #00FF88;
+  border: 1px solid #00FF88;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  transition: background 0.18s, box-shadow 0.18s, color 0.18s;
+  margin-top: 4px;
+}
+
+.cp-submit-btn:hover:not(:disabled) {
+  background: #00FF8818;
+  box-shadow: 0 0 20px #00FF8844;
+}
+
+.cp-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Loading text ──────────────────────────────────────── */
+.cp-loading-text {
+  display: inline-block;
+  animation: cp-blink 1s step-end infinite;
+  letter-spacing: 0.1em;
+}
+
+@keyframes cp-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+/* ── Mode toggle ───────────────────────────────────────── */
+.cp-toggle {
+  text-align: center;
+  margin: 24px 0 0;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.8rem;
+  color: #8888AA;
+}
+
+.cp-toggle-btn {
+  background: transparent;
+  border: none;
+  color: #FF2D78;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  padding: 0;
+  transition: text-shadow 0.18s;
+}
+
+.cp-toggle-btn:hover {
+  text-shadow: 0 0 10px #FF2D78;
+}

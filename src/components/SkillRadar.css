@@ -1,0 +1,143 @@
+/* ── SKILL RADAR SYSTEM ── */
+.cp-radar-card {
+  background: rgba(12, 12, 20, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+  font-family: 'Share Tech Mono', monospace;
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.cp-radar-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, #FF2D78, #00FF88);
+}
+
+.cp-radar-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.cp-radar-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #00FF88;
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+/* Control deck panel */
+.cp-radar-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.cp-radar-btn {
+  background: #141424;
+  border: 1px solid rgba(0, 255, 136, 0.3);
+  border-radius: 4px;
+  color: #00FF88;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.65rem;
+  font-weight: bold;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cp-radar-btn:hover {
+  background: rgba(0, 255, 136, 0.1);
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+}
+
+.cp-radar-btn--active {
+  background: #00FF88;
+  color: #0A0A0F;
+  border-color: #00FF88;
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.4);
+}
+
+.cp-radar-btn--active:hover {
+  background: #33ffa3;
+  color: #0A0A0F;
+}
+
+.cp-radar-select {
+  background: #141424;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: #E8E8FF;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.72rem;
+  padding: 5px 10px;
+  cursor: pointer;
+  outline: none;
+}
+
+.cp-radar-select:focus {
+  border-color: #FF2D78;
+}
+
+/* Canvas viewport */
+.cp-radar-viewport {
+  position: relative;
+  width: 440px;
+  height: 440px;
+  background: #0A0A0F;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Tooltip popup overlay */
+.cp-radar-tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: rgba(10, 10, 16, 0.95);
+  border: 1px solid #FFAA00;
+  border-radius: 4px;
+  padding: 8px 12px;
+  color: #E8E8FF;
+  font-size: 0.72rem;
+  font-family: 'Share Tech Mono', monospace;
+  z-index: 100;
+  box-shadow: 0 4px 15px rgba(255, 170, 0, 0.2);
+  transform: translate(-50%, -100%);
+  margin-top: -12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cp-radar-tooltip-title {
+  font-family: 'Orbitron', sans-serif;
+  color: #FFAA00;
+  font-weight: 800;
+  font-size: 0.75rem;
+}
+
+.cp-radar-tooltip-score {
+  color: #E8E8FF;
+}
+
+.cp-radar-tooltip-rank {
+  color: #00FF88;
+}
