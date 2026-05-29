@@ -2,16 +2,13 @@ import { db, auth, isMockMode } from './firebase';
 import { 
   collection, 
   doc, 
-  setDoc, 
   getDoc,
   getDocs, 
   query, 
   where, 
   orderBy, 
   addDoc,
-  runTransaction,
-  deleteDoc,
-  updateDoc
+  runTransaction
 } from 'firebase/firestore';
 
 /**

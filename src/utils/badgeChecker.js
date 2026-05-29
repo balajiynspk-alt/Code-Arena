@@ -14,7 +14,7 @@ export const checkAndAwardBadges = async (userId, userDocData) => {
   const currentBadges = userDocData.badges || [];
   const newlyEarned = [];
 
-  for (const [key, badge] of Object.entries(BADGES)) {
+  for (const badge of Object.values(BADGES)) {
     if (!currentBadges.includes(badge.id)) {
       if (badge.condition(userDocData)) {
         newlyEarned.push(badge.id);
