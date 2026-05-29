@@ -10,6 +10,8 @@ import { subscribeNotifications, markAllAsRead } from '../services/notificationS
 import logoImg from '../assets/logo.png';
 import './Navbar.css';
 
+import { useAuth } from '../context/AuthContext';
+
 const NAV_LINKS = [
   { label: 'Dashboard', path: '/dashboard' },
   { label: 'Problems',  path: '/problems' },
@@ -34,7 +36,7 @@ const NAV_LINKS = [
 const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const currentUser = auth.currentUser;
+  const { currentUser } = useAuth();
 
   const [activeChallenge, setActiveChallenge] = useState(null);
   const [unreadDMs, setUnreadDMs] = useState(0);

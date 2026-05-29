@@ -37,6 +37,7 @@ import { EmotionProvider } from './context/EmotionContext';
 import EmotionBadge from './components/EmotionBadge';
 import { auth } from './services/firebase';
 import { updateStreak } from './utils/streakTracker';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import './App.css';
 
 const queryClient = new QueryClient();
@@ -44,7 +45,7 @@ const queryClient = new QueryClient();
 
 
 function MainApp() {
-  const currentUser = auth.currentUser;
+  const { currentUser } = useAuth();
 
   useEffect(() => {
     if (currentUser) {
@@ -107,11 +108,13 @@ function MainApp() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <EmotionProvider>
-        <Router>
-          <MainApp />
-        </Router>
-      </EmotionProvider>
+      <AuthProvider>
+        <EmotionProvider>
+          <Router>
+            <MainApp />
+          </Router>
+        </EmotionProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
