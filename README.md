@@ -93,6 +93,23 @@
 *   **AI DSA problem compiler** — Formulates unique DSA challenges matching your weakness vectors.
 *   **Matrix Rain loader** — Matrix canvas animations, parameter bounds, progressive hints, and adjusters.
 
+### 21. 🔍 Search, Tags, & Social Ecosystem
+*   **Firestore Prefix Search** — High-performance user queries filtering profiles dynamically using boundary markers (`>= term` AND `<= term + \uf8ff`).
+*   **Rank Badges & Follow Mechanics** — Rich profile summary cards showing solved counts, college guilds, active day streaks, follow states, and rank tiers.
+*   **Comprehensive Submission Profiles** — Interactive historical logs showing problem, difficulty, verdict, runtime, and language distribution charts.
+*   **Canonical Tags Pages** — Real-time filter index sorting posts, tutorials, and problems by topic and difficulty tags.
+
+### 22. ⚔️ Live Battle Invite & Presence System
+*   **Realtime Presence (Firebase RTDB)** — Tracks live connection heartbeats at `/presence/{uid}` to display green active status dots and elapsed "Last seen" telemetry.
+*   **Multi-touchpoint Invites** — Challenge button integrated across profiles, leaderboards, activity feed logs, DM lines, and chat rooms.
+*   **Timed Battle Invites** — Auto-expiring 10-minute battle invites (`battleInvites/{inviteId}`) allowing opponents to accept/decline dynamically with instant push triggers.
+*   **Combat Feed Broadcasts** — Auto-posts battle results (e.g., `"Winner defeated Loser · +24 ELO"`) directly to the social activity feed on outcome resolution.
+
+### 23. 📡 Automated LeetCode Scraper & Weekly Sync Pipeline
+*   **Differential Fetch Engine** — Only scrapes newly added LeetCode problems, using a local cross-run cache file (`problem_details.json`) to skip existing docs.
+*   **HTML Cleaners & Normalizers** — Converts complex nested HTML templates into clean Markdown, normalizes 30 competitive tags, and maps 10 starter code structures.
+*   **Automatic Cron Job Sync** — Runs on GitHub Actions every Sunday at midnight, executing a multi-step sequence to fetch, transform, enrich, and batched-upload (O(500) items per commit) into Firestore.
+
 ---
 
 ## 🛠️ Tech Stack
@@ -107,6 +124,7 @@
 | Charts | Recharts |
 | Markdown | react-markdown + remark-math + rehype-highlight |
 | Webcam Processing | face-api.js |
+| Scraping / Pipeline | node-fetch, firebase-admin |
 
 ---
 
@@ -131,7 +149,14 @@ REACT_APP_FIREBASE_APP_ID=your_app_id
 REACT_APP_GEMINI_KEY=your_gemini_key
 ```
 
-### 3. Start the dev server
+### 3. Setup Weekly Problems Sync (Optional CI/CD)
+To sync new LeetCode challenges automatically:
+1. Go to your GitHub Repository → **Settings** → **Secrets and variables** → **Actions**.
+2. Click **New repository secret**.
+3. Name: `FIREBASE_SERVICE_ACCOUNT`
+4. Value: Paste the entire content of your Firebase `serviceAccountKey.json`.
+
+### 4. Start the dev server
 ```bash
 npm start
 ```
