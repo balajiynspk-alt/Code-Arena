@@ -1,0 +1,275 @@
+/* ═══════════════════════════════════════════════════════
+   SolutionCard System Styling Sheet — Cyberpunk
+   ═══════════════════════════════════════════════════════ */
+
+.cp-solution-card {
+  background: #0D0D19;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 4px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.cp-solution-card:hover {
+  border-color: rgba(255, 45, 120, 0.15);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* User header */
+.cp-sol-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cp-sol-avatar-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 45, 120, 0.08);
+  border: 1px solid #FF2D78;
+  color: #FF2D78;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.8rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 8px rgba(255, 45, 120, 0.2);
+}
+
+.cp-sol-username {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.88rem;
+  font-weight: bold;
+  color: #FFF;
+}
+
+.cp-sol-time {
+  font-size: 0.65rem;
+  color: #666688;
+  margin-top: 2px;
+  letter-spacing: 0.5px;
+}
+
+.cp-sol-problem-tag {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.cp-sol-prob-title {
+  font-size: 0.8rem;
+  color: #8888AA;
+}
+
+.cp-sol-prob-diff {
+  font-size: 0.58rem;
+  font-family: 'Orbitron', monospace;
+  font-weight: bold;
+  padding: 1px 6px;
+  border-radius: 2px;
+  border: 1px solid transparent;
+}
+
+.cp-sol-prob-diff.easy {
+  border-color: #00FF88;
+  color: #00FF88;
+  background: rgba(0, 255, 136, 0.05);
+}
+
+.cp-sol-prob-diff.medium {
+  border-color: #FFAA00;
+  color: #FFAA00;
+  background: rgba(255, 170, 0, 0.05);
+}
+
+.cp-sol-prob-diff.hard {
+  border-color: #FF2D78;
+  color: #FF2D78;
+  background: rgba(255, 45, 120, 0.05);
+}
+
+/* Caption and Tags */
+.cp-sol-caption {
+  font-size: 0.86rem;
+  color: #DDD;
+  line-height: 1.4;
+  margin: 0;
+  text-align: left;
+}
+
+.cp-sol-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cp-sol-tag-pill {
+  font-size: 0.72rem;
+  color: #00FF88;
+  background: rgba(0, 255, 136, 0.05);
+  border: 1px solid rgba(0, 255, 136, 0.12);
+  padding: 2px 8px;
+  border-radius: 2px;
+}
+
+/* Syntax Highlighting */
+.cp-sol-code-box {
+  background: #06060A;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 4px;
+  padding: 16px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.cp-sol-code-pre {
+  margin: 0;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.8rem;
+  color: #A9B2C3;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.cp-code-keyword {
+  color: #FF2D78;
+  font-weight: bold;
+}
+
+.cp-code-function {
+  color: #00FF88;
+}
+
+.cp-code-string {
+  color: #FFAA00;
+}
+
+/* Performance progress bars */
+.cp-sol-stats-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  padding: 12px;
+  border-radius: 2px;
+}
+
+.cp-sol-stats-label {
+  font-size: 0.68rem;
+  color: #8888AA;
+  text-align: left;
+  letter-spacing: 0.5px;
+}
+
+.cp-sol-bar-wrapper {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+  position: relative;
+  overflow: hidden;
+}
+
+.cp-sol-bar-fill {
+  height: 100%;
+  background: #00FF88;
+  box-shadow: 0 0 8px #00FF88;
+  border-radius: 3px;
+}
+
+.cp-sol-bar-label {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  font-size: 0.55rem;
+  font-weight: bold;
+  color: #0A0A0F;
+  background: #00FF88;
+  padding: 1px 4px;
+  border-radius: 1px;
+  pointer-events: none;
+}
+
+/* Footer reaction decks */
+.cp-sol-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  padding-top: 16px;
+}
+
+.cp-sol-reactions-deck {
+  display: flex;
+  gap: 8px;
+}
+
+.cp-sol-react-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 6px 12px;
+  border-radius: 2px;
+  color: #8888AA;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cp-sol-react-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #FFF;
+}
+
+.cp-sol-react-btn.active {
+  background: rgba(255, 45, 120, 0.08);
+  border-color: #FF2D78;
+  color: #FF2D78;
+  box-shadow: 0 0 10px rgba(255, 45, 120, 0.2);
+  animation: cpReactionBounce 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes cpReactionBounce {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.cp-react-icon {
+  font-size: 0.9rem;
+}
+
+.cp-react-count {
+  font-weight: bold;
+}
+
+.cp-sol-editor-btn {
+  background: transparent;
+  border: 1px solid #FF2D78;
+  color: #FF2D78;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.65rem;
+  font-weight: bold;
+  padding: 8px 16px;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all 0.2s ease;
+  clip-path: polygon(5px 0%, 100% 0%, calc(100% - 5px) 100%, 0% 100%);
+}
+
+.cp-sol-editor-btn:hover {
+  background: rgba(255, 45, 120, 0.08);
+  box-shadow: 0 0 12px rgba(255, 45, 120, 0.3);
+}

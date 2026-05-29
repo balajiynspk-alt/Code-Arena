@@ -551,3 +551,123 @@
   line-height: 1.4;
 }
 
+/* ── SYSTEM SHOWCASE FEATURE GRID ── */
+.cp-showcase-section {
+  grid-column: span 2;
+  background: #0F0F1A;
+  border: 1px solid #FF2D7844;
+  padding: 24px;
+  border-radius: 4px;
+  margin-bottom: 24px;
+}
+
+.cp-showcase-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.cp-showcase-card {
+  background: #07070C;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 16px;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.cp-showcase-card:hover {
+  border-color: #00DDFF;
+  box-shadow: 0 0 12px rgba(0, 221, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+.cp-showcase-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.cp-showcase-num {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.65rem;
+  color: #8888AA;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2px 6px;
+  border-radius: 2px;
+}
+
+.cp-showcase-status {
+  font-size: 0.58rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  color: #00FF88;
+  border: 1px solid rgba(0, 255, 136, 0.3);
+  padding: 1px 5px;
+  border-radius: 2px;
+}
+
+.cp-showcase-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.82rem;
+  color: #FFF;
+  margin: 0 0 6px 0;
+  letter-spacing: 0.5px;
+}
+
+.cp-showcase-desc {
+  font-size: 0.72rem;
+  color: #8888AA;
+  margin: 0 0 16px 0;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.cp-showcase-launch-btn {
+  display: block;
+  text-align: center;
+  background: rgba(0, 221, 255, 0.08);
+  border: 1px solid rgba(0, 221, 255, 0.3);
+  color: #00DDFF;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.68rem;
+  font-weight: bold;
+  padding: 8px 0;
+  text-decoration: none;
+  border-radius: 2px;
+  letter-spacing: 1px;
+  transition: all 0.2s ease;
+}
+
+.cp-showcase-launch-btn:hover {
+  background: #00DDFF;
+  color: #0A0A0F;
+  box-shadow: 0 0 10px rgba(0, 221, 255, 0.3);
+}
+
+/* ── Activity Feed Card Cyberpunk Additions ── */
+.cp-feed-card {
+  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease !important;
+}
+
+.cp-feed-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6), 0 0 18px rgba(255, 45, 120, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.cp-tab-btn {
+  transition: all 0.2s ease;
+}
+
+.cp-tab-btn:hover {
+  opacity: 0.8;
+}
+
+

@@ -24,6 +24,14 @@ import WhiteboardLibrary from './pages/WhiteboardLibrary';
 import Multiverse from './pages/Multiverse';
 import WatchStream from './pages/WatchStream';
 import QuantumGenerator from './pages/QuantumGenerator';
+import Contest from './pages/Contest';
+import Communities from './pages/Communities';
+import CommunityDetail from './pages/CommunityDetail';
+import Chat from './pages/Chat';
+import Messages from './pages/Messages';
+import Notifications from './pages/Notifications';
+import Search from './pages/Search';
+import TagPage from './pages/TagPage';
 import Navbar from './components/Navbar';
 import { EmotionProvider } from './context/EmotionContext';
 import EmotionBadge from './components/EmotionBadge';
@@ -41,6 +49,9 @@ function MainApp() {
   useEffect(() => {
     if (currentUser) {
       updateStreak(currentUser.uid);
+      import('./services/presenceService').then(({ trackPresence }) => {
+        trackPresence(currentUser.uid);
+      });
     }
   }, [currentUser]);
 
@@ -62,6 +73,8 @@ function MainApp() {
           <Route path="/skills" element={<Skills />} />
           <Route path="/battle/:id" element={<Battle />} />
           <Route path="/profile/:username" element={<Profile />} />
+          <Route path="/search" element={<Search />} />
+          <Route path="/tag/:topic" element={<TagPage />} />
           <Route path="/replay/:userId/:problemId" element={<ReplayTheatre />} />
           <Route path="/theatre" element={<TopReplays />} />
           <Route path="/boss" element={<BossBattle />} />
@@ -78,6 +91,12 @@ function MainApp() {
           <Route path="/watch" element={<WatchStream />} />
           <Route path="/watch/:userId" element={<WatchStream />} />
           <Route path="/quantum" element={<QuantumGenerator />} />
+          <Route path="/contest" element={<Contest />} />
+          <Route path="/communities" element={<Communities />} />
+          <Route path="/community/:slug" element={<CommunityDetail />} />
+          <Route path="/chat" element={<Chat />} />
+          <Route path="/messages" element={<Messages />} />
+          <Route path="/notifications" element={<Notifications />} />
         </Routes>
       </main>
       <EmotionBadge />

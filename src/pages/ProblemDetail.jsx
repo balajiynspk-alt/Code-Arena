@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Editor from '@monaco-editor/react';
 import ReactMarkdown from 'react-markdown';
@@ -21,6 +21,9 @@ import { db } from '../services/firebase';
 import EyeTracker from '../components/EyeTracker';
 import { useEmotion } from '../context/EmotionContext';
 import { startBroadcast, updateBroadcast, endBroadcast } from '../services/spectatorService';
+import { getComments, addComment, editComment, deleteComment, voteComment } from '../services/discussionService';
+import { getUserWeaknessProfile, saveWeaknessProfile } from '../services/quantumGeneratorService';
+import ShareSolutionModal from '../components/ShareSolutionModal';
 import './ProblemDetail.css';
 
 const DEFAULT_CODE = {
@@ -36,6 +39,9 @@ const DIFF_CLASS = { Easy: 'easy', Medium: 'medium', Hard: 'hard' };
 const ProblemDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { state: routerState } = useLocation();
+  const customProblem = routerState?.customProblem;
+  
   const queryClient = useQueryClient();
   const currentUser = auth.currentUser;
 
@@ -125,6 +131,101 @@ const ProblemDetail = () => {
   };
 
   const [activeTab, setActiveTab]         = useState('description');
+
+  /* ── Problem Discussion System States ── */
+  const [comments, setComments]           = useState([]);
+  const [commentsCount, setCommentsCount] = useState(0);
+  const [commentText, setCommentText]     = useState('');
+  const [snippetText, setSnippetText]     = useState('');
+  const [snippetLang, setSnippetLang]     = useState('python');
+  const [showSnippet, setShowSnippet]     = useState(false);
+  const [discussionSort, setDiscussionSort] = useState('top'); // 'top' | 'new' | 'my'
+  const [replyToId, setReplyToId]         = useState(null);
+  const [replyText, setReplyText]         = useState('');
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editText, setEditText]           = useState('');
+
+  const loadDiscussions = async () => {
+    if (!id) return;
+    try {
+      const list = await getComments(id);
+      setComments(list);
+      setCommentsCount(list.length);
+    } catch (err) {
+      console.error("Failed to load comments:", err);
+    }
+  };
+
+  useEffect(() => {
+    loadDiscussions();
+  }, [id]);
+
+  const handleSubmitComment = async (e) => {
+    e.preventDefault();
+    if (!commentText.trim()) return;
+    try {
+      await addComment(
+        id,
+        commentText,
+        showSnippet ? snippetText : '',
+        showSnippet ? snippetLang : 'python'
+      );
+      setCommentText('');
+      setSnippetText('');
+      setShowSnippet(false);
+      await loadDiscussions();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  const handleSubmitReply = async (parentId) => {
+    if (!replyText.trim()) return;
+    try {
+      await addComment(id, replyText, '', 'python', parentId);
+      setReplyText('');
+      setReplyToId(null);
+      await loadDiscussions();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  const handleVoteComment = async (commentId, voteType) => {
+    try {
+      const res = await voteComment(id, commentId, voteType);
+      setComments(prev => prev.map(c => {
+        if (c.id === commentId) {
+          return { ...c, upvotes: res.upvotes, downvotes: res.downvotes };
+        }
+        return c;
+      }));
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  const handleSaveEdit = async (commentId) => {
+    if (!editText.trim()) return;
+    try {
+      await editComment(id, commentId, editText);
+      setEditingCommentId(null);
+      setEditText('');
+      await loadDiscussions();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm("Are you sure you want to delete this post?")) return;
+    try {
+      await deleteComment(id, commentId);
+      await loadDiscussions();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
   const [language, setLanguage]           = useState('python');
   const [code, setCode]                   = useState(DEFAULT_CODE['python']);
   const [executionResult, setExResult]    = useState(null);
@@ -148,6 +249,7 @@ const ProblemDetail = () => {
   const [thoughtMapSaved, setThoughtMapSaved] = useState(false);
   const [showMoodSelector, setShowMoodSelector] = useState(false);
   const [isBroadcasting, setIsBroadcasting] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   // Sync editor keystrokes to spectators live
   useEffect(() => {
@@ -282,10 +384,26 @@ const ProblemDetail = () => {
     }
   }, [code, language]);
 
-  const { data: problem, isLoading, isError } = useQuery({
+  const { data: dbProblem, isLoading: dbLoading, isError: dbError } = useQuery({
     queryKey: ['problem', id],
-    queryFn:  () => getProblemById(id)
+    queryFn:  () => getProblemById(id),
+    enabled: !customProblem
   });
+
+  const problem = customProblem || dbProblem;
+  const isLoading = !customProblem && dbLoading;
+  const isError = !customProblem && dbError;
+
+  // Sync starter code
+  useEffect(() => {
+    if (problem) {
+      if (problem.starterCode && problem.starterCode[language]) {
+        setCode(problem.starterCode[language]);
+      } else {
+        setCode(DEFAULT_CODE[language] || "");
+      }
+    }
+  }, [problem, language]);
 
   const submitMutation = useMutation({
     mutationFn: async ({ verdict, executionTime }) => {
@@ -398,6 +516,33 @@ const ProblemDetail = () => {
         }
 
         submitMutation.mutate({ verdict: result.verdict, executionTime: result.executionTime });
+
+        if (customProblem && currentUser) {
+          // Dynamic weakness profile recalibration!
+          getUserWeaknessProfile(currentUser.uid).then(async (profile) => {
+            const topic = problem.targetedWeakness || "";
+            const updatedWeak = profile.weakTopics.map(t => {
+              if (topic.toLowerCase().includes(t.topic.toLowerCase()) || problem.title.toLowerCase().includes(t.topic.toLowerCase())) {
+                const newWin = Math.min(t.winRate + 8, 95);
+                return { ...t, winRate: newWin };
+              }
+              return t;
+            });
+            await saveWeaknessProfile(currentUser.uid, {
+              ...profile,
+              weakTopics: updatedWeak
+            });
+            
+            // Mark the problem solved in local quantum Problems Bank if present
+            const bankRaw = localStorage.getItem(`mock_quantum_bank_${currentUser.uid}`) || '[]';
+            const bank = JSON.parse(bankRaw);
+            const updatedBank = bank.map(p => {
+              if (p.title === problem.title) return { ...p, isSolved: true };
+              return p;
+            });
+            localStorage.setItem(`mock_quantum_bank_${currentUser.uid}`, JSON.stringify(updatedBank));
+          });
+        }
       } else if (result.verdict === 'Error') {
         setErrorCount(prev => prev + 1);
         recorderRef.current.recordMarker('run', 'Production compile failure');
@@ -427,14 +572,14 @@ const ProblemDetail = () => {
 
         {/* Tabs */}
         <div className="cp-pd-tabs">
-          {['description', 'hints', 'dna'].map(tab => (
+          {['description', 'hints', 'dna', 'discussion'].map(tab => (
             <button
               key={tab}
               className={`cp-pd-tab ${activeTab === tab ? 'cp-pd-tab--active' : ''}`}
               style={activeTab === tab ? { borderColor: themeColor, color: themeColor } : {}}
               onClick={() => setActiveTab(tab)}
             >
-              {tab === 'dna' ? 'CODE DNA' : tab.toUpperCase()}
+              {tab === 'discussion' ? `DISCUSSION (${commentsCount})` : tab === 'dna' ? 'CODE DNA' : tab.toUpperCase()}
             </button>
           ))}
         </div>
@@ -521,6 +666,396 @@ const ProblemDetail = () => {
               submissionsHistory={submissionsHistory} 
               language={language}
             />
+          )}
+
+          {activeTab === 'discussion' && (
+            <div className="cp-pd-discussion" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              
+              {/* Filter Row */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255, 255, 255, 0.05)', paddingBottom: '10px' }}>
+                <span style={{ fontFamily: 'Orbitron', fontSize: '0.72rem', color: 'var(--cyber-pink)', letterSpacing: '1px' }}>
+                  // RECONSTRUCTING TELEMETRY FORUM
+                </span>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  {[
+                    { key: 'top', label: 'Top Voted' },
+                    { key: 'new', label: 'Newest' },
+                    { key: 'my', label: 'My Posts' }
+                  ].map(opt => (
+                    <button
+                      key={opt.key}
+                      onClick={() => setDiscussionSort(opt.key)}
+                      style={{
+                        background: discussionSort === opt.key ? 'rgba(255, 45, 120, 0.1)' : 'transparent',
+                        border: `1px solid ${discussionSort === opt.key ? 'var(--cyber-pink)' : 'rgba(255,255,255,0.06)'}`,
+                        borderRadius: '2px',
+                        padding: '4px 10px',
+                        fontSize: '0.62rem',
+                        color: discussionSort === opt.key ? '#FFF' : '#8888AA',
+                        cursor: 'pointer',
+                        fontFamily: 'Orbitron',
+                        letterSpacing: '1px'
+                      }}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Comment submit form */}
+              <form onSubmit={handleSubmitComment} style={{ display: 'flex', flexDirection: 'column', gap: '12px', background: '#0F0F1A', padding: '16px', borderRadius: '4px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                <textarea
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  placeholder="Post comments in Markdown format..."
+                  style={{
+                    width: '100%',
+                    minHeight: '80px',
+                    background: '#07070C',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    borderRadius: '4px',
+                    color: '#FFF',
+                    padding: '12px',
+                    fontSize: '0.78rem',
+                    fontFamily: 'Share Tech Mono',
+                    resize: 'vertical'
+                  }}
+                  required
+                />
+
+                {/* Monaco Toggle and Selection */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <button
+                    type="button"
+                    onClick={() => setShowSnippet(!showSnippet)}
+                    style={{
+                      background: 'transparent',
+                      border: `1px solid ${showSnippet ? 'var(--cyber-green)' : 'rgba(255,255,255,0.1)'}`,
+                      borderRadius: '4px',
+                      padding: '4px 10px',
+                      fontSize: '0.65rem',
+                      color: showSnippet ? 'var(--cyber-green)' : '#8888AA',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      fontFamily: 'Orbitron'
+                    }}
+                  >
+                    <span>💻</span>
+                    <span>{showSnippet ? 'REMOVE SNIPPET' : 'ATTACH CODE SNIPPET'}</span>
+                  </button>
+
+                  {showSnippet && (
+                    <select
+                      value={snippetLang}
+                      onChange={(e) => setSnippetLang(e.target.value)}
+                      style={{
+                        background: '#07070C',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        borderRadius: '2px',
+                        color: '#FFF',
+                        fontSize: '0.65rem',
+                        padding: '4px 8px',
+                        fontFamily: 'Orbitron'
+                      }}
+                    >
+                      <option value="python">Python</option>
+                      <option value="javascript">JavaScript</option>
+                      <option value="cpp">C++</option>
+                      <option value="java">Java</option>
+                      <option value="go">Go</option>
+                    </select>
+                  )}
+                </div>
+
+                {/* Mini Monaco Code Sandbox (5 lines high) */}
+                {showSnippet && (
+                  <div style={{ height: '120px', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '4px', overflow: 'hidden' }}>
+                    <Editor
+                      height="100%"
+                      language={snippetLang === 'cpp' ? 'cpp' : snippetLang}
+                      theme="vs-dark"
+                      value={snippetText}
+                      onChange={(val) => setSnippetText(val || '')}
+                      options={{
+                        minimap: { enabled: false },
+                        fontSize: 12,
+                        fontFamily: "'Share Tech Mono', monospace",
+                        lineHeight: 18,
+                        scrollBeyondLastLine: false,
+                        lineNumbers: 'on',
+                        folding: false
+                      }}
+                    />
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  className="cp-pd-submit-btn"
+                  style={{ alignSelf: 'flex-end', background: 'var(--cyber-pink)', borderColor: 'var(--cyber-pink)', color: '#FFF', padding: '6px 16px', fontSize: '0.68rem' }}
+                >
+                  TRANSMIT COMMENT ⚡
+                </button>
+              </form>
+
+              {/* Comments Render Section */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {(() => {
+                  const getRankColor = (rank) => {
+                    switch (rank?.toLowerCase()) {
+                      case 'master': return '#FF2D78';
+                      case 'expert': return '#00FF88';
+                      case 'beginner': return '#00A2FF';
+                      default: return '#FFAA00';
+                    }
+                  };
+
+                  const sortedComments = [...comments].filter(c => {
+                    if (discussionSort === 'my') {
+                      return c.uid === currentUser?.uid || c.displayName === currentUser?.displayName;
+                    }
+                    return true;
+                  }).sort((a, b) => {
+                    if (discussionSort === 'top') {
+                      return (b.upvotes - b.downvotes) - (a.upvotes - a.downvotes);
+                    }
+                    return b.createdAt - a.createdAt;
+                  });
+
+                  const parents = sortedComments.filter(c => !c.parentId);
+                  const getReplies = (pId) => sortedComments.filter(c => c.parentId === pId);
+
+                  const renderCard = (c, isReply = false) => {
+                    const color = getRankColor(c.userRank);
+                    const isOwner = currentUser && (c.uid === currentUser.uid || c.displayName === currentUser.displayName);
+                    const timeString = new Date(c.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                    return (
+                      <div
+                        key={c.id}
+                        className="cp-comment-card"
+                        style={{
+                          background: '#0B0B12',
+                          border: '1px solid rgba(255, 255, 255, 0.04)',
+                          borderLeft: isReply ? `2px solid var(--cyber-green)` : `3px solid ${color}`,
+                          borderRadius: '4px',
+                          padding: '16px',
+                          marginLeft: isReply ? '20px' : '0',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '12px',
+                          boxShadow: '0 4px 10px rgba(0,0,0,0.3)'
+                        }}
+                      >
+                        {/* Header */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <div
+                              style={{
+                                width: '26px',
+                                height: '26px',
+                                borderRadius: '50%',
+                                background: color + '15',
+                                border: `1px solid ${color}`,
+                                color: color,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '0.62rem',
+                                fontWeight: 'bold'
+                              }}
+                            >
+                              {c.displayName?.substring(0, 2).toUpperCase() || 'OP'}
+                            </div>
+                            <span style={{ fontFamily: 'Orbitron', fontSize: '0.74rem', color: '#FFF', fontWeight: 'bold' }}>
+                              {c.displayName}
+                            </span>
+                            <span
+                              style={{
+                                fontSize: '0.52rem',
+                                border: `1px solid ${color}`,
+                                color: color,
+                                borderRadius: '2px',
+                                padding: '1px 5px',
+                                fontWeight: 'bold',
+                                textTransform: 'uppercase',
+                                fontFamily: 'Orbitron',
+                                letterSpacing: '0.5px'
+                              }}
+                            >
+                              {c.userRank}
+                            </span>
+                          </div>
+                          <span style={{ fontSize: '0.62rem', color: '#555577', fontFamily: 'Share Tech Mono' }}>
+                            ⏳ {timeString}
+                          </span>
+                        </div>
+
+                        {/* Text Rendered inside ReactMarkdown or Editing form */}
+                        {editingCommentId === c.id ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <textarea
+                              value={editText}
+                              onChange={(e) => setEditText(e.target.value)}
+                              style={{
+                                width: '100%',
+                                background: '#07070C',
+                                border: '1px solid var(--cyber-pink)',
+                                borderRadius: '4px',
+                                color: '#FFF',
+                                padding: '8px',
+                                fontSize: '0.76rem',
+                                fontFamily: 'Share Tech Mono'
+                              }}
+                            />
+                            <div style={{ display: 'flex', gap: '6px', alignSelf: 'flex-end' }}>
+                              <button onClick={() => setEditingCommentId(null)} className="cp-pd-run-btn" style={{ padding: '3px 8px', fontSize: '0.58rem', background: 'transparent' }}>
+                                CANCEL
+                              </button>
+                              <button onClick={() => handleSaveEdit(c.id)} className="cp-pd-submit-btn" style={{ padding: '3px 8px', fontSize: '0.58rem', background: 'var(--cyber-pink)', borderColor: 'var(--cyber-pink)' }}>
+                                SAVE
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div style={{ fontSize: '0.78rem', color: '#A8A8C0', lineHeight: '1.4' }}>
+                            <ReactMarkdown>{c.text}</ReactMarkdown>
+                          </div>
+                        )}
+
+                        {/* Code snippet block if attached */}
+                        {c.codeSnippet && (
+                          <div style={{ position: 'relative' }}>
+                            <pre
+                              style={{
+                                background: '#050508',
+                                border: '1px solid rgba(255,255,255,0.03)',
+                                borderRadius: '4px',
+                                padding: '12px',
+                                color: '#00FF88',
+                                fontFamily: 'Share Tech Mono',
+                                fontSize: '0.7rem',
+                                overflowX: 'auto',
+                                margin: '0'
+                              }}
+                            >
+                              <code>{c.codeSnippet}</code>
+                            </pre>
+                            <span style={{ position: 'absolute', right: '10px', top: '6px', fontSize: '0.52rem', color: '#555577', textTransform: 'uppercase', fontFamily: 'Orbitron' }}>
+                              {c.language}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Actions bar (Votes + edit/delete + reply) */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.03)', paddingTop: '8px' }}>
+                          <div style={{ display: 'flex', gap: '10px' }}>
+                            {/* Upvote button */}
+                            <button
+                              onClick={() => handleVoteComment(c.id, 'upvote')}
+                              style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '0.68rem', color: '#8888AA', display: 'flex', alignItems: 'center', gap: '4px' }}
+                            >
+                              <span>▲</span>
+                              <span style={{ fontFamily: 'Share Tech Mono' }}>{c.upvotes || 0}</span>
+                            </button>
+                            {/* Downvote button */}
+                            <button
+                              onClick={() => handleVoteComment(c.id, 'downvote')}
+                              style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '0.68rem', color: '#8888AA', display: 'flex', alignItems: 'center', gap: '4px' }}
+                            >
+                              <span>▼</span>
+                              <span style={{ fontFamily: 'Share Tech Mono' }}>{c.downvotes || 0}</span>
+                            </button>
+                          </div>
+
+                          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                            {/* Reply button */}
+                            {!isReply && (
+                              <button
+                                onClick={() => {
+                                  setReplyToId(replyToId === c.id ? null : c.id);
+                                  setReplyText('');
+                                }}
+                                style={{ background: 'transparent', border: 'none', color: 'var(--cyber-green)', fontSize: '0.62rem', fontFamily: 'Orbitron', cursor: 'pointer', letterSpacing: '0.5px' }}
+                              >
+                                {replyToId === c.id ? 'CANCEL REPLY' : 'REPLY 💬'}
+                              </button>
+                            )}
+
+                            {/* Owner controls */}
+                            {isOwner && (
+                              <>
+                                <button
+                                  onClick={() => {
+                                    setEditingCommentId(c.id);
+                                    setEditText(c.text);
+                                  }}
+                                  style={{ background: 'transparent', border: 'none', color: '#FFAA00', fontSize: '0.62rem', fontFamily: 'Orbitron', cursor: 'pointer' }}
+                                >
+                                  EDIT
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteComment(c.id)}
+                                  style={{ background: 'transparent', border: 'none', color: 'var(--cyber-pink)', fontSize: '0.62rem', fontFamily: 'Orbitron', cursor: 'pointer' }}
+                                >
+                                  DELETE
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Inline Reply input field */}
+                        {replyToId === c.id && (
+                          <div style={{ display: 'flex', gap: '8px', background: '#05050A', padding: '10px', borderRadius: '4px', border: '1px solid rgba(0, 255, 136, 0.2)', marginTop: '8px' }}>
+                            <input
+                              type="text"
+                              value={replyText}
+                              onChange={(e) => setReplyText(e.target.value)}
+                              placeholder="Type a responsive reply..."
+                              style={{
+                                flex: 1,
+                                background: '#020205',
+                                border: '1px solid rgba(255,255,255,0.06)',
+                                borderRadius: '2px',
+                                color: '#FFF',
+                                padding: '6px 10px',
+                                fontSize: '0.74rem',
+                                fontFamily: 'Share Tech Mono'
+                              }}
+                            />
+                            <button
+                              onClick={() => handleSubmitReply(c.id)}
+                              className="cp-pd-submit-btn"
+                              style={{ background: 'var(--cyber-green)', borderColor: 'var(--cyber-green)', color: '#000', padding: '4px 12px', fontSize: '0.62rem', fontWeight: 'bold' }}
+                            >
+                              SUBMIT
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Render Nested Replies */}
+                        {getReplies(c.id).map(r => renderCard(r, true))}
+                      </div>
+                    );
+                  };
+
+                  if (parents.length === 0) {
+                    return (
+                      <p style={{ textAlign: 'center', color: '#666688', fontSize: '0.72rem', padding: '20px' }}>
+                        // NO COMMENTS RECORDED FOR THIS PROBLEM NODE.
+                      </p>
+                    );
+                  }
+
+                  return parents.map(p => renderCard(p, false));
+                })()}
+              </div>
+
+            </div>
           )}
         </div>
       </div>
@@ -843,6 +1378,34 @@ const ProblemDetail = () => {
                   </div>
                 )}
 
+                {isAccepted && (
+                  <div 
+                    style={{
+                      background: 'rgba(0, 255, 136, 0.05)',
+                      border: '1px solid #00FF88',
+                      borderRadius: '4px',
+                      padding: '12px 16px',
+                      marginBottom: '16px',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      boxShadow: '0 0 10px rgba(0, 255, 136, 0.2)'
+                    }}
+                  >
+                    <div>
+                      <h4 style={{ margin: '0 0 4px 0', color: '#00FF88', fontFamily: 'Orbitron', fontSize: '0.8rem', letterSpacing: '1px' }}>🌐 SHARE YOUR SOLUTION CORE!</h4>
+                      <p style={{ margin: 0, fontSize: '0.72rem', color: '#8888AA' }}>Publish your code schematic with approach tags and reactions to the public feed timeline.</p>
+                    </div>
+                    <button
+                      className="cp-radar-btn"
+                      onClick={() => setShowShareModal(true)}
+                      style={{ border: '1px solid #00FF88', color: '#00FF88', fontSize: '0.65rem', background: 'transparent', cursor: 'pointer', fontFamily: 'Orbitron' }}
+                    >
+                      SHARE SOLUTION 🌐
+                    </button>
+                  </div>
+                )}
+
                 {!executionResult && !isJudging && (
                   <span className="cp-pd-placeholder">// RUN YOUR CODE TO SEE OUTPUT</span>
                 )}
@@ -880,6 +1443,23 @@ const ProblemDetail = () => {
         wrongAnswers={wrongAnswers} 
         isAccepted={isAccepted} 
       />
+
+      {showShareModal && (
+        <ShareSolutionModal
+          problemId={id}
+          problemTitle={problem?.title || 'Algorithm Challenge'}
+          difficulty={problem?.difficulty || 'Medium'}
+          code={code}
+          language={language}
+          runtime_ms={executionResult?.executionTime || 24}
+          memory_kb={1240}
+          onClose={() => setShowShareModal(false)}
+          onSuccess={() => {
+            alert("Solution successfully shared to the grid!");
+            setShowShareModal(false);
+          }}
+        />
+      )}
     </div>
   );
 };

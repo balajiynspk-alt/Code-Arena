@@ -5,11 +5,15 @@ import { auth, db, rtdb } from '../services/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { ref, onValue, query, orderByChild, equalTo } from 'firebase/database';
 import { acceptChallenge, declineChallenge } from '../services/battleService';
+import { subscribeConversations } from '../services/dmService';
+import { subscribeNotifications, markAllAsRead } from '../services/notificationService';
+import logoImg from '../assets/logo.png';
 import './Navbar.css';
 
 const NAV_LINKS = [
   { label: 'Dashboard', path: '/dashboard' },
   { label: 'Problems',  path: '/problems' },
+  { label: 'Search Users', path: '/search' },
   { label: 'College Guild', path: '/guild' },
   { label: 'Standings', path: '/leaderboard' },
   { label: 'AI Whiteboard', path: '/whiteboard' },
@@ -22,6 +26,8 @@ const NAV_LINKS = [
   { label: 'Interview',  path: '/interview' },
   { label: 'Constellations', path: '/constellation' },
   { label: 'Watch Live', path: '/watch' },
+  { label: 'Communities', path: '/communities' },
+  { label: 'Realtime Chat', path: '/chat' },
   { label: 'Quantum AI', path: '/quantum' },
 ];
 
@@ -31,6 +37,43 @@ const Navbar = () => {
   const currentUser = auth.currentUser;
 
   const [activeChallenge, setActiveChallenge] = useState(null);
+  const [unreadDMs, setUnreadDMs] = useState(0);
+
+  useEffect(() => {
+    if (!currentUser) {
+      setUnreadDMs(0);
+      return;
+    }
+    const unsub = subscribeConversations((list) => {
+      const total = list.reduce((acc, c) => acc + (c.unreadCount?.[currentUser.uid] || 0), 0);
+      setUnreadDMs(total);
+    });
+    return () => unsub();
+  }, [currentUser]);
+
+  const [notifications, setNotifications] = useState([]);
+  const [showNotifDropdown, setShowNotifDropdown] = useState(false);
+
+  useEffect(() => {
+    if (!currentUser) {
+      setNotifications([]);
+      return;
+    }
+    const unsub = subscribeNotifications(currentUser.uid, (list) => {
+      setNotifications(list);
+    });
+    return () => unsub();
+  }, [currentUser]);
+
+  const unreadNotifs = notifications.filter(n => !n.read).length;
+
+  const handleToggleNotifDropdown = async () => {
+    const nextState = !showNotifDropdown;
+    setShowNotifDropdown(nextState);
+    if (nextState && unreadNotifs > 0) {
+      await markAllAsRead(currentUser.uid, notifications);
+    }
+  };
 
   const { data: userData } = useQuery({
     queryKey: ['navUserData', currentUser?.uid],
@@ -93,8 +136,7 @@ const Navbar = () => {
     <nav className="cp-navbar">
       {/* Logo */}
       <Link to="/" className="cp-logo">
-        <span className="cp-logo-code">CODE</span>
-        <span className="cp-logo-arena">ARENA</span>
+        <img src={logoImg} alt="CodeArena" className="cp-logo-img" />
       </Link>
 
       {/* Nav Links */}
@@ -125,6 +167,84 @@ const Navbar = () => {
             <div className="cp-coins" title="Coins">
               <span className="cp-coins-icon">🪙</span>
               <span className="cp-coins-count">{userData?.coinsBalance ?? 0}</span>
+            </div>
+
+            {/* Direct Messages */}
+            <Link to="/messages" className="cp-nav-dm-link" title="Direct Transmissions">
+              <span className="cp-nav-dm-icon">✉️</span>
+              {unreadDMs > 0 && <span className="cp-nav-dm-badge">{unreadDMs}</span>}
+            </Link>
+
+            {/* Notification Bell */}
+            <div className="cp-nav-notif-container" style={{ position: 'relative' }}>
+              <button 
+                onClick={handleToggleNotifDropdown} 
+                className="cp-nav-notif-btn" 
+                title="System Notifications"
+              >
+                <span className="cp-nav-notif-icon">🔔</span>
+                {unreadNotifs > 0 && (
+                  <span className="cp-nav-notif-badge">
+                    {unreadNotifs > 99 ? '99+' : unreadNotifs}
+                  </span>
+                )}
+              </button>
+
+              {/* Dropdown menu */}
+              {showNotifDropdown && (
+                <div className="cp-nav-notif-dropdown">
+                  <div className="cp-dropdown-header">
+                    <span>// SYSTEM ALERTS</span>
+                    <button 
+                      onClick={async () => {
+                        await markAllAsRead(currentUser.uid, notifications);
+                        setShowNotifDropdown(false);
+                      }} 
+                      className="cp-dropdown-clear"
+                    >
+                      MARK ALL READ
+                    </button>
+                  </div>
+                  
+                  <div className="cp-dropdown-list">
+                    {notifications.length === 0 ? (
+                      <div className="cp-dropdown-empty">// TIMELINE CLEAR</div>
+                    ) : (
+                      notifications.slice(0, 10).map(n => (
+                        <div 
+                          key={n.id} 
+                          onClick={() => {
+                            setShowNotifDropdown(false);
+                            if (n.link) navigate(n.link);
+                          }}
+                          className={`cp-dropdown-item ${n.read ? 'read' : 'unread'}`}
+                        >
+                          <span style={{ fontSize: '0.9rem' }}>
+                            {n.type === 'NEW_FOLLOWER' ? '👤' : 
+                             n.type === 'REACTION' ? '🔥' : 
+                             n.type === 'COMMENT_REPLY' ? '💬' : 
+                             n.type === 'BATTLE_INVITE' ? '⚔️' : 
+                             n.type === 'BATTLE_RESULT' ? '🏆' : 
+                             n.type === 'BADGE_EARNED' ? '🎖️' : '🔔'}
+                          </span>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                            <p className="cp-dropdown-text">{n.text}</p>
+                            <span className="cp-dropdown-time">{new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  <Link 
+                    to="/notifications" 
+                    onClick={() => setShowNotifDropdown(false)} 
+                    className="cp-dropdown-see-all"
+                  >
+                    SEE ALL SYSTEM ALERTS →
+                  </Link>
+                </div>
+              )}
             </div>
 
             {/* Profile */}

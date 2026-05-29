@@ -13,6 +13,13 @@ const firebaseConfig = {
   appId: process.env.REACT_APP_FIREBASE_APP_ID,
 };
 
+// Check if Firebase keys are default developer placeholders
+export const isMockMode = 
+  !firebaseConfig.apiKey || 
+  firebaseConfig.apiKey === 'your_key' || 
+  firebaseConfig.apiKey.includes('your_') ||
+  firebaseConfig.apiKey.includes('placeholder');
+
 const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);

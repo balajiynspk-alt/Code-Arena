@@ -5,7 +5,8 @@ import {
   getUserWeaknessProfile, 
   generateQuantumProblem, 
   saveQuantumProblemToBank,
-  getQuantumProblemsBank 
+  getQuantumProblemsBank,
+  saveWeaknessProfile
 } from '../services/quantumGeneratorService';
 import './QuantumGenerator.css';
 
@@ -157,10 +158,30 @@ const QuantumGenerator = () => {
     }
   };
 
+  const handleFeedbackChange = async (score) => {
+    setFeedback(score);
+    if (!profile) return;
+    
+    let nextDifficulty = profile.recommendedDifficulty || 'Medium';
+    if (score === 'too-easy') {
+      nextDifficulty = nextDifficulty === 'Easy' ? 'Medium' : 'Hard';
+    } else if (score === 'too-hard') {
+      nextDifficulty = nextDifficulty === 'Hard' ? 'Medium' : 'Easy';
+    }
+    
+    const updated = {
+      ...profile,
+      recommendedDifficulty: nextDifficulty
+    };
+    
+    setProfile(updated);
+    await saveWeaknessProfile(currentUser?.uid || 'anonymous', updated);
+  };
+
   const handleOpenProblem = () => {
     if (!generatedProblem) return;
     // Launch standard detail workspace with quantum flag details
-    navigate(`/problems`, { state: { customProblem: generatedProblem } });
+    navigate(`/problems/quantum-challenge`, { state: { customProblem: generatedProblem } });
   };
 
   const stepsList = [
@@ -318,24 +339,24 @@ const QuantumGenerator = () => {
                   ))}
                 </div>
 
-                {/* Feedback adjuster */}
+                 {/* Feedback adjuster */}
                 <div className="cp-q-feedback-panel">
                   <h4 className="cp-q-feedback-h">// ALGORITHMIC PACING FEEDBACK</h4>
                   <div className="cp-feedback-buttons">
                     <button 
-                      onClick={() => setFeedback('too-easy')} 
+                      onClick={() => handleFeedbackChange('too-easy')} 
                       className={`cp-feedback-btn ${feedback === 'too-easy' ? 'active' : ''}`}
                     >
                       TOO EASY (UP DIFFICULTY)
                     </button>
                     <button 
-                      onClick={() => setFeedback('optimal')} 
+                      onClick={() => handleFeedbackChange('optimal')} 
                       className={`cp-feedback-btn ${feedback === 'optimal' ? 'active' : ''}`}
                     >
                       OPTIMAL TRAINING DWELL
                     </button>
                     <button 
-                      onClick={() => setFeedback('too-hard')} 
+                      onClick={() => handleFeedbackChange('too-hard')} 
                       className={`cp-feedback-btn ${feedback === 'too-hard' ? 'active' : ''}`}
                     >
                       TOO COMPLEX (DOWN SCALE)

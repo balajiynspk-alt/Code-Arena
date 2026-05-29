@@ -1,11 +1,10 @@
-/* ── Cyberpunk Navbar ─────────────────────────────────── */
 .cp-navbar {
   position: sticky;
   top: 0;
   z-index: 1000;
   display: flex;
   align-items: center;
-  gap: 40px;
+  gap: 20px;
   height: 64px;
   padding: 0 32px;
   background: #0F0F1A;
@@ -18,22 +17,21 @@
   text-decoration: none;
   display: flex;
   align-items: center;
-  gap: 1px;
-  font-family: 'Orbitron', monospace;
-  font-weight: 700;
-  font-size: 1.35rem;
-  letter-spacing: 0.08em;
-  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.cp-logo-code {
-  color: #FF2D78;
-  text-shadow: 0 0 12px #FF2D78aa;
+.cp-logo-img {
+  height: 48px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+  transition: filter 0.2s ease, transform 0.2s ease;
+  filter: drop-shadow(0 0 6px rgba(255, 45, 120, 0.35));
 }
 
-.cp-logo-arena {
-  color: #00FF88;
-  text-shadow: 0 0 12px #00FF88aa;
+.cp-logo:hover .cp-logo-img {
+  transform: scale(1.04);
+  filter: drop-shadow(0 0 12px rgba(255, 45, 120, 0.65));
 }
 
 /* ── Nav Links ─────────────────────────────────────────── */
@@ -43,6 +41,13 @@
   margin: 0;
   padding: 0;
   gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.cp-nav-links::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
 }
 
 .cp-nav-link {
@@ -237,5 +242,187 @@
 .cp-battle-notification-btn--decline:hover {
   background: #ff5599;
   box-shadow: 0 0 20px rgba(255, 45, 120, 0.6);
+}
+
+/* ── Direct Messages Navbar Elements ── */
+.cp-nav-dm-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  color: #8888AA;
+  text-decoration: none;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.cp-nav-dm-link:hover {
+  border-color: #FF2D78;
+  color: #FF2D78;
+  box-shadow: 0 0 10px rgba(255, 45, 120, 0.3);
+}
+
+.cp-nav-dm-icon {
+  font-size: 1.1rem;
+}
+
+.cp-nav-dm-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #FF2D78;
+  color: #0A0A0F;
+  font-size: 0.58rem;
+  font-weight: bold;
+  font-family: 'Orbitron', monospace;
+  padding: 1px 5px;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #FF2D78;
+}
+
+/* ── Notifications Navbar Dropdown ── */
+.cp-nav-notif-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  color: #8888AA;
+  position: relative;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.cp-nav-notif-btn:hover {
+  border-color: #00FF88;
+  color: #00FF88;
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+}
+
+.cp-nav-notif-icon {
+  font-size: 1.05rem;
+}
+
+.cp-nav-notif-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #FF2D78;
+  color: #0A0A0F;
+  font-size: 0.55rem;
+  font-weight: bold;
+  font-family: 'Orbitron', monospace;
+  padding: 1px 4px;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #FF2D78;
+}
+
+.cp-nav-notif-dropdown {
+  position: absolute;
+  top: 48px;
+  right: 0;
+  width: 320px;
+  background: #0F0F1A;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+.cp-dropdown-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.72rem;
+  color: #8888AA;
+}
+
+.cp-dropdown-clear {
+  background: transparent;
+  border: none;
+  color: #FF2D78;
+  font-size: 0.58rem;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.cp-dropdown-clear:hover {
+  text-decoration: underline;
+}
+
+.cp-dropdown-list {
+  max-height: 280px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.cp-dropdown-empty {
+  padding: 24px;
+  text-align: center;
+  color: #555577;
+  font-size: 0.76rem;
+}
+
+.cp-dropdown-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.cp-dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.cp-dropdown-item.unread {
+  background: rgba(255, 255, 255, 0.01);
+  border-left: 2px solid #FF2D78;
+}
+
+.cp-dropdown-item.read {
+  opacity: 0.6;
+}
+
+.cp-dropdown-text {
+  font-size: 0.76rem;
+  color: #FFF;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.cp-dropdown-time {
+  font-size: 0.58rem;
+  color: #666688;
+}
+
+.cp-dropdown-see-all {
+  padding: 12px;
+  text-align: center;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.68rem;
+  color: #00FF88;
+  text-decoration: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(0, 255, 136, 0.02);
+}
+
+.cp-dropdown-see-all:hover {
+  background: rgba(0, 255, 136, 0.06);
 }
 

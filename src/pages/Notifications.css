@@ -1,0 +1,161 @@
+/* ═══════════════════════════════════════════════════════
+   Notifications System Styling Sheet — Laser Cyberpunk
+   ═══════════════════════════════════════════════════════ */
+
+.cp-notifications-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 24px;
+  font-family: 'Share Tech Mono', monospace;
+  color: #FFF;
+  min-height: calc(100vh - 80px);
+}
+
+.cp-notif-state {
+  color: #FF2D78;
+  font-family: 'Orbitron', monospace;
+  font-size: 1.1rem;
+  text-align: center;
+  padding: 120px 20px;
+}
+
+.cp-notif-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 24px;
+  margin-bottom: 30px;
+}
+
+.cp-notif-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.6rem;
+  color: #FFF;
+  margin: 0 0 8px 0;
+  letter-spacing: 1.5px;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.15);
+}
+
+.cp-notif-subtitle {
+  font-size: 0.8rem;
+  color: #8888AA;
+  margin: 0;
+  max-width: 500px;
+  line-height: 1.5;
+}
+
+.cp-notif-clear-btn {
+  background: transparent;
+  border: 1px solid #FF2D78;
+  color: #FF2D78;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.68rem;
+  font-weight: bold;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all 0.2s ease;
+  clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+}
+
+.cp-notif-clear-btn:hover {
+  background: rgba(255, 45, 120, 0.08);
+  box-shadow: 0 0 12px rgba(255, 45, 120, 0.3);
+}
+
+.cp-notif-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cp-notif-empty {
+  text-align: center;
+  padding: 80px;
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+  color: #555577;
+  font-size: 0.88rem;
+  letter-spacing: 1px;
+}
+
+/* Base item card */
+.cp-notif-item {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 16px 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  position: relative;
+}
+
+/* Color categorization left border triggers */
+.cp-notif-cat--social {
+  border-left: 3px solid #00E5FF; /* Cyan */
+}
+
+.cp-notif-cat--battle {
+  border-left: 3px solid #FF2D78; /* Pink */
+}
+
+.cp-notif-cat--system {
+  border-left: 3px solid #FFAA00; /* Amber */
+}
+
+.cp-notif-cat--achievement {
+  border-left: 3px solid #00FF88; /* Green */
+}
+
+/* Hover effects */
+.cp-notif-item:hover {
+  transform: translateX(4px);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Read/Unread structures */
+.cp-notif-item.unread {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.cp-notif-item.read {
+  background: transparent;
+  opacity: 0.55;
+}
+
+.cp-notif-icon-badge {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.cp-notif-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cp-notif-text {
+  font-size: 0.88rem;
+  color: #FFF;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.cp-notif-time {
+  font-size: 0.68rem;
+  color: #666688;
+}
+
+.cp-notif-unread-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #FF2D78;
+  box-shadow: 0 0 8px #FF2D78;
+  position: absolute;
+  right: 24px;
+}

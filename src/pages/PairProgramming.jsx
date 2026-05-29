@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
-import { auth, rtdb } from '../services/firebase';
+import { auth, rtdb, isMockMode } from '../services/firebase';
 import { ref, onValue, off } from 'firebase/database';
 import { 
   joinPairRoom, 
@@ -41,8 +41,54 @@ const PairProgramming = () => {
   // 1. Subscribe to active Room payload
   useEffect(() => {
     if (!roomId) return;
-    const roomRef = ref(rtdb, `pairRooms/${roomId}`);
 
+    if (isMockMode) {
+      const handleMockRoomData = () => {
+        const roomRaw = localStorage.getItem(`mock_pair_room_${roomId}`);
+        if (!roomRaw) return;
+        const data = JSON.parse(roomRaw);
+        setRoom(data);
+        // Only set local code if we are not the driver or if localCode is empty
+        const isHost = data.hostId === (currentUser?.uid || 'guest');
+        const isDriver = data.driverId === (currentUser?.uid || 'guest');
+        if (!isDriver || !localCode) {
+          setLocalCode(data.code || '');
+        }
+
+        // Sync Partner Cursor coordinates in Monaco workspace
+        if (editorRef.current && monacoRef.current && data.cursors) {
+          const monaco = monacoRef.current;
+          const currentUid = currentUser?.uid || 'guest';
+          
+          // Find partner id
+          const partnerId = Object.keys(data.cursors).find(uid => uid !== currentUid);
+          const partnerCursor = partnerId ? data.cursors[partnerId] : null;
+
+          const newDecorations = [];
+          if (partnerCursor && partnerCursor.line && partnerCursor.column) {
+            newDecorations.push({
+              range: new monaco.Range(
+                partnerCursor.line, 
+                partnerCursor.column, 
+                partnerCursor.line, 
+                partnerCursor.column
+              ),
+              options: {
+                className: partnerCursor.role === 'host' ? 'cp-pair-cursor-host' : 'cp-pair-cursor-guest',
+                hoverMessage: { value: `${partnerCursor.role === 'host' ? 'Host' : 'Partner'} Cursor` }
+              }
+            });
+          }
+          decorationsRef.current = editorRef.current.deltaDecorations(decorationsRef.current, newDecorations);
+        }
+      };
+
+      handleMockRoomData();
+      const interval = setInterval(handleMockRoomData, 1000);
+      return () => clearInterval(interval);
+    }
+
+    const roomRef = ref(rtdb, `pairRooms/${roomId}`);
     const handleRoomData = (snapshot) => {
       const data = snapshot.val();
       if (!data) return;
@@ -80,13 +126,23 @@ const PairProgramming = () => {
 
     onValue(roomRef, handleRoomData);
     return () => off(roomRef, 'value', handleRoomData);
-  }, [roomId, currentUser]);
+  }, [roomId, currentUser, localCode]);
 
   // 2. Subscribe to Chat history
   useEffect(() => {
     if (!roomId) return;
-    const chatRef = ref(rtdb, `pairRooms/${roomId}/chat`);
 
+    if (isMockMode) {
+      const handleMockChat = () => {
+        const chatRaw = localStorage.getItem(`mock_pair_chat_${roomId}`) || '[]';
+        setChatMessages(JSON.parse(chatRaw));
+      };
+      handleMockChat();
+      const interval = setInterval(handleMockChat, 1000);
+      return () => clearInterval(interval);
+    }
+
+    const chatRef = ref(rtdb, `pairRooms/${roomId}/chat`);
     const handleChatData = (snapshot) => {
       const data = snapshot.val();
       if (!data) return;
@@ -124,6 +180,91 @@ const PairProgramming = () => {
       checkJoin();
     }
   }, [currentUser, roomId]);
+
+  // ── Peer AI / Companion Bot Simulator ──
+  useEffect(() => {
+    if (!roomId || !isMockMode) return;
+
+    // 1. Join Room after 2 seconds
+    const joinTimeout = setTimeout(() => {
+      const roomRaw = localStorage.getItem(`mock_pair_room_${roomId}`);
+      if (roomRaw) {
+        const roomData = JSON.parse(roomRaw);
+        if (!roomData.guestId) {
+          roomData.guestId = 'aura_netrunner';
+          roomData.guestName = 'Aura Netrunner ⚡';
+          localStorage.setItem(`mock_pair_room_${roomId}`, JSON.stringify(roomData));
+
+          // Post chat greeting
+          const chatRaw = localStorage.getItem(`mock_pair_chat_${roomId}`) || '[]';
+          const chat = JSON.parse(chatRaw);
+          chat.push({
+            id: `msg_join`,
+            senderId: 'aura_netrunner',
+            senderName: 'Aura Netrunner ⚡',
+            text: 'System link established! Ready to optimize this node together. 👾 Should I lead the driver controls or are you guiding?',
+            timestamp: Date.now()
+          });
+          localStorage.setItem(`mock_pair_chat_${roomId}`, JSON.stringify(chat));
+        }
+      }
+    }, 2000);
+
+    // 2. Cursor coordinate movement loop
+    const cursorInterval = setInterval(() => {
+      const roomRaw = localStorage.getItem(`mock_pair_room_${roomId}`);
+      if (roomRaw) {
+        const roomData = JSON.parse(roomRaw);
+        if (roomData.guestId === 'aura_netrunner') {
+          const randomLine = Math.floor(Math.random() * 8) + 2;
+          const randomCol = Math.floor(Math.random() * 20) + 1;
+          if (!roomData.cursors) roomData.cursors = {};
+          roomData.cursors['aura_netrunner'] = {
+            line: randomLine,
+            column: randomCol,
+            role: 'guest',
+            timestamp: Date.now()
+          };
+          localStorage.setItem(`mock_pair_room_${roomId}`, JSON.stringify(roomData));
+        }
+      }
+    }, 5000);
+
+    // 3. Periodic dialogue sequences in chat
+    const chatInterval = setInterval(() => {
+      const roomRaw = localStorage.getItem(`mock_pair_room_${roomId}`);
+      if (roomRaw) {
+        const roomData = JSON.parse(roomRaw);
+        if (roomData.guestId === 'aura_netrunner') {
+          const commentBank = [
+            "We should pay close attention to off-by-one errors on the index boundaries.",
+            "DFS recursion stack space might exceed limit, let's keep it minimal.",
+            "I'm keeping an eye on your cursor coordinates, looking very neat!",
+            "Let's execute the compiler tests to see if we satisfy base parameters.",
+            "Should we swap control to driver-navigator mode to focus cleanly?"
+          ];
+          const randomComment = commentBank[Math.floor(Math.random() * commentBank.length)];
+          
+          const chatRaw = localStorage.getItem(`mock_pair_chat_${roomId}`) || '[]';
+          const chat = JSON.parse(chatRaw);
+          chat.push({
+            id: `msg_${Date.now()}`,
+            senderId: 'aura_netrunner',
+            senderName: 'Aura Netrunner ⚡',
+            text: randomComment,
+            timestamp: Date.now()
+          });
+          localStorage.setItem(`mock_pair_chat_${roomId}`, JSON.stringify(chat));
+        }
+      }
+    }, 20000);
+
+    return () => {
+      clearTimeout(joinTimeout);
+      clearInterval(cursorInterval);
+      clearInterval(chatInterval);
+    };
+  }, [roomId]);
 
   // ── Sync Editor changes (debounced update) ──
   const handleEditorChange = (value) => {
@@ -218,6 +359,10 @@ const PairProgramming = () => {
       `${currentUser?.displayName || 'Partner'} executed the test suite!`
     );
   };
+
+  if (roomId === 'lobby') {
+    return <PairLobbyHub navigate={navigate} currentUser={currentUser} />;
+  }
 
   return (
     <div className="cp-pair-page">
@@ -387,6 +532,130 @@ const PairProgramming = () => {
 
       </div>
 
+    </div>
+  );
+};
+
+const PairLobbyHub = ({ navigate, currentUser }) => {
+  const [rooms] = useState([
+    { id: 'room_mock_1', title: 'DP Cache Minimizer Loop', host: 'Cyber_Synthesizer', difficulty: 'Medium', language: 'python' },
+    { id: 'room_mock_2', title: 'Quantum DFS Junction', host: 'Aura_Netrunner', difficulty: 'Hard', language: 'javascript' },
+    { id: 'room_mock_3', title: 'Junction Splice Array', host: 'Glitch_Viper', difficulty: 'Easy', language: 'cpp' }
+  ]);
+
+  const handleCreateRoom = async () => {
+    const newRoomId = `room_${Date.now()}`;
+    const payload = {
+      roomId: newRoomId,
+      problemId: '1',
+      hostId: currentUser?.uid || 'guest_user',
+      hostName: currentUser?.displayName || 'Host Coder',
+      guestId: null,
+      guestName: null,
+      code: 'def solve(weights, target):\n    # Write Python code\n    pass',
+      language: 'python',
+      driverId: currentUser?.uid || 'guest_user',
+      mode: 'free',
+      compileResult: null,
+      turnLockExpires: 0
+    };
+    localStorage.setItem(`mock_pair_room_${newRoomId}`, JSON.stringify(payload));
+    localStorage.setItem(`mock_pair_chat_${newRoomId}`, JSON.stringify([]));
+    navigate(`/pair/${newRoomId}`);
+  };
+
+  const handleJoinRoom = (rid) => {
+    const selected = rooms.find(r => r.id === rid);
+    const newRoomId = `room_${Date.now()}`;
+    const payload = {
+      roomId: newRoomId,
+      problemId: '2',
+      hostId: 'simulated_host',
+      hostName: selected.host,
+      guestId: currentUser?.uid || 'guest_user',
+      guestName: currentUser?.displayName || 'Guest Coder',
+      code: 'function solve(tunnels, start) {\n    // Node routing analysis\n}',
+      language: selected.language,
+      driverId: 'simulated_host',
+      mode: 'free',
+      compileResult: null,
+      turnLockExpires: 0
+    };
+    localStorage.setItem(`mock_pair_room_${newRoomId}`, JSON.stringify(payload));
+    localStorage.setItem(`mock_pair_chat_${newRoomId}`, JSON.stringify([]));
+    navigate(`/pair/${newRoomId}`);
+  };
+
+  return (
+    <div className="cp-pair-page cp-lobby-hub-active">
+      <div className="cp-battle-lobby-glow" style={{ background: 'rgba(255, 170, 0, 0.04)' }} />
+      
+      <div className="cp-pair-workspace cp-lobby-workspace">
+        <div className="cp-pair-topbar">
+          <span className="cp-pair-title-meta">
+            MULTIPLAYER COOP HUB // COLLABORATIVE LOBBIES
+          </span>
+          <button className="cp-radar-btn cp-radar-btn--active" onClick={handleCreateRoom} style={{ background: '#FFAA00', borderColor: '#FFAA00', color: '#000', fontWeight: 'bold' }}>
+            CREATE COOPERATIVE ROOM 🤝
+          </button>
+        </div>
+
+        <div className="cp-lobby-layout-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '30px', padding: '30px' }}>
+          
+          {/* Active Rooms Listing */}
+          <div className="cp-active-rooms-container">
+            <h3 style={{ fontFamily: 'Orbitron', color: '#FFAA00', fontSize: '0.9rem', letterSpacing: '1px', marginBottom: '20px', borderBottom: '1px solid rgba(255, 170, 0, 0.15)', paddingBottom: '10px' }}>
+              // ACTIVE CYBERNETIC CO-OP ROOMS
+            </h3>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {rooms.map(room => (
+                <div key={room.id} className="cp-lobby-room-card" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '6px', padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <h4 style={{ fontFamily: 'Orbitron', color: '#FFF', fontSize: '0.88rem', margin: '0 0 6px 0', letterSpacing: '1px' }}>
+                      {room.title.toUpperCase()}
+                    </h4>
+                    <div style={{ display: 'flex', gap: '15px', fontSize: '0.72rem', color: '#8888AA' }}>
+                      <span>Host: <strong style={{ color: '#FFAA00' }}>{room.host}</strong></span>
+                      <span>Difficulty: <strong style={{ fontSize: '0.65rem', padding: '2px 6px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '2px' }}>{room.difficulty}</strong></span>
+                      <span>Language: <strong style={{ color: '#00FF88' }}>{room.language.toUpperCase()}</strong></span>
+                    </div>
+                  </div>
+
+                  <button className="cp-radar-btn cp-radar-btn--active" onClick={() => handleJoinRoom(room.id)} style={{ padding: '8px 16px', fontSize: '0.7rem' }}>
+                    JOIN WORKSPACE ⚡
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Lobby stats & rules sidebar */}
+          <div className="cp-lobby-sidebar">
+            <h3 style={{ fontFamily: 'Orbitron', color: '#00FF88', fontSize: '0.9rem', letterSpacing: '1px', marginBottom: '20px', borderBottom: '1px solid rgba(0, 255, 136, 0.15)', paddingBottom: '10px' }}>
+              // OPERATOR STATS
+            </h3>
+
+            <div className="cp-pair-partner-card" style={{ marginBottom: '20px' }}>
+              <div className="cp-pair-partner-avatar" style={{ background: '#00FF88', color: '#000' }}>
+                {currentUser?.displayName ? currentUser.displayName.substring(0,2).toUpperCase() : 'ME'}
+              </div>
+              <div className="cp-pair-partner-info">
+                <span className="cp-pair-partner-name">{currentUser?.displayName || 'Developer Coder'}</span>
+                <span className="cp-pair-partner-status">Rank ELO: 1540</span>
+              </div>
+            </div>
+
+            <div style={{ background: 'rgba(0, 255, 136, 0.03)', border: '1px solid rgba(0, 255, 136, 0.1)', borderRadius: '6px', padding: '16px', fontSize: '0.72rem', color: '#8888AA', lineHeight: '1.5' }}>
+              <h4 style={{ margin: '0 0 8px 0', color: '#00FF88', fontFamily: 'Orbitron', fontSize: '0.78rem' }}>DRIVER-NAVIGATOR RULES</h4>
+              <p style={{ margin: '0 0 8px 0' }}>1. The **Driver** owns exclusive keyboard write access in Monaco.</p>
+              <p style={{ margin: '0 0 8px 0' }}>2. The **Navigator** views coordinates and guides through audio channels.</p>
+              <p style={{ margin: 0 }}>3. Request turn control at any time using the active Take-Turn override keys.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
     </div>
   );
 };

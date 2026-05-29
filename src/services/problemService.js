@@ -1,4 +1,5 @@
-import { db } from './firebase';
+import { db, isMockMode } from './firebase';
+import { MOCK_PROBLEMS } from './mockData';
 import { 
   collection, 
   query, 
@@ -19,6 +20,20 @@ const SUBMISSIONS_COLLECTION = 'submissions';
 const USERS_COLLECTION = 'users';
 
 export const getProblems = async (filters = {}, lastVisibleDoc = null) => {
+  if (isMockMode) {
+    let list = [...MOCK_PROBLEMS];
+    if (filters.difficulty && filters.difficulty !== 'All') {
+      list = list.filter(p => p.difficulty === filters.difficulty);
+    }
+    if (filters.topics && filters.topics.length > 0) {
+      list = list.filter(p => p.topics.some(t => filters.topics.includes(t)));
+    }
+    return {
+      problems: list,
+      lastDoc: null
+    };
+  }
+
   try {
     let q = collection(db, PROBLEMS_COLLECTION);
     let conditions = [];
@@ -59,6 +74,12 @@ export const getProblems = async (filters = {}, lastVisibleDoc = null) => {
 };
 
 export const getProblemById = async (id) => {
+  if (isMockMode) {
+    const found = MOCK_PROBLEMS.find(p => p.id === id || p.number.toString() === id);
+    if (found) return found;
+    throw new Error("Problem not found");
+  }
+
   try {
     const docRef = doc(db, PROBLEMS_COLLECTION, id);
     const docSnap = await getDoc(docRef);
@@ -75,6 +96,11 @@ export const getProblemById = async (id) => {
 };
 
 export const getUserSolvedProblems = async (uid) => {
+  if (isMockMode) {
+    const solved = localStorage.getItem('mock_solved_problems');
+    return solved ? JSON.parse(solved) : ["1", "2"]; // Default solved problems
+  }
+
   try {
     if (!uid) return [];
     const docRef = doc(db, USERS_COLLECTION, uid);
@@ -90,6 +116,46 @@ export const getUserSolvedProblems = async (uid) => {
 };
 
 export const saveAcceptedSubmission = async (uid, problemId, code, language, executionTime, codeDNA = null) => {
+  if (isMockMode) {
+    // Update Solved Problems array in LocalStorage
+    const solved = localStorage.getItem('mock_solved_problems');
+    let solvedArray = solved ? JSON.parse(solved) : ["1", "2"];
+    if (!solvedArray.includes(problemId)) {
+      solvedArray.push(problemId);
+      localStorage.setItem('mock_solved_problems', JSON.stringify(solvedArray));
+    }
+
+    // Save Submission detail
+    const submissions = localStorage.getItem('mock_submissions') || '[]';
+    const subList = JSON.parse(submissions);
+    subList.push({
+      id: `sub_${Date.now()}`,
+      userId: uid || 'local_user',
+      problemId,
+      code,
+      language,
+      verdict: 'Accepted',
+      executionTime,
+      timestamp: new Date().toISOString(),
+      codeDNA
+    });
+    localStorage.setItem('mock_submissions', JSON.stringify(subList));
+
+    // Update User metadata stats in LocalStorage
+    const profile = localStorage.getItem('mock_user_profile');
+    const profileData = profile ? JSON.parse(profile) : { streak: 12, coinsBalance: 450, rating: 1200 };
+    profileData.coinsBalance = (profileData.coinsBalance || 0) + 10;
+    if (!profileData.solvedProblems) profileData.solvedProblems = [];
+    if (!profileData.solvedProblems.includes(problemId)) {
+      profileData.solvedProblems.push(problemId);
+    }
+    localStorage.setItem('mock_user_profile', JSON.stringify(profileData));
+    
+    // Dispatch local state change trigger event so Navbar updates instantly
+    window.dispatchEvent(new Event('mock_profile_updated'));
+    return;
+  }
+
   try {
     await runTransaction(db, async (transaction) => {
       // 1. Save the submission
@@ -135,6 +201,16 @@ export const saveAcceptedSubmission = async (uid, problemId, code, language, exe
 };
 
 export const getUserSubmissionsForProblem = async (uid, problemId) => {
+  if (isMockMode) {
+    const submissions = localStorage.getItem('mock_submissions') || '[]';
+    const subList = JSON.parse(submissions);
+    const results = subList.filter(s => s.problemId === problemId);
+    return results.map(s => ({
+      ...s,
+      timestamp: { toDate: () => new Date(s.timestamp) } // Mock Firestore Timestamp
+    }));
+  }
+
   try {
     if (!uid || !problemId) return [];
     const q = query(
@@ -162,7 +238,49 @@ export const getUserSubmissionsForProblem = async (uid, problemId) => {
   }
 };
 
+export const getUserSubmissions = async (uid) => {
+  if (isMockMode) {
+    const submissions = localStorage.getItem('mock_submissions') || '[]';
+    const subList = JSON.parse(submissions);
+    // Filter matching either username or uid
+    return subList.filter(s => s.userId === uid || s.username === uid).map(s => ({
+      id: s.id,
+      problemId: s.problemId,
+      code: s.code || `// optimal execution\nconsole.log('optimal output');`,
+      language: s.language || 'python',
+      verdict: s.verdict || 'Accepted',
+      executionTime: s.executionTime || 24,
+      runtime: s.executionTime || 24,
+      timestamp: s.timestamp ? new Date(s.timestamp).getTime() : Date.now()
+    }));
+  }
+
+  try {
+    const q = query(
+      collection(db, 'submissions'),
+      where('userId', '==', uid)
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        runtime: data.executionTime || 24,
+        timestamp: data.timestamp?.toDate ? data.timestamp.toDate().getTime() : new Date(data.timestamp || 0).getTime()
+      };
+    });
+  } catch (err) {
+    console.error("Error fetching user submissions:", err);
+    return [];
+  }
+};
+
 export const getAllProblems = async () => {
+  if (isMockMode) {
+    return MOCK_PROBLEMS;
+  }
+
   try {
     const q = query(collection(db, PROBLEMS_COLLECTION), orderBy('number', 'asc'));
     const snapshot = await getDocs(q);
@@ -174,6 +292,16 @@ export const getAllProblems = async () => {
 };
 
 export const saveMasteredSkill = async (uid, topicName) => {
+  if (isMockMode) {
+    const mastered = localStorage.getItem('mock_mastered_skills');
+    const masteredArray = mastered ? JSON.parse(mastered) : [];
+    if (!masteredArray.includes(topicName)) {
+      masteredArray.push(topicName);
+      localStorage.setItem('mock_mastered_skills', JSON.stringify(masteredArray));
+    }
+    return;
+  }
+
   try {
     const userRef = doc(db, USERS_COLLECTION, uid);
     await updateDoc(userRef, {

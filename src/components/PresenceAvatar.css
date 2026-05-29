@@ -1,0 +1,61 @@
+.cp-presence-avatar-wrapper {
+  position: relative;
+  display: inline-block;
+  user-select: none;
+}
+
+.cp-presence-avatar-img {
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: block;
+}
+
+.cp-presence-avatar-fallback {
+  border-radius: 50%;
+  background: radial-gradient(circle, #251025, #0F0F1A);
+  color: var(--cyber-pink, #FF2D78);
+  border: 1.5px solid var(--cyber-pink, #FF2D78);
+  text-shadow: 0 0 6px var(--cyber-pink, #FF2D78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 800;
+}
+
+.cp-status-dot {
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.8px solid #0A0A0F;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  transition: background 0.3s, box-shadow 0.3s;
+}
+
+.cp-status-dot.online {
+  background: var(--cyber-green, #00FF88);
+  box-shadow: 0 0 8px var(--cyber-green, #00FF88), 0 0 2px var(--cyber-green, #00FF88);
+  animation: pulse-active 2s infinite ease-in-out;
+}
+
+.cp-status-dot.offline {
+  background: #666688;
+  box-shadow: none;
+}
+
+@keyframes pulse-active {
+  0% {
+    box-shadow: 0 0 4px var(--cyber-green, #00FF88);
+  }
+  50% {
+    box-shadow: 0 0 10px var(--cyber-green, #00FF88), 0 0 4px var(--cyber-green, #00FF88);
+  }
+  100% {
+    box-shadow: 0 0 4px var(--cyber-green, #00FF88);
+  }
+}

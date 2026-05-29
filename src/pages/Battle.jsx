@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
-import { ref, onValue, set, get, update } from 'firebase/database';
+import { ref, onValue, set, get } from 'firebase/database';
 import { doc, getDoc } from 'firebase/firestore';
-import { auth, db, rtdb } from '../services/firebase';
+import { auth, db, rtdb, isMockMode } from '../services/firebase';
+import { MOCK_PROBLEMS } from '../services/mockData';
 import { updateBattleProgress, completeBattle, sendSpectatorMessage } from '../services/battleService';
 import { getAllProblems } from '../services/problemService';
 import GhostMentor from '../components/GhostMentor';
@@ -37,8 +38,111 @@ const Battle = () => {
   const canvasRef = useRef(null);
   const particlesRef = useRef([]);
 
-  // 1. Sync battle room details from Realtime DB
+  // 1. Sync battle room details from Realtime DB (or LocalStorage simulator in Mock Mode)
   useEffect(() => {
+    if (isMockMode) {
+      const loadLocalBattle = () => {
+        const raw = localStorage.getItem(`mock_battle_${battleId}`);
+        if (raw) {
+          const data = JSON.parse(raw);
+          setBattleData(data);
+          return data;
+        } else {
+          const mockOpponents = ['FAANG_Slayer_99', 'CodeGhost_404', 'binary_phantom', 'NeonOperator', 'DP_Ninja'];
+          const oppName = mockOpponents[Math.floor(Math.random() * mockOpponents.length)];
+          const randomProblem = MOCK_PROBLEMS[Math.floor(Math.random() * MOCK_PROBLEMS.length)];
+          const startTime = Date.now();
+          const endTime = startTime + 600000;
+          const initial = {
+            battleId,
+            challenger: currentUser?.uid || 'local_user',
+            challengerName: currentUser?.displayName || 'AlphaCoder',
+            challengerRating: 1200,
+            opponent: 'opp_id_simulated',
+            opponentName: oppName,
+            opponentRating: 1230,
+            difficulty: 'Medium',
+            status: 'active',
+            timestamp: Date.now(),
+            startTime,
+            endTime,
+            problemId: randomProblem.id,
+            problemTitle: randomProblem.title,
+            winnerId: '',
+            tieBreakerReason: '',
+            durationMs: 600000,
+            challengerProgress: {
+              linesWritten: 0,
+              testsPassed: 0,
+              totalTests: 5,
+              status: 'Typing...',
+              submitted: false,
+              codeText: '// Enter your solution here...\n\nfunction solve() {\n  \n}'
+            },
+            opponentProgress: {
+              linesWritten: 0,
+              testsPassed: 0,
+              totalTests: 5,
+              status: 'Typing...',
+              submitted: false,
+              codeText: ''
+            }
+          };
+          localStorage.setItem(`mock_battle_${battleId}`, JSON.stringify(initial));
+          setBattleData(initial);
+          return initial;
+        }
+      };
+
+      loadLocalBattle();
+
+      // Simulate opponent updates over time
+      const interval = setInterval(() => {
+        const raw = localStorage.getItem(`mock_battle_${battleId}`);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        if (data.status === 'completed') {
+          setBattleData(data);
+          clearInterval(interval);
+          return;
+        }
+
+        // Simulate opponent typing
+        if (data.opponentProgress && !data.opponentProgress.submitted) {
+          data.opponentProgress.linesWritten = Math.min(30, (data.opponentProgress.linesWritten || 0) + Math.floor(Math.random() * 3));
+          data.opponentProgress.status = Math.random() < 0.25 ? 'Running...' : 'Typing...';
+          
+          if (Math.random() < 0.12 && (data.opponentProgress.testsPassed || 0) < 5) {
+            data.opponentProgress.testsPassed = Math.min(5, (data.opponentProgress.testsPassed || 0) + 1);
+            if (data.opponentProgress.testsPassed === 5) {
+              data.opponentProgress.submitted = true;
+              data.opponentProgress.status = 'Submitted';
+              
+              // Opponent wins battle!
+              data.status = 'completed';
+              data.winnerId = 'opp_id_simulated';
+              data.tieBreakerReason = 'Opponent completed all verification test cases first!';
+              
+              const ratingA = data.challengerRating || 1200;
+              const ratingB = data.opponentRating || 1200;
+              const elo = calculateElo(ratingA, ratingB, 'loss');
+
+              data.challengerNewRating = elo.newRatingA;
+              data.opponentNewRating = elo.newRatingB;
+              data.challengerRatingChange = elo.changeA;
+              data.opponentRatingChange = elo.changeB;
+              data.opponentProgress.codeText = `// Perfect Hash Map Solution\nfunction solve(nums, target) {\n  const map = {};\n  for (let i = 0; i < nums.length; i++) {\n    const diff = target - nums[i];\n    if (diff in map) return [map[diff], i];\n    map[nums[i]] = i;\n  }\n  return [];\n}`;
+            }
+          }
+        }
+
+        localStorage.setItem(`mock_battle_${battleId}`, JSON.stringify(data));
+        setBattleData(data);
+      }, 4000);
+
+      return () => clearInterval(interval);
+    }
+
     const battleRef = ref(rtdb, `battles/${battleId}`);
     const unsubscribe = onValue(battleRef, (snapshot) => {
       if (snapshot.exists()) {
@@ -53,8 +157,8 @@ const Battle = () => {
   // 2. Identify Role: Challenger, Opponent, or Spectator
   const role = useMemo(() => {
     if (!currentUser || !battleData) return { isPlayer: false, isChallenger: false, isOpponent: false };
-    const isChallenger = currentUser.uid === battleData.challenger;
-    const isOpponent = currentUser.uid === battleData.opponent;
+    const isChallenger = currentUser.uid === battleData.challenger || isMockMode;
+    const isOpponent = currentUser.uid === battleData.opponent && !isMockMode;
     return {
       isPlayer: isChallenger || isOpponent,
       isChallenger,
@@ -62,11 +166,27 @@ const Battle = () => {
     };
   }, [currentUser, battleData]);
 
+  // helper calculation for ELO formula
+  const calculateElo = (ratingA, ratingB, outcome, K = 32) => {
+    const expectedA = 1 / (1 + Math.pow(10, (ratingB - ratingA) / 400));
+    const expectedB = 1 / (1 + Math.pow(10, (ratingA - ratingB) / 400));
+    let actualA = 0.5, actualB = 0.5;
+    if (outcome === 'win') { actualA = 1; actualB = 0; }
+    if (outcome === 'loss') { actualA = 0; actualB = 1; }
+    const deltaA = Math.round(K * (actualA - expectedA));
+    const deltaB = Math.round(K * (actualB - expectedB));
+    return {
+      newRatingA: Math.max(100, ratingA + deltaA),
+      newRatingB: Math.max(100, ratingB + deltaB),
+      changeA: deltaA >= 0 ? `+${deltaA}` : `${deltaA}`,
+      changeB: deltaB >= 0 ? `+${deltaB}` : `${deltaB}`
+    };
+  };
+
   // 3. Register spectator presence in room
   useEffect(() => {
-    if (!currentUser || !battleData) return;
+    if (isMockMode || !currentUser || !battleData) return;
     
-    // Only register if NOT an active player
     if (!role.isPlayer) {
       const presenceRef = ref(rtdb, `battles/${battleId}/spectators/${currentUser.uid}`);
       set(presenceRef, {
@@ -75,13 +195,18 @@ const Battle = () => {
       });
 
       return () => {
-        set(presenceRef, null); // cleanup on unmount
+        set(presenceRef, null); // cleanup
       };
     }
   }, [currentUser, battleId, role.isPlayer, battleData]);
 
   // 4. Listen to spectator counts
   useEffect(() => {
+    if (isMockMode) {
+      setSpectatorCount(6);
+      return;
+    }
+
     const specsRef = ref(rtdb, `battles/${battleId}/spectators`);
     const unsubscribe = onValue(specsRef, (snapshot) => {
       if (snapshot.exists()) {
@@ -93,8 +218,39 @@ const Battle = () => {
     return () => unsubscribe();
   }, [battleId]);
 
-  // 5. Listen to Live Chat messages
+  // 5. Listen to Live Chat messages (simulate active spectator feed under mock mode)
   useEffect(() => {
+    if (isMockMode) {
+      const initialChats = [
+        { id: '1', userName: 'system', text: '// Live feed active. Contest protocol engaged.', timestamp: Date.now() - 10000 },
+        { id: '2', userName: 'SpectatorB', text: 'This looks like an intense speed round!', timestamp: Date.now() - 5000 }
+      ];
+      setChatMessages(initialChats);
+
+      const commentators = ['SpectatorA', 'DP_Guru', 'CodeNinja', 'AlgorithmicGuy'];
+      const comments = [
+        'Brilliant optimal scanning approach!',
+        'Space complexity looks very sleek.',
+        'Will they finish within the 10-minute compile limit?',
+        'Almost passed all unit tests!',
+        'Excellent linear speed!'
+      ];
+
+      const interval = setInterval(() => {
+        setChatMessages(curr => {
+          if (curr.length > 15) curr.shift(); // Max 15 messages in view
+          return [...curr, {
+            id: `msg_${Date.now()}`,
+            userName: commentators[Math.floor(Math.random() * commentators.length)],
+            text: comments[Math.floor(Math.random() * comments.length)],
+            timestamp: Date.now()
+          }];
+        });
+      }, 12000);
+
+      return () => clearInterval(interval);
+    }
+
     const chatRef = ref(rtdb, `battles/${battleId}/chat`);
     const unsubscribe = onValue(chatRef, (snapshot) => {
       if (snapshot.exists()) {
@@ -103,7 +259,6 @@ const Battle = () => {
           id: key,
           ...val[key]
         }));
-        // Sort by timestamp
         list.sort((a, b) => a.timestamp - b.timestamp);
         setChatMessages(list);
       } else {
@@ -311,11 +466,22 @@ const Battle = () => {
 
     setTimeout(async () => {
       // Direct completion win if we pass all 5 tests!
-      const finalPasses = 5; // force pass on final submit
       setTestsPassed(5);
       setRunLogs(prev => prev + `[SUCCESS] All 5/5 Production Test Cases Accepted!\n[TRANSMITTING] Syncing victory with arena...`);
 
       updateBattleProgress(battleId, role.isChallenger, code.split('\n').length, 5, 5, 'Submitted', code);
+
+      if (isMockMode) {
+        const raw = localStorage.getItem(`mock_battle_${battleId}`);
+        if (raw) {
+          const data = JSON.parse(raw);
+          if (data.status === 'active') {
+            await completeBattle(battleId, data, currentUser?.uid || 'local_user', 'Solved all test cases first!');
+          }
+        }
+        setIsSubmitting(false);
+        return;
+      }
 
       // Trigger ELO completion in Realtime DB if still active
       const snapshot = await get(ref(rtdb, `battles/${battleId}`));
@@ -329,6 +495,16 @@ const Battle = () => {
 
   // Synchronized Timeout Trigger (tied outcomes or shorter code check)
   const handleTimeOut = async () => {
+    if (isMockMode) {
+      const raw = localStorage.getItem(`mock_battle_${battleId}`);
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      if (data.status === 'active' && role.isChallenger) {
+        await completeBattle(battleId, data, currentUser?.uid || 'local_user', 'Timer expired.');
+      }
+      return;
+    }
+
     const snap = await get(ref(rtdb, `battles/${battleId}`));
     if (!snap.exists()) return;
     const data = snap.val();

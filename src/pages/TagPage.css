@@ -1,0 +1,291 @@
+/* CSS specifications for tag streams and topic leaderboards */
+
+.cp-tag-container {
+  padding: 40px;
+  background: radial-gradient(circle at 50% 10%, #0F0F1D 0%, #08080E 100%);
+  min-height: calc(100vh - 80px);
+  color: #E2E2F0;
+  font-family: 'Share Tech Mono', monospace;
+}
+
+.cp-tag-breadcrumb {
+  font-size: 0.65rem;
+  color: var(--cyber-pink, #FF2D78);
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cp-tag-breadcrumb:hover {
+  text-shadow: 0 0 6px var(--cyber-pink, #FF2D78);
+  color: #FFF;
+}
+
+.cp-tag-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 24px;
+  margin-bottom: 30px;
+}
+
+.cp-tag-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.8rem;
+  letter-spacing: 1.5px;
+  margin: 8px 0;
+  color: #FFF;
+}
+
+.cp-tag-highlight {
+  color: var(--cyber-pink, #FF2D78);
+  text-shadow: 0 0 10px rgba(255, 45, 120, 0.3);
+}
+
+.cp-tag-subtitle {
+  font-size: 0.78rem;
+  color: #8888AA;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.cp-tag-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.cp-tag-sort-btn {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.65rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  padding: 10px 16px;
+  color: #8888AA;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cp-tag-sort-btn.active, .cp-tag-sort-btn:hover {
+  color: #FFF;
+  border-color: var(--cyber-pink, #FF2D78);
+  background: rgba(255, 45, 120, 0.05);
+  box-shadow: 0 0 8px rgba(255, 45, 120, 0.2);
+}
+
+/* Layout */
+.cp-tag-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 30px;
+}
+
+/* Main stream */
+.cp-tag-main-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.cp-tag-loading {
+  text-align: center;
+  padding: 80px 20px;
+  color: var(--cyber-pink, #FF2D78);
+  font-size: 0.95rem;
+  letter-spacing: 1px;
+  text-shadow: 0 0 8px rgba(255, 45, 120, 0.25);
+}
+
+.cp-tag-empty-feed {
+  text-align: center;
+  padding: 60px 40px;
+  background: rgba(15, 15, 26, 0.5);
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  color: #8888AA;
+}
+
+.cp-tag-empty-icon {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 12px;
+  opacity: 0.4;
+}
+
+.cp-tag-empty-txt {
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+  margin-bottom: 20px;
+}
+
+.cp-tag-nav-problems-btn {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.72rem;
+  font-weight: bold;
+  border: 1px solid var(--cyber-green, #00FF88);
+  background: rgba(0, 255, 136, 0.05);
+  color: var(--cyber-green, #00FF88);
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cp-tag-nav-problems-btn:hover {
+  background: var(--cyber-green, #00FF88);
+  color: #000;
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+}
+
+/* Sidebar Leaderboard widget styling */
+.cp-tag-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.cp-tag-leaderboard-box {
+  background: #0F0F1C;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.cp-leaderboard-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--cyber-pink, #FF2D78);
+  box-shadow: 0 0 10px var(--cyber-pink, #FF2D78);
+}
+
+.cp-leaderboard-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.92rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  color: #FFF;
+  margin: 0 0 6px 0;
+}
+
+.cp-leaderboard-subtitle {
+  font-size: 0.62rem;
+  color: #666688;
+  margin: 0 0 20px 0;
+  letter-spacing: 0.5px;
+}
+
+.cp-leaderboard-loading, .cp-leaderboard-empty {
+  text-align: center;
+  padding: 30px;
+  font-size: 0.72rem;
+  color: #666688;
+}
+
+.cp-leaderboard-table {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cp-leaderboard-row {
+  display: grid;
+  grid-template-columns: 36px 1fr 60px 70px;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 4px;
+  padding: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cp-leaderboard-row:hover {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 45, 120, 0.2);
+  transform: translateX(2px);
+}
+
+.cp-leaderboard-rank {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.8rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+.cp-leaderboard-rank.gold { color: #FFAA00; text-shadow: 0 0 8px rgba(255, 170, 0, 0.4); }
+.cp-leaderboard-rank.silver { color: #C0C0C0; text-shadow: 0 0 8px rgba(192, 192, 192, 0.4); }
+.cp-leaderboard-rank.bronze { color: #CD7F32; text-shadow: 0 0 8px rgba(205, 127, 50, 0.4); }
+.cp-leaderboard-rank.normal { color: #8888AA; }
+
+.cp-leaderboard-identity {
+  display: flex;
+  flex-direction: column;
+  padding-left: 6px;
+  overflow: hidden;
+}
+
+.cp-leader-name {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: #FFF;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cp-leader-badge {
+  font-size: 0.48rem;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  margin-top: 3px;
+  width: fit-content;
+}
+
+.cp-leader-badge.intermediate { color: #00A2FF; }
+.cp-leader-badge.expert { color: #FFAA00; }
+.cp-leader-badge.master { color: var(--cyber-pink, #FF2D78); }
+
+.cp-leaderboard-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cp-leader-val {
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.cp-leader-lbl {
+  font-size: 0.46rem;
+  color: #666688;
+  margin-top: 2px;
+}
+
+.cp-leader-val.text-green {
+  color: var(--cyber-green, #00FF88);
+}
+
+.cp-leaderboard-rating {
+  font-size: 0.72rem;
+  color: var(--cyber-pink, #FF2D78);
+  font-weight: bold;
+  text-align: right;
+  padding-right: 4px;
+}
+
+@media (max-width: 992px) {
+  .cp-tag-layout {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,117 @@
+name: Sync LeetCode Problems
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'   # Every Sunday at midnight UTC
+  workflow_dispatch:        # Manual trigger from GitHub Actions UI
+    inputs:
+      force_full_sync:
+        description: 'Force full re-fetch of all problems (ignores cache)'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  sync:
+    name: Fetch → Transform → Upload
+    runs-on: ubuntu-latest
+    timeout-minutes: 90     # Full sync can take ~60 min for details fetch
+
+    steps:
+      # ── 1. Checkout ──────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. Node Setup ────────────────────────────────────────────────────
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      # ── 3. Install dependencies ──────────────────────────────────────────
+      - name: Install dependencies
+        run: npm ci --prefer-offline
+
+      # ── 4. Restore cached problem data ───────────────────────────────────
+      # Caches data/leetcode_problems.json and data/problem_details.json
+      # across runs so we only fetch NEW problems each week.
+      - name: Restore problem data cache
+        id: cache-data
+        uses: actions/cache@v4
+        with:
+          path: |
+            data/leetcode_problems.json
+            data/problem_details.json
+            data/upload_progress.json
+          key: problem-data-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            problem-data-${{ runner.os }}-
+
+      # ── 5. Create service account key ────────────────────────────────────
+      - name: Write Firebase service account key
+        run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > serviceAccountKey.json
+
+      # ── 6. Fetch all problem titles ──────────────────────────────────────
+      - name: Fetch LeetCode problem list
+        run: node scripts/fetchLeetcodeProblems.js
+
+      # ── 7. Fetch details (new problems only) ─────────────────────────────
+      # Uses resume support — skips slugs already in problem_details.json
+      - name: Fetch details for new problems only
+        run: node scripts/fetchNewProblemsOnly.js
+
+      # ── 8. Transform to CodeArena format ─────────────────────────────────
+      - name: Transform problems
+        run: node scripts/transformProblems.js
+
+      # ── 9. Upload to Firestore (resume-safe) ─────────────────────────────
+      - name: Upload to Firestore
+        run: node scripts/uploadToFirestore.js --resume
+
+      # ── 10. Add company tags ─────────────────────────────────────────────
+      - name: Add company tags
+        run: node scripts/addCompanyTags.js
+
+      # ── 11. Add exam problems ────────────────────────────────────────────
+      - name: Upload exam problems
+        run: node scripts/addExamProblems.js
+
+      # ── 12. Rebuild topic index ──────────────────────────────────────────
+      - name: Rebuild topic index
+        run: node scripts/buildTopicIndex.js
+
+      # ── 13. Save updated cache ───────────────────────────────────────────
+      - name: Save problem data cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            data/leetcode_problems.json
+            data/problem_details.json
+            data/upload_progress.json
+          key: problem-data-${{ runner.os }}-${{ github.run_id }}
+
+      # ── 14. Cleanup secrets ──────────────────────────────────────────────
+      # Always runs — even if previous steps fail
+      - name: Cleanup service account key
+        if: always()
+        run: |
+          rm -f serviceAccountKey.json
+          echo "✅ Service account key removed"
+
+      # ── 15. Summary ──────────────────────────────────────────────────────
+      - name: Print sync summary
+        if: success()
+        run: |
+          echo "## ✅ Sync Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| File | Size |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|------|" >> $GITHUB_STEP_SUMMARY
+          for f in data/*.json; do
+            size=$(du -sh "$f" 2>/dev/null | cut -f1)
+            echo "| $f | $size |" >> $GITHUB_STEP_SUMMARY
+          done
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Run triggered:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Timestamp:** $(date -u)" >> $GITHUB_STEP_SUMMARY

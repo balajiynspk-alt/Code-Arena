@@ -615,3 +615,13 @@ body:has(.cp-flow-active) .main-content {
   flex-grow: 1;
 }
 
+/* ── Threaded Discussions Styling Additions ── */
+.cp-comment-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cp-comment-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4), 0 0 10px rgba(255, 45, 120, 0.05) !important;
+}
+
