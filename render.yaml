@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: code-arena
+    runtime: node
+    buildCommand: npm install && npm run build
+    publishPath: build
+    staticPublishDelay: 0
+    envVars:
+      - key: NODE_VERSION
+        value: 18.16.0
+      - key: CI
+        value: false
