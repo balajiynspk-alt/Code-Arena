@@ -60,18 +60,12 @@ const ThoughtReplay = () => {
     setTimeout(() => setCopiedLink(false), 2000);
   };
 
-  const formatTime = (sec) => {
-    const m = Math.floor(sec / 60);
-    const s = Math.floor(sec % 60);
-    return `${m}:${s.toString().padStart(2, '0')}`;
-  };
-
   if (isLoading) {
     return (
       <div className="cp-battle-lobby">
         <div className="cp-battle-lobby-glow" style={{ background: 'rgba(255, 45, 120, 0.05)' }} />
         <h2 className="cp-battle-lobby-title" style={{ color: '#FF2D78', textShadow: '0 0 15px rgba(255, 45, 120, 0.3)' }}>
-          // ENGAGING THOUGHT BEAMS
+          ENGAGING THOUGHT BEAMS
         </h2>
         <span className="cp-battle-lobby-status">Synchronizing vocal transcript map...</span>
       </div>
@@ -81,7 +75,7 @@ const ThoughtReplay = () => {
   if (!thoughtMap) {
     return (
       <div className="cp-battle-lobby">
-        <h2 className="cp-battle-lobby-title" style={{ color: '#FF2D78' }}>// THOUGHT GRAPH BLANK</h2>
+        <h2 className="cp-battle-lobby-title" style={{ color: '#FF2D78' }}>THOUGHT GRAPH BLANK</h2>
         <span className="cp-battle-lobby-status">No vocal debugger transcript found in archive.</span>
         <button className="cp-battle-action-btn cp-battle-action-btn--run" onClick={() => navigate('/dashboard')}>
           RETURN
@@ -169,7 +163,7 @@ const ThoughtReplay = () => {
       <div className="cp-thoughts-insight-panel">
         
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div className="cp-thoughts-insight-header">// AI COGNITIVE RATINGS ANALYSIS</div>
+          <div className="cp-thoughts-insight-header">AI COGNITIVE RATINGS ANALYSIS</div>
           
           {/* Share links card */}
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>

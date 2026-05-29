@@ -34,7 +34,7 @@ const TopReplays = () => {
       <div className="cp-battle-lobby">
         <div className="cp-battle-lobby-glow" style={{ background: 'rgba(0, 255, 136, 0.05)' }} />
         <h2 className="cp-battle-lobby-title" style={{ color: '#00FF88', textShadow: '0 0 15px rgba(0, 255, 136, 0.3)' }}>
-          // QUERYING ARENA SPECTRUM
+          QUERYING ARENA SPECTRUM
         </h2>
         <span className="cp-battle-lobby-status">Aggregating record solve sessions...</span>
       </div>
@@ -109,7 +109,7 @@ const TopReplays = () => {
         </div>
       ) : (
         <div style={{ textAlign: 'center', marginTop: '64px', color: '#5A5A72', fontStyle: 'italic' }}>
-          // No record replays saved to the theatre archives yet. Solve a problem to save yours!
+          No record replays saved to the theatre archives yet. Solve a problem to save yours!
         </div>
       )}
 

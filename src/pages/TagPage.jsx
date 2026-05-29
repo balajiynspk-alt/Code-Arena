@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { getPostsByTag, getTagLeaderboard } from '../services/tagService';
 import SolutionCard from '../components/SolutionCard';
 import './TagPage.css';
@@ -40,10 +40,12 @@ const TagPage = () => {
 
   useEffect(() => {
     fetchTaggedData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [topic, sortBy]);
 
   useEffect(() => {
     fetchLeaderboardData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [topic]);
 
   return (
@@ -52,7 +54,7 @@ const TagPage = () => {
       <div className="cp-tag-header-row">
         <div>
           <span className="cp-tag-breadcrumb" onClick={() => navigate('/dashboard')}>
-            // HOME NODE / TARGET DECK
+            HOME NODE / TARGET DECK
           </span>
           <h1 className="cp-tag-title">
             TAG STREAM: <span className="cp-tag-highlight">#{topic}</span>
@@ -83,7 +85,7 @@ const TagPage = () => {
         {/* Solution feed column */}
         <main className="cp-tag-main-feed">
           {loadingPosts ? (
-            <div className="cp-tag-loading">// HARVESTING Tagged telemetry buffers...</div>
+            <div className="cp-tag-loading">HARVESTING Tagged telemetry buffers...</div>
           ) : posts.length === 0 ? (
             <div className="cp-tag-empty-feed">
               <span className="cp-tag-empty-icon">📂</span>
@@ -113,7 +115,7 @@ const TagPage = () => {
             <h3 className="cp-leaderboard-title">
               🏆 #{topic.toUpperCase()} TOP SOLVERS
             </h3>
-            <p className="cp-leaderboard-subtitle">// RANKED BY SYSTEM SUBMISSIONS UNDER THIS TAG</p>
+            <p className="cp-leaderboard-subtitle">RANKED BY SYSTEM SUBMISSIONS UNDER THIS TAG</p>
 
             {loadingLeaderboard ? (
               <div className="cp-leaderboard-loading">COMPILING AGENT RANKINGS...</div>
