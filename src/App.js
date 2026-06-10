@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { useEffect } from 'react';
+import Landing from './pages/Landing';
 import Problems from './pages/Problems';
 import ProblemDetail from './pages/ProblemDetail';
 import Courses from './pages/Courses';
@@ -57,14 +58,14 @@ function MainApp() {
   }, [currentUser]);
 
   const location = useLocation();
-  const hideNav = location.pathname === '/login';
+  const hideNav = location.pathname === '/login' || location.pathname === '/';
 
   return (
     <div className="App">
       {!hideNav && <Navbar />}
       <main className={hideNav ? '' : 'main-content'}>
         <Routes>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/problems" element={<Problems />} />

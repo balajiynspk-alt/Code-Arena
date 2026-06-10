@@ -28,3 +28,7 @@ serviceAccountKey.json
 
 # Generated data files (large, re-fetchable)
 /data/
+
+# Firebase local cache
+.firebase/
+

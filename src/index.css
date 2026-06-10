@@ -161,7 +161,7 @@ button {
 
 .main-content {
   height: calc(100vh - 60px);
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 /* Custom Scrollbar */
