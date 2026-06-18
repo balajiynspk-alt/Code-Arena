@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import CodeEditor, { LanguageSelector } from '../components/Editor/CodeEditor';
 import Editor from '@monaco-editor/react';
 import ReactMarkdown from 'react-markdown';
 import { getProblemById, saveAcceptedSubmission, getUserSubmissionsForProblem } from '../services/problemService';
-import { judgeSubmission } from '../services/pistonService';
+import { executeCode, judgeCode, checkEngineHealth } from '../services/compilerService';
 import { auth } from '../services/firebase';
-import AlgorithmVisualizer from '../components/AlgorithmVisualizer';
+import AlgorithmVisualizer from '../components/Visualizer/AlgorithmVisualizer';
 import CodeDNA from '../components/CodeDNA';
 import GhostMentor from '../components/GhostMentor';
 import { analyzeCode } from '../utils/codeAnalyzer';
@@ -16,7 +17,7 @@ import { saveThoughtMap } from '../services/thoughtService';
 import { createPairRoom } from '../services/pairService';
 import { startFlowSession, recordKeystroke, endFlowSession } from '../services/flowService';
 import { addGuildPoints } from '../services/guildService';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, query, where, orderBy, limit, collection, getDocs } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import EyeTracker from '../components/EyeTracker';
 import { useEmotion } from '../context/EmotionContext';
@@ -24,6 +25,9 @@ import { startBroadcast, updateBroadcast, endBroadcast } from '../services/spect
 import { getComments, addComment, editComment, deleteComment, voteComment } from '../services/discussionService';
 import { getUserWeaknessProfile, saveWeaknessProfile } from '../services/quantumGeneratorService';
 import ShareSolutionModal from '../components/ShareSolutionModal';
+import toast, { Toaster } from 'react-hot-toast';
+import confetti from 'canvas-confetti';
+import { saveCodeDraft, submitSolution } from '../services/firestoreService';
 import './ProblemDetail.css';
 
 const DEFAULT_CODE = {
@@ -230,7 +234,24 @@ const ProblemDetail = () => {
   const [code, setCode]                   = useState(DEFAULT_CODE['python']);
   const [executionResult, setExResult]    = useState(null);
   const [isJudging, setIsJudging]         = useState(false);
+  const [progress, setProgress]           = useState('');
+  const [nextProblemId, setNextProblemId] = useState(null);
   const [rightPanelTab, setRightPanelTab] = useState('output');
+  const [activeMobileTab, setActiveMobileTab] = useState('problem');
+  const [isOnline, setIsOnline]           = useState(navigator.onLine);
+
+  const { data: dbProblem, isLoading: dbLoading, isError: dbError } = useQuery({
+    queryKey: ['problem', id],
+    queryFn:  () => getProblemById(id),
+    enabled: !customProblem
+  });
+
+  const cachedProblemRaw = localStorage.getItem('last_viewed_problem');
+  const cachedProblem = cachedProblemRaw ? JSON.parse(cachedProblemRaw) : null;
+  const problem = customProblem || dbProblem || (cachedProblem?.id === id || cachedProblem?.number?.toString() === id ? cachedProblem : null);
+
+  const isLoading = !customProblem && dbLoading && isOnline;
+  const isError = !customProblem && dbError && !problem;
 
   // Tracking states for AI Ghost Mentor
   const { data: userData } = useQuery({
@@ -250,6 +271,179 @@ const ProblemDetail = () => {
   const [showMoodSelector, setShowMoodSelector] = useState(false);
   const [isBroadcasting, setIsBroadcasting] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [compilerStatus, setCompilerStatus] = useState('checking');
+
+  // Sync isAccepted based on user profile solvedProblems list
+  useEffect(() => {
+    if (userData && problem) {
+      const solvedList = userData.solvedProblems || [];
+      if (solvedList.includes(id) || solvedList.includes(problem.id)) {
+        setIsAccepted(true);
+      }
+    }
+  }, [userData, problem, id]);
+
+  // Load language preference from user data or local storage
+  useEffect(() => {
+    if (userData?.preferredLanguage) {
+      setLanguage(userData.preferredLanguage);
+    } else {
+      const savedLang = localStorage.getItem(`lang_${id}`);
+      if (savedLang) {
+        setLanguage(savedLang);
+      }
+    }
+  }, [userData, id]);
+
+  // Track internet connectivity and process queued submissions
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      toast.success("Back online! Sending queued submissions...");
+      
+      const queued = JSON.parse(localStorage.getItem('queued_submissions') || '[]');
+      if (queued.length > 0) {
+        queued.forEach(async (sub) => {
+          try {
+            await submitSolution(sub.userId, sub.problemId, sub.code, sub.language, sub.verdict, sub.testResults);
+          } catch (e) {
+            console.error("Failed to send queued solution:", e);
+          }
+        });
+        localStorage.removeItem('queued_submissions');
+      }
+    };
+    const handleOffline = () => {
+      setIsOnline(false);
+      toast.error("You are offline. Submissions will be queued.");
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  // Save last viewed problem to local storage for offline retrieval
+  useEffect(() => {
+    if (problem) {
+      localStorage.setItem('last_viewed_problem', JSON.stringify(problem));
+    }
+  }, [problem]);
+
+  // Load draft code from localStorage (fast) or Firestore
+  useEffect(() => {
+    if (!id || !language) return;
+
+    const localSaved = localStorage.getItem(`code_${id}_${language}`);
+    if (localSaved) {
+      setCode(localSaved);
+      return;
+    }
+
+    if (currentUser) {
+      import('../services/firestoreService').then(({ getCodeDraft }) => {
+        getCodeDraft(currentUser.uid, id).then(draft => {
+          if (draft && draft.language === language && draft.code) {
+            setCode(draft.code);
+            localStorage.setItem(`code_${id}_${language}`, draft.code);
+          } else {
+            setCode(DEFAULT_CODE[language] || '');
+          }
+        }).catch(err => {
+          console.warn("Failed to load draft from Firestore:", err);
+          setCode(DEFAULT_CODE[language] || '');
+        });
+      });
+    } else {
+      setCode(DEFAULT_CODE[language] || '');
+    }
+  }, [id, language, currentUser]);
+
+  // Query next unsolved/next problem sequentially
+  useEffect(() => {
+    if (problem) {
+      const getNext = async () => {
+        try {
+          const q = query(
+            collection(db, 'problems'),
+            where('number', '>', problem.number || 0),
+            orderBy('number', 'asc'),
+            limit(1)
+          );
+          const snap = await getDocs(q);
+          if (!snap.empty) {
+            setNextProblemId(snap.docs[0].id);
+          }
+        } catch (e) {
+          console.warn("Failed to fetch next problem suggestion:", e);
+        }
+      };
+      getNext();
+    }
+  }, [problem]);
+
+  useEffect(() => {
+    const verifyHealth = async () => {
+      try {
+        const health = await checkEngineHealth();
+        if (!health.healthy) {
+          setCompilerStatus('offline');
+        } else {
+          setCompilerStatus(health.status);
+        }
+      } catch (e) {
+        setCompilerStatus('offline');
+      }
+    };
+    verifyHealth();
+    const interval = setInterval(verifyHealth, 20000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Auto-save draft code to localStorage immediately, and sync to Firestore with a subtle notification toast
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      if (currentUser && code && problem) {
+        localStorage.setItem(`code_${id}_${language}`, code);
+        try {
+          await saveCodeDraft(currentUser.uid, id, code, language);
+          toast('Code saved', {
+            duration: 1500,
+            style: {
+              background: '#222',
+              color: '#FFF',
+              border: '1px solid rgba(255, 255, 255, 0.05)',
+              fontSize: '0.72rem',
+              padding: '6px 12px',
+              fontFamily: 'Share Tech Mono'
+            }
+          });
+        } catch (e) {
+          console.warn("Failed to sync code draft to Firestore. Saved locally.", e);
+        }
+      }
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [code, language, currentUser, problem, id]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.ctrlKey && !e.shiftKey && e.key === 'Enter') {
+        e.preventDefault();
+        run();
+      }
+      if (e.ctrlKey && e.shiftKey && e.key === 'Enter') {
+        e.preventDefault();
+        submit();
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [code, language, problem]);
 
   // Sync editor keystrokes to spectators live
   useEffect(() => {
@@ -384,26 +578,7 @@ const ProblemDetail = () => {
     }
   }, [code, language]);
 
-  const { data: dbProblem, isLoading: dbLoading, isError: dbError } = useQuery({
-    queryKey: ['problem', id],
-    queryFn:  () => getProblemById(id),
-    enabled: !customProblem
-  });
 
-  const problem = customProblem || dbProblem;
-  const isLoading = !customProblem && dbLoading;
-  const isError = !customProblem && dbError;
-
-  // Sync starter code
-  useEffect(() => {
-    if (problem) {
-      if (problem.starterCode && problem.starterCode[language]) {
-        setCode(problem.starterCode[language]);
-      } else {
-        setCode(DEFAULT_CODE[language] || "");
-      }
-    }
-  }, [problem, language]);
 
   const submitMutation = useMutation({
     mutationFn: async ({ verdict, executionTime }) => {
@@ -438,12 +613,8 @@ const ProblemDetail = () => {
     }
   });
 
-  const handleLanguageChange = (e) => {
-    const lang = e.target.value;
+  const handleLanguageChange = (lang) => {
     setLanguage(lang);
-    const defaultCodeText = DEFAULT_CODE[lang];
-    setCode(defaultCodeText);
-    recorderRef.current.start(defaultCodeText);
   };
 
   const handleCodeChange = (val) => {
@@ -454,42 +625,162 @@ const ProblemDetail = () => {
   };
 
   const run = async () => {
-    if (!problem?.testCases) return;
     setIsJudging(true);
+    setProgress('');
+    setRightPanelTab('output');
     setExResult(null);
     try {
-      const result = await judgeSubmission(language, code, problem.testCases.slice(0, 1));
-      setExResult(result);
-      if (result.verdict === 'Error') {
+      const sampleInput = problem.sampleTestCase || (problem.testCases && problem.testCases[0]?.input) || (problem.examples && problem.examples[0]?.input) || '';
+      const result = await executeCode({
+        language,
+        code,
+        stdin: sampleInput
+      });
+
+      const isOk = result.exitCode === 0 && !result.stderr && !result.compileOutput;
+      const verdict = isOk ? 'Accepted' : result.compileOutput ? 'Compilation Error' : 'Runtime Error';
+
+      setExResult({
+        verdict,
+        executionTime: result.time ? Math.round(result.time * 1000) : 0,
+        results: [{
+          testCase: 1,
+          status: isOk ? 'Accepted' : 'Error',
+          output: result.stdout || result.stderr || result.compileOutput || '',
+          expected: (problem.testCases && problem.testCases[0]?.expectedOutput) || (problem.examples && problem.examples[0]?.output) || ''
+        }]
+      });
+
+      if (verdict === 'Accepted') {
+        toast.success('Sample test case passed!');
+      } else if (verdict === 'Compilation Error') {
         setErrorCount(prev => prev + 1);
-        recorderRef.current.recordMarker('run', 'Failed compile checks');
-      } else if (result.verdict === 'Wrong Answer') {
-        setWrongAnswers(prev => prev + 1);
-        recorderRef.current.recordMarker('run', 'Failed test case bounds');
-      } else if (result.verdict === 'Accepted') {
-        setIsAccepted(true);
-        recorderRef.current.recordMarker('run', 'Passed test suite');
+        toast.error('Compilation Error — check your code syntax');
+      } else {
+        setErrorCount(prev => prev + 1);
+        toast.error('Execution returned runtime errors');
       }
     } catch (err) {
-      setExResult({ verdict: 'Error', executionTime: 0, results: [{ status: 'Error', output: err.message }] });
+      setExResult({
+        verdict: 'Error',
+        executionTime: 0,
+        results: [{ testCase: 1, status: 'Error', output: err.message }]
+      });
       setErrorCount(prev => prev + 1);
-      recorderRef.current.recordMarker('run', 'Exception error encountered');
-    } finally { setIsJudging(false); }
+      toast.error('Compilation service unavailable, try again');
+    } finally {
+      setIsJudging(false);
+    }
   };
 
   const submit = async () => {
-    if (!problem?.testCases) return;
+    if (!currentUser) {
+      toast.error('Please login to submit');
+      return;
+    }
+    const testSuite = problem.hiddenTestCases || problem.testCases || [];
+    if (testSuite.length === 0) {
+      toast.error('No test cases available for this challenge');
+      return;
+    }
+
+    // Queue submission if user is offline
+    if (!isOnline) {
+      toast('Offline. Submission queued to local database.', {
+        icon: '💾',
+        style: {
+          background: '#151525',
+          color: '#00FF88',
+          border: '1px solid #00FF88',
+          fontFamily: 'Orbitron',
+          fontSize: '0.75rem'
+        }
+      });
+      const queued = JSON.parse(localStorage.getItem('queued_submissions') || '[]');
+      queued.push({
+        userId: currentUser.uid,
+        problemId: id || problem.id || problem.number.toString(),
+        code,
+        language,
+        verdict: 'Accepted',
+        testResults: []
+      });
+      localStorage.setItem('queued_submissions', JSON.stringify(queued));
+      return;
+    }
+    
     setIsJudging(true);
+    setProgress('0/' + testSuite.length);
+    setRightPanelTab('output');
     setExResult(null);
     registerSubmitAttempt();
+    
     try {
-      const result = await judgeSubmission(language, code, problem.testCases);
-      setExResult(result);
-      if (result.verdict === 'Accepted') {
+      const judgement = await judgeCode({
+        language,
+        code,
+        testCases: testSuite.map(tc => ({
+          input: tc.input || '',
+          expectedOutput: tc.expectedOutput || tc.output || ''
+        })),
+        onProgress: (i, total) => setProgress(`${i}/${total}`)
+      });
+
+      const resultsMapped = judgement.results.map((r, idx) => ({
+        testCase: idx + 1,
+        status: r.passed ? 'Accepted' : r.verdict === 'Compilation Error' || r.verdict === 'Runtime Error' ? 'Error' : 'Wrong',
+        output: r.actual || r.stderr || r.compileOutput || '',
+        expected: r.expected,
+        executionTime: r.time ? Math.round(r.time * 1000) : 0
+      }));
+
+      setExResult({
+        verdict: judgement.verdict,
+        executionTime: judgement.totalTime,
+        results: resultsMapped
+      });
+
+      // Save submission stats to Firestore
+      await submitSolution(
+        currentUser.uid,
+        id || problem.id || problem.number.toString(),
+        code,
+        language,
+        judgement.verdict,
+        judgement.results
+      );
+
+      if (judgement.verdict === 'Accepted') {
         setIsAccepted(true);
         setShowMoodSelector(true);
         recorderRef.current.recordMarker('accepted', 'Passed production tests');
+        confetti({ particleCount: 120, spread: 80, colors: ['#00FFA8','#FF2D9E','#FFD23F'] });
         
+        // Premium Green Toast at Bottom Right
+        toast.success('+10 coins earned 🎉', {
+          position: 'bottom-right',
+          style: {
+            background: '#0B1A12',
+            color: '#00FF88',
+            border: '1px solid #00FF88',
+            fontFamily: 'Orbitron',
+            fontSize: '0.8rem'
+          }
+        });
+
+        // Award badge notification: amber themed
+        toast('New badge: Week Warrior! 🏆', {
+          duration: 4500,
+          icon: '🏆',
+          style: {
+            background: '#1A150B',
+            color: '#FFAA00',
+            border: '1px solid #FFAA00',
+            fontFamily: 'Orbitron',
+            fontSize: '0.75rem'
+          }
+        });
+
         // Save Replay payload to Firestore
         const payload = recorderRef.current.getPayload();
         saveReplay(
@@ -509,16 +800,15 @@ const ProblemDetail = () => {
             problem.title,
             recordedThoughts,
             code,
-            result.executionTime || 120
+            judgement.totalTime || 120
           ).then(() => {
             setThoughtMapSaved(true);
           });
         }
 
-        submitMutation.mutate({ verdict: result.verdict, executionTime: result.executionTime });
+        submitMutation.mutate({ verdict: judgement.verdict, executionTime: judgement.totalTime });
 
         if (customProblem && currentUser) {
-          // Dynamic weakness profile recalibration!
           getUserWeaknessProfile(currentUser.uid).then(async (profile) => {
             const topic = problem.targetedWeakness || "";
             const updatedWeak = profile.weakTopics.map(t => {
@@ -533,7 +823,6 @@ const ProblemDetail = () => {
               weakTopics: updatedWeak
             });
             
-            // Mark the problem solved in local quantum Problems Bank if present
             const bankRaw = localStorage.getItem(`mock_quantum_bank_${currentUser.uid}`) || '[]';
             const bank = JSON.parse(bankRaw);
             const updatedBank = bank.map(p => {
@@ -543,21 +832,64 @@ const ProblemDetail = () => {
             localStorage.setItem(`mock_quantum_bank_${currentUser.uid}`, JSON.stringify(updatedBank));
           });
         }
-      } else if (result.verdict === 'Error') {
+      } else if (judgement.verdict === 'Compilation Error') {
         setErrorCount(prev => prev + 1);
         recorderRef.current.recordMarker('run', 'Production compile failure');
+        toast.error('Submission failed: check your code', {
+          duration: 5000,
+          style: {
+            background: '#1A0B12',
+            color: '#FF2D78',
+            border: '1px solid #FF2D78',
+            fontFamily: 'Share Tech Mono',
+            fontSize: '0.75rem'
+          }
+        });
       } else {
         setWrongAnswers(prev => prev + 1);
         recorderRef.current.recordMarker('run', 'Production wrong answer verdict');
+        toast.error('Submission failed: check your code', {
+          duration: 5000,
+          style: {
+            background: '#1A0B12',
+            color: '#FF2D78',
+            border: '1px solid #FF2D78',
+            fontFamily: 'Share Tech Mono',
+            fontSize: '0.75rem'
+          }
+        });
       }
     } catch (err) {
-      setExResult({ verdict: 'Error', executionTime: 0, results: [{ status: 'Error', output: err.message }] });
+      setExResult({
+        verdict: 'Error',
+        executionTime: 0,
+        results: [{ testCase: 1, status: 'Error', output: err.message }]
+      });
       setErrorCount(prev => prev + 1);
       recorderRef.current.recordMarker('run', 'Production system exception');
-    } finally { setIsJudging(false); }
+      toast.error('Compilation service unavailable, try again');
+    } finally {
+      setIsJudging(false);
+      setProgress('');
+    }
   };
 
-  if (isLoading) return <div className="cp-pd-state">// LOADING PROBLEM...</div>;
+  if (isLoading) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#0A0A0F', padding: '24px', gap: '16px' }}>
+        <div style={{ height: '40px', background: '#151525', borderRadius: '4px', animation: 'cp-blink 1.5s infinite' }} />
+        <div style={{ display: 'flex', flex: 1, gap: '20px' }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ height: '20px', width: '80%', background: '#151525', borderRadius: '4px', animation: 'cp-blink 1.5s infinite' }} />
+            <div style={{ height: '120px', background: '#151525', borderRadius: '4px', animation: 'cp-blink 1.5s infinite' }} />
+            <div style={{ height: '200px', background: '#151525', borderRadius: '4px', animation: 'cp-blink 1.5s infinite' }} />
+          </div>
+          <div style={{ width: '45%', background: '#080810', borderRadius: '4px', animation: 'cp-blink 1.5s infinite' }} />
+        </div>
+      </div>
+    );
+  }
+  
   if (isError || !problem) return <div className="cp-pd-state cp-pd-state--err">// PROBLEM NOT FOUND</div>;
 
   const verdictClass =
@@ -565,7 +897,28 @@ const ProblemDetail = () => {
     executionResult?.verdict === 'Error'    ? 'error'    : 'wrong';
 
   return (
-    <div className={`cp-pd-container ${isMinimalMode ? 'cp-flow-active' : ''}`}>
+    <div className={`cp-pd-container ${isMinimalMode ? 'cp-flow-active' : ''} cp-mobile-view--${activeMobileTab}`}>
+      {!isOnline && (
+        <div 
+          style={{ 
+            position: 'absolute', 
+            top: 0, 
+            left: 0, 
+            right: 0, 
+            background: '#FF2D78', 
+            color: '#FFF', 
+            fontSize: '0.62rem', 
+            fontFamily: 'Orbitron', 
+            padding: '4px 10px', 
+            textAlign: 'center', 
+            fontWeight: 'bold', 
+            letterSpacing: '1px',
+            zIndex: 1002
+          }}
+        >
+          ⚠️ OFFLINE WORKSPACE — SOLVING FROM CACHED DATABASE
+        </div>
+      )}
 
       {/* ═══════════════ LEFT PANE ═══════════════ */}
       <div className="cp-pd-left">
@@ -1065,13 +1418,23 @@ const ProblemDetail = () => {
 
         {/* Editor toolbar */}
         <div className="cp-pd-toolbar">
-          <select className="cp-pd-lang-sel" value={language} onChange={handleLanguageChange}>
-            <option value="python">Python 3</option>
-            <option value="javascript">JavaScript</option>
-            <option value="java">Java</option>
-            <option value="cpp">C++</option>
-            <option value="go">Go</option>
-          </select>
+          <LanguageSelector language={language} onLanguageChange={handleLanguageChange} />
+
+          <div className="cp-compiler-status-badge" style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: '12px', fontSize: '0.68rem', fontFamily: 'Orbitron', color: '#8888AA' }}>
+            <span style={{
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              backgroundColor: compilerStatus === 'healthy' ? '#00FF88' : compilerStatus === 'slow' ? '#FFAA00' : compilerStatus === 'offline' ? '#FF5555' : '#888888',
+              boxShadow: compilerStatus === 'healthy' ? '0 0 8px #00FF88' : compilerStatus === 'slow' ? '0 0 8px #FFAA00' : compilerStatus === 'offline' ? '0 0 8px #FF5555' : 'none',
+              display: 'inline-block'
+            }} />
+            <span style={{ textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              {compilerStatus === 'healthy' ? 'Compiler Online' : 
+               compilerStatus === 'slow' ? 'Slow response' : 
+               compilerStatus === 'offline' ? 'Compiler Offline — submissions paused' : 'Checking compiler...'}
+            </span>
+          </div>
 
           <div className="cp-pd-actions">
             {!isMinimalMode && (
@@ -1162,10 +1525,10 @@ const ProblemDetail = () => {
               </div>
             )}
 
-            <button className="cp-pd-run-btn" onClick={run} style={{ border: `1px solid ${themeColor}`, color: themeColor }} disabled={isJudging}>
+            <button className="cp-pd-run-btn" onClick={run} style={{ border: `1px solid ${themeColor}`, color: themeColor }} disabled={isJudging || compilerStatus === 'offline'}>
               {isJudging ? '⟳ RUNNING...' : '▶ RUN'}
             </button>
-            <button className="cp-pd-submit-btn" onClick={submit} style={{ background: themeColor, borderColor: themeColor }} disabled={isJudging}>
+            <button className="cp-pd-submit-btn" onClick={submit} style={{ background: themeColor, borderColor: themeColor }} disabled={isJudging || compilerStatus === 'offline'}>
               {isJudging ? 'SUBMITTING...' : 'SUBMIT'}
             </button>
           </div>
@@ -1173,24 +1536,16 @@ const ProblemDetail = () => {
 
         {/* Monaco Editor */}
         <div className="cp-pd-editor">
-          <Editor
-            height="100%"
-            language={language === 'cpp' ? 'cpp' : language}
-            theme="vs-dark"
-            value={code}
+          <CodeEditor
+            problemId={id}
+            userId={currentUser?.uid}
+            problem={problem}
+            code={code}
             onChange={handleCodeChange}
+            language={language}
+            onLanguageChange={handleLanguageChange}
             onMount={handleEditorDidMount}
-            options={{
-              minimap:            { enabled: false },
-              fontSize:           13,
-              fontFamily:         "'Share Tech Mono', monospace",
-              lineHeight:         22,
-              padding:            { top: 16, bottom: 16 },
-              scrollBeyondLastLine: false,
-              renderLineHighlight: 'line',
-              cursorBlinking:     'phase',
-              cursorStyle:        'block',
-            }}
+            onDraftLoaded={(loadedCode) => recorderRef.current.start(loadedCode)}
           />
         </div>
 
@@ -1410,26 +1765,144 @@ const ProblemDetail = () => {
                   <span className="cp-pd-placeholder">// RUN YOUR CODE TO SEE OUTPUT</span>
                 )}
                 {isJudging && (
-                  <span className="cp-pd-judging">JUDGING IN PROGRESS...</span>
-                )}
-                {executionResult?.results.map((res, i) => (
-                  <div key={i} className="cp-pd-result">
-                    <div className={`cp-pd-result-title ${res.status === 'Accepted' ? 'ok' : 'fail'}`}>
-                      TEST CASE {res.testCase}: {res.status.toUpperCase()}
-                    </div>
-                    <div className="cp-pd-result-label">OUTPUT:</div>
-                    <pre className="cp-pd-pre">{res.output || '<empty>'}</pre>
-                    {res.status !== 'Accepted' && res.status !== 'Error' && (
-                      <>
-                        <div className="cp-pd-result-label">EXPECTED:</div>
-                        <pre className="cp-pd-pre cp-pd-pre--expected">{res.expected}</pre>
-                      </>
+                  <div style={{ padding: '16px 0' }}>
+                    {progress ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: '#FF2D78', fontFamily: 'Orbitron', fontSize: '0.75rem' }}>
+                        <span>🛸 RUNNING PRODUCTION TEST SUITE...</span>
+                        <div style={{ height: '8px', background: '#222', borderRadius: '4px', overflow: 'hidden' }}>
+                          <div 
+                            style={{ 
+                              height: '100%', 
+                              background: '#FF2D78', 
+                              width: `${(parseInt(progress.split('/')[0]) / (parseInt(progress.split('/')[1]) || 1)) * 100}%`,
+                              transition: 'width 0.2s ease-in-out'
+                            }} 
+                          />
+                        </div>
+                        <span style={{ fontSize: '0.62rem', color: '#8888AA', fontFamily: 'Share Tech Mono' }}>
+                          Running test {progress.split('/')[0]} of {progress.split('/')[1]}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="cp-pd-judging" style={{ color: '#00FF88', fontSize: '0.8rem', fontFamily: 'Share Tech Mono' }}>
+                        ⚡ EXECUTING CODE AGAINST PRODUCTION TARGET... <span style={{ animation: 'cp-blink 0.5s step-end infinite' }}>▋</span>
+                      </div>
                     )}
                   </div>
-                ))}
+                )}
+
+                {/* 6. RESULTS DISPLAY */}
+                {executionResult && (
+                  <div 
+                    className={`cp-verdict-summary cp-verdict-summary--${verdictClass}`}
+                    style={{
+                      background: 'rgba(20, 20, 35, 0.6)',
+                      border: '1px solid rgba(255, 255, 255, 0.08)',
+                      borderRadius: '4px',
+                      padding: '16px',
+                      marginBottom: '16px',
+                      fontFamily: 'Share Tech Mono'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.1rem', marginBottom: '8px' }}>
+                      {executionResult.verdict === 'Accepted' && <span style={{ color: '#00FF88' }}>🟢 ACCEPTED</span>}
+                      {executionResult.verdict === 'Wrong Answer' && <span style={{ color: '#FF2D78' }}>❌ WRONG ANSWER</span>}
+                      {executionResult.verdict === 'Time Limit Exceeded' && <span style={{ color: '#FFB300' }}>⏰ TIME LIMIT EXCEEDED</span>}
+                      {executionResult.verdict === 'Runtime Error' && <span style={{ color: '#FF5555' }}>⚠️ RUNTIME ERROR</span>}
+                      {executionResult.verdict === 'Compilation Error' && <span style={{ color: '#FF7700' }}>⚠️ COMPILATION ERROR</span>}
+                      
+                      <span style={{ fontSize: '0.75rem', color: '#8888AA', marginLeft: 'auto' }}>
+                        Time: {executionResult.executionTime}ms
+                      </span>
+                    </div>
+
+                    {executionResult.verdict === 'Time Limit Exceeded' && (
+                      <p style={{ color: '#FFB300', margin: '0 0 10px 0', fontSize: '0.78rem' }}>
+                        ⏱️ Your solution was too slow. Optimize your algorithm's time complexity.
+                      </p>
+                    )}
+                    {executionResult.verdict === 'Runtime Error' && (
+                      <p style={{ color: '#FF5555', margin: '0 0 10px 0', fontSize: '0.78rem' }}>
+                        💥 A runtime exception occurred during execution. Check array bounds or division by zero.
+                      </p>
+                    )}
+                    {executionResult.verdict === 'Compilation Error' && (
+                      <p style={{ color: '#FF7700', margin: '0 0 10px 0', fontSize: '0.78rem' }}>
+                        🛠️ Code compilation failed. Verify syntax errors in compiler logs.
+                      </p>
+                    )}
+
+                    {executionResult.results && executionResult.results.map((res, i) => (
+                      <div key={i} className="cp-pd-result" style={{ borderLeft: `3px solid ${res.status === 'Accepted' ? '#00FF88' : '#FF2D78'}`, paddingLeft: '12px', marginTop: '12px' }}>
+                        <div className={`cp-pd-result-title ${res.status === 'Accepted' ? 'ok' : 'fail'}`} style={{ fontWeight: 'bold', fontSize: '0.82rem' }}>
+                          TEST CASE {res.testCase}: {res.status.toUpperCase()}
+                        </div>
+                        
+                        {res.output && (
+                          <>
+                            <div className="cp-pd-result-label" style={{ fontSize: '0.7rem', color: '#8888AA', marginTop: '4px' }}>OUTPUT:</div>
+                            <pre className="cp-pd-pre" style={{ background: '#090912', padding: '8px', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '3px', fontSize: '0.76rem', color: '#FFF' }}>{res.output}</pre>
+                          </>
+                        )}
+                        
+                        {res.status !== 'Accepted' && res.expected && (
+                          <>
+                            <div className="cp-pd-result-label" style={{ fontSize: '0.7rem', color: '#8888AA', marginTop: '4px' }}>EXPECTED OUTPUT:</div>
+                            <pre className="cp-pd-pre cp-pd-pre--expected" style={{ background: '#091A12', padding: '8px', border: '1px solid rgba(0,255,136,0.1)', borderRadius: '3px', fontSize: '0.76rem', color: '#00FF88' }}>{res.expected}</pre>
+                          </>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* 7. AFTER ACCEPTED ACTIONS */}
+                {isAccepted && (
+                  <div 
+                    className="cp-accepted-extra-actions" 
+                    style={{ 
+                      display: 'flex', 
+                      gap: '12px', 
+                      marginTop: '16px', 
+                      background: 'rgba(0, 255, 136, 0.02)', 
+                      padding: '16px', 
+                      borderRadius: '4px', 
+                      border: '1px dashed rgba(0, 255, 136, 0.15)',
+                      flexWrap: 'wrap'
+                    }}
+                  >
+                    <button 
+                      className="cp-pd-run-btn" 
+                      onClick={() => {
+                        toast.success("Select another language from the dropdown menu above.");
+                      }}
+                      style={{ border: '1px solid var(--cyber-pink)', color: 'var(--cyber-pink)', fontSize: '0.7rem', flex: 1, minWidth: '150px' }}
+                    >
+                      🔀 TRY ANOTHER LANGUAGE
+                    </button>
+                    
+                    {nextProblemId && (
+                      <button 
+                        className="cp-pd-submit-btn" 
+                        onClick={() => navigate(`/problem/${nextProblemId}`)}
+                        style={{ background: 'var(--cyber-green)', borderColor: 'var(--cyber-green)', color: '#000', fontWeight: 'bold', fontSize: '0.7rem', flex: 1, minWidth: '150px' }}
+                      >
+                        NEXT PROBLEM ➔
+                      </button>
+                    )}
+                    
+                    <button 
+                      className="cp-pd-run-btn" 
+                      onClick={() => navigate('/skills')}
+                      style={{ border: '1px solid #00E5FF', color: '#00E5FF', fontSize: '0.7rem', flex: 1, minWidth: '150px' }}
+                    >
+                      🔓 VIEW SKILL TREE NODES
+                    </button>
+                  </div>
+                )}
               </>
             ) : (
-              <AlgorithmVisualizer />
+              <AlgorithmVisualizer problem={problem} />
             )}
           </div>
         </div>
@@ -1460,6 +1933,35 @@ const ProblemDetail = () => {
           }}
         />
       )}
+      <Toaster position="top-right" toastOptions={{ style: { background: '#0F0F1A', color: '#FFF', border: '1px solid rgba(255,255,255,0.1)' } }} />
+
+      {/* Mobile Sticky Navigation Panel */}
+      <div className="cp-mobile-tabs-nav">
+        <button 
+          className={`cp-mobile-nav-btn ${activeMobileTab === 'problem' ? 'active' : ''}`}
+          onClick={() => setActiveMobileTab('problem')}
+        >
+          <span style={{ fontSize: '1.2rem' }}>📄</span>
+          <span>PROBLEM</span>
+        </button>
+        <button 
+          className={`cp-mobile-nav-btn ${activeMobileTab === 'code' ? 'active' : ''}`}
+          onClick={() => setActiveMobileTab('code')}
+        >
+          <span style={{ fontSize: '1.2rem' }}>💻</span>
+          <span>CODE</span>
+        </button>
+        <button 
+          className={`cp-mobile-nav-btn ${activeMobileTab === 'output' ? 'active' : ''}`}
+          onClick={() => {
+            setActiveMobileTab('output');
+            setRightPanelTab('output');
+          }}
+        >
+          <span style={{ fontSize: '1.2rem' }}>🖥️</span>
+          <span>OUTPUT</span>
+        </button>
+      </div>
     </div>
   );
 };

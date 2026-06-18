@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import Editor from '@monaco-editor/react';
 import { getProblemById } from '../services/problemService';
-import { executeCode } from '../services/pistonService';
+import { executeCode } from '../services/compilerService';
 import { 
   generateMultiverseSolutions, 
   explainMultiverseApproach, 

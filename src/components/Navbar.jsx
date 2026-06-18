@@ -40,6 +40,11 @@ const Navbar = () => {
 
   const [activeChallenge, setActiveChallenge] = useState(null);
   const [unreadDMs, setUnreadDMs] = useState(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location]);
 
   useEffect(() => {
     if (!currentUser) {
@@ -259,6 +264,37 @@ const Navbar = () => {
             <span>LOGIN</span>
           </Link>
         )}
+      </div>
+
+      {/* Mobile Menu Toggle */}
+      <button 
+        className={`cp-menu-toggle ${mobileMenuOpen ? 'open' : ''}`}
+        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        aria-label="Toggle navigation menu"
+      >
+        <span className="cp-menu-bar"></span>
+        <span className="cp-menu-bar"></span>
+        <span className="cp-menu-bar"></span>
+      </button>
+
+      {/* Mobile Navigation Drawer */}
+      <div className={`cp-mobile-drawer ${mobileMenuOpen ? 'open' : ''}`}>
+        <div className="cp-mobile-drawer-header">
+          <span className="cp-mobile-logo">// CODEARENA MENU</span>
+          <button className="cp-mobile-close" onClick={() => setMobileMenuOpen(false)}>×</button>
+        </div>
+        <ul className="cp-mobile-nav-links">
+          {NAV_LINKS.map(({ label, path }) => (
+            <li key={path}>
+              <Link
+                to={path}
+                className={`cp-mobile-nav-link ${location.pathname.startsWith(path) ? 'active' : ''}`}
+              >
+                {label}
+              </Link>
+            </li>
+          ))}
+        </ul>
       </div>
 
       {/* 1v1 Battle Toast Alert Overlay */}

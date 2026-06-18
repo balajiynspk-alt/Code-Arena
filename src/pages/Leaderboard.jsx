@@ -28,7 +28,22 @@ const Leaderboard = () => {
         </div>
 
         {/* Highlighted Top 3 podium items */}
-        {!isLoading && guilds.length >= 3 && (
+        {isLoading ? (
+          <div className="cp-podium-grid">
+            <div className="cp-podium-card cp-podium-card--second" style={{ animation: 'cp-blink 1.5s infinite', background: '#151525', border: '1px solid #222' }}>
+              <div style={{ height: '30px', width: '60px', background: '#222', margin: '0 auto 10px auto' }} />
+              <div style={{ height: '20px', width: '100px', background: '#222', margin: '0 auto 10px auto' }} />
+            </div>
+            <div className="cp-podium-card cp-podium-card--first" style={{ animation: 'cp-blink 1.5s infinite', background: '#18182E', border: '1px solid #333' }}>
+              <div style={{ height: '30px', width: '60px', background: '#333', margin: '0 auto 10px auto' }} />
+              <div style={{ height: '20px', width: '100px', background: '#333', margin: '0 auto 10px auto' }} />
+            </div>
+            <div className="cp-podium-card cp-podium-card--third" style={{ animation: 'cp-blink 1.5s infinite', background: '#151525', border: '1px solid #222' }}>
+              <div style={{ height: '30px', width: '60px', background: '#222', margin: '0 auto 10px auto' }} />
+              <div style={{ height: '20px', width: '100px', background: '#222', margin: '0 auto 10px auto' }} />
+            </div>
+          </div>
+        ) : guilds.length >= 3 && (
           <div className="cp-podium-grid">
             
             {/* Rank 2 */}
@@ -69,7 +84,28 @@ const Leaderboard = () => {
           </div>
 
           {isLoading ? (
-            <p className="cp-loading-text">CALCULATING SEASON SCORING...</p>
+            <div className="cp-leader-table-wrap" style={{ animation: 'cp-blink 1.5s infinite' }}>
+              <table className="cp-leader-table">
+                <thead>
+                  <tr>
+                    <th className="cp-th">RANK</th>
+                    <th className="cp-th">GUILD NAME</th>
+                    <th className="cp-th" style={{ textAlign: 'center' }}>MEMBERS</th>
+                    <th className="cp-th" style={{ textAlign: 'right' }}>ACCUMULATED RATING</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[1, 2, 3, 4, 5].map((item) => (
+                    <tr key={item} className="cp-tr">
+                      <td className="cp-td"><div style={{ height: '16px', width: '30px', background: '#151525' }} /></td>
+                      <td className="cp-td"><div style={{ height: '16px', width: '120px', background: '#151525' }} /></td>
+                      <td className="cp-td" style={{ display: 'flex', justifyContent: 'center' }}><div style={{ height: '16px', width: '60px', background: '#151525' }} /></td>
+                      <td className="cp-td" style={{ textAlign: 'right' }}><div style={{ height: '16px', width: '80px', background: '#151525', float: 'right' }} /></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           ) : (
             <div className="cp-leader-table-wrap">
               <table className="cp-leader-table">

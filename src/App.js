@@ -1,38 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React, { useEffect } from 'react';
-import Landing from './pages/Landing';
-import Problems from './pages/Problems';
-import ProblemDetail from './pages/ProblemDetail';
-import Courses from './pages/Courses';
-import CourseDetail from './pages/CourseDetail';
-import Profile from './pages/Profile';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import Skills from './pages/Skills';
-import Battle from './pages/Battle';
-import ReplayTheatre from './pages/ReplayTheatre';
-import TopReplays from './pages/TopReplays';
-import BossBattle from './pages/BossBattle';
-import ThoughtReplay from './pages/ThoughtReplay';
-import InterviewSimulator from './pages/InterviewSimulator';
-import ConstellationMap from './pages/ConstellationMap';
-import PairProgramming from './pages/PairProgramming';
-import Guild from './pages/Guild';
-import Leaderboard from './pages/Leaderboard';
-import Whiteboard from './pages/Whiteboard';
-import WhiteboardLibrary from './pages/WhiteboardLibrary';
-import Multiverse from './pages/Multiverse';
-import WatchStream from './pages/WatchStream';
-import QuantumGenerator from './pages/QuantumGenerator';
-import Contest from './pages/Contest';
-import Communities from './pages/Communities';
-import CommunityDetail from './pages/CommunityDetail';
-import Chat from './pages/Chat';
-import Messages from './pages/Messages';
-import Notifications from './pages/Notifications';
-import Search from './pages/Search';
-import TagPage from './pages/TagPage';
+import React, { useEffect, Suspense, lazy } from 'react';
 import Navbar from './components/Navbar';
 import { EmotionProvider } from './context/EmotionContext';
 import EmotionBadge from './components/EmotionBadge';
@@ -41,7 +9,57 @@ import { updateStreak } from './utils/streakTracker';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import './App.css';
 
-const queryClient = new QueryClient();
+// Lazy load page components
+const Landing = lazy(() => import('./pages/Landing'));
+const Problems = lazy(() => import('./pages/Problems'));
+const ProblemDetail = lazy(() => import('./pages/ProblemDetail'));
+const Courses = lazy(() => import('./pages/Courses'));
+const CourseDetail = lazy(() => import('./pages/CourseDetail'));
+const Profile = lazy(() => import('./pages/Profile'));
+const Login = lazy(() => import('./pages/Login'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Skills = lazy(() => import('./pages/Skills'));
+const Battle = lazy(() => import('./pages/Battle'));
+const ReplayTheatre = lazy(() => import('./pages/ReplayTheatre'));
+const TopReplays = lazy(() => import('./pages/TopReplays'));
+const BossBattle = lazy(() => import('./pages/BossBattle'));
+const ThoughtReplay = lazy(() => import('./pages/ThoughtReplay'));
+const InterviewSimulator = lazy(() => import('./pages/InterviewSimulator'));
+const ConstellationMap = lazy(() => import('./pages/ConstellationMap'));
+const PairProgramming = lazy(() => import('./pages/PairProgramming'));
+const Guild = lazy(() => import('./pages/Guild'));
+const Leaderboard = lazy(() => import('./pages/Leaderboard'));
+const Whiteboard = lazy(() => import('./pages/Whiteboard'));
+const WhiteboardLibrary = lazy(() => import('./pages/WhiteboardLibrary'));
+const Multiverse = lazy(() => import('./pages/Multiverse'));
+const WatchStream = lazy(() => import('./pages/WatchStream'));
+const QuantumGenerator = lazy(() => import('./pages/QuantumGenerator'));
+const Contest = lazy(() => import('./pages/Contest'));
+const Communities = lazy(() => import('./pages/Communities'));
+const CommunityDetail = lazy(() => import('./pages/CommunityDetail'));
+const Chat = lazy(() => import('./pages/Chat'));
+const Messages = lazy(() => import('./pages/Messages'));
+const Notifications = lazy(() => import('./pages/Notifications'));
+const Search = lazy(() => import('./pages/Search'));
+const TagPage = lazy(() => import('./pages/TagPage'));
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes stale time
+      cacheTime: 10 * 60 * 1000,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+const PageLoader = () => (
+  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#0A0A0F', color: '#00FF88', fontFamily: 'Orbitron' }}>
+    <div className="cp-pd-judging" style={{ fontSize: '1.2rem', letterSpacing: '3px', textShadow: '0 0 10px #00FF88' }}>
+      LOADING_GRID // CONNECTING...
+    </div>
+  </div>
+);
 
 
 
@@ -64,42 +82,44 @@ function MainApp() {
     <div className="App">
       {!hideNav && <Navbar />}
       <main className={hideNav ? '' : 'main-content'}>
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/problems" element={<Problems />} />
-          <Route path="/problems/:id" element={<ProblemDetail />} />
-          <Route path="/courses" element={<Courses />} />
-          <Route path="/courses/:id" element={<CourseDetail />} />
-          <Route path="/skills" element={<Skills />} />
-          <Route path="/battle/:id" element={<Battle />} />
-          <Route path="/profile/:username" element={<Profile />} />
-          <Route path="/search" element={<Search />} />
-          <Route path="/tag/:topic" element={<TagPage />} />
-          <Route path="/replay/:userId/:problemId" element={<ReplayTheatre />} />
-          <Route path="/theatre" element={<TopReplays />} />
-          <Route path="/boss" element={<BossBattle />} />
-          <Route path="/thoughts/:userId/:problemId" element={<ThoughtReplay />} />
-          <Route path="/interview" element={<InterviewSimulator />} />
-          <Route path="/constellation" element={<ConstellationMap />} />
-          <Route path="/pair/:roomId" element={<PairProgramming />} />
-          <Route path="/guild" element={<Guild />} />
-          <Route path="/leaderboard" element={<Leaderboard />} />
-          <Route path="/whiteboard" element={<Whiteboard />} />
-          <Route path="/whiteboard/:problemId" element={<Whiteboard />} />
-          <Route path="/whiteboard/library" element={<WhiteboardLibrary />} />
-          <Route path="/multiverse/:problemId" element={<Multiverse />} />
-          <Route path="/watch" element={<WatchStream />} />
-          <Route path="/watch/:userId" element={<WatchStream />} />
-          <Route path="/quantum" element={<QuantumGenerator />} />
-          <Route path="/contest" element={<Contest />} />
-          <Route path="/communities" element={<Communities />} />
-          <Route path="/community/:slug" element={<CommunityDetail />} />
-          <Route path="/chat" element={<Chat />} />
-          <Route path="/messages" element={<Messages />} />
-          <Route path="/notifications" element={<Notifications />} />
-        </Routes>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/problems" element={<Problems />} />
+            <Route path="/problems/:id" element={<ProblemDetail />} />
+            <Route path="/courses" element={<Courses />} />
+            <Route path="/courses/:id" element={<CourseDetail />} />
+            <Route path="/skills" element={<Skills />} />
+            <Route path="/battle/:id" element={<Battle />} />
+            <Route path="/profile/:username" element={<Profile />} />
+            <Route path="/search" element={<Search />} />
+            <Route path="/tag/:topic" element={<TagPage />} />
+            <Route path="/replay/:userId/:problemId" element={<ReplayTheatre />} />
+            <Route path="/theatre" element={<TopReplays />} />
+            <Route path="/boss" element={<BossBattle />} />
+            <Route path="/thoughts/:userId/:problemId" element={<ThoughtReplay />} />
+            <Route path="/interview" element={<InterviewSimulator />} />
+            <Route path="/constellation" element={<ConstellationMap />} />
+            <Route path="/pair/:roomId" element={<PairProgramming />} />
+            <Route path="/guild" element={<Guild />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/whiteboard" element={<Whiteboard />} />
+            <Route path="/whiteboard/:problemId" element={<Whiteboard />} />
+            <Route path="/whiteboard/library" element={<WhiteboardLibrary />} />
+            <Route path="/multiverse/:problemId" element={<Multiverse />} />
+            <Route path="/watch" element={<WatchStream />} />
+            <Route path="/watch/:userId" element={<WatchStream />} />
+            <Route path="/quantum" element={<QuantumGenerator />} />
+            <Route path="/contest" element={<Contest />} />
+            <Route path="/communities" element={<Communities />} />
+            <Route path="/community/:slug" element={<CommunityDetail />} />
+            <Route path="/chat" element={<Chat />} />
+            <Route path="/messages" element={<Messages />} />
+            <Route path="/notifications" element={<Notifications />} />
+          </Routes>
+        </Suspense>
       </main>
       <EmotionBadge />
     </div>

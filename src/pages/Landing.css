@@ -48,7 +48,6 @@
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.55;
   width: 100%;
   height: 100%;
 }
@@ -757,3 +756,176 @@
   margin-bottom: .5rem;
 }
 .landing-page-root .uniq-label { font-family: var(--mo); font-size: 10px; color: var(--txd); line-height: 1.5; }
+
+/* ── Landing Page Mobile Navigation Toggle ── */
+.landing-page-root .landing-menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 20px;
+  height: 16px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 101;
+  outline: none;
+}
+.landing-page-root .landing-menu-toggle .bar {
+  width: 100%;
+  height: 2px;
+  background-color: var(--txd);
+  transition: all 0.3s ease;
+}
+.landing-page-root .landing-menu-toggle.open .bar:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+  background-color: var(--gn);
+}
+.landing-page-root .landing-menu-toggle.open .bar:nth-child(2) {
+  opacity: 0;
+}
+.landing-page-root .landing-menu-toggle.open .bar:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+  background-color: var(--gn);
+}
+
+/* ── Landing Page Mobile Navigation Drawer ── */
+.landing-page-root .landing-mobile-drawer {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 280px;
+  height: 100vh;
+  background: rgba(7, 7, 16, 0.96);
+  backdrop-filter: blur(20px);
+  border-left: 2px solid var(--pk);
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 2rem;
+}
+.landing-page-root .landing-mobile-drawer.open {
+  right: 0;
+}
+.landing-page-root .landing-mobile-drawer .drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 45, 120, 0.15);
+}
+.landing-page-root .landing-mobile-drawer .drawer-logo {
+  font-family: var(--fo);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gn);
+  letter-spacing: 2px;
+}
+.landing-page-root .landing-mobile-drawer .drawer-close {
+  background: transparent;
+  border: none;
+  color: var(--pk);
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+.landing-page-root .landing-mobile-drawer .drawer-links {
+  list-style: none;
+  margin: 0 0 2rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.landing-page-root .landing-mobile-drawer .drawer-links a {
+  display: block;
+  font-family: var(--fo);
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--txd);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.landing-page-root .landing-mobile-drawer .drawer-links a:hover {
+  color: var(--gn);
+}
+.landing-page-root .landing-mobile-drawer .drawer-cta {
+  font-family: var(--fo);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 12px 24px;
+  background: var(--pk);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+  transition: background 0.2s;
+}
+.landing-page-root .landing-mobile-drawer .drawer-cta:hover {
+  background: #ff1a6a;
+}
+
+/* ── LANDING RESPONSIVE STYLING ── */
+@media (max-width: 992px) {
+  .landing-page-root nav {
+    padding: 0 1.5rem;
+  }
+  .landing-page-root nav .nav-links,
+  .landing-page-root nav .nav-cta {
+    display: none;
+  }
+  .landing-page-root nav .landing-menu-toggle {
+    display: flex;
+  }
+  .landing-page-root .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  .landing-page-root section {
+    padding: 4rem 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .landing-page-root .problem-showcase {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  .landing-page-root .hero {
+    padding-top: 80px;
+  }
+  .landing-page-root .hero-pill {
+    font-size: 9px;
+    padding: 4px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .landing-page-root .stats-row {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+  .landing-page-root .hero-btns {
+    flex-direction: column;
+    width: 100%;
+    align-items: stretch;
+  }
+  .landing-page-root .btn-primary,
+  .landing-page-root .btn-secondary {
+    justify-content: center;
+    width: 100%;
+  }
+  .landing-page-root .unique-strip .uniq-card {
+    width: 160px;
+    padding: 1rem;
+  }
+  .landing-page-root .uniq-num {
+    font-size: 22px;
+  }
+}

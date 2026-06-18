@@ -30,7 +30,7 @@ service cloud.firestore {
 
     // Problems Catalog
     match /problems/{problemId} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow write: if false; // System defined
     }
 

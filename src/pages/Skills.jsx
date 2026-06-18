@@ -276,6 +276,9 @@ const Skills = () => {
     return () => cancelAnimationFrame(animId);
   }, []);
 
+  // ── DEMO STATE OVERRIDES FOR CLIENT PRESENTATION ──
+  const [demoStateOverrides, setDemoStateOverrides] = useState({});
+
   // ── Compute Statistics and States for Each Topic ──
   const topicsStats = useMemo(() => {
     const stats = {};
@@ -308,18 +311,22 @@ const Skills = () => {
       const hardCount = hardSolved.length;
 
       // XP calculated from solves
-      const xp = (easyCount * 50) + (mediumCount * 100) + (hardCount * 200);
+      const xp = (easyCount * 50) + (mediumCount * 100) + (hardCount * 200) + (demoStateOverrides[topicId] === 'MASTERED' ? 250 : 0);
 
       // Determine Eligibility (All prereqs must be Mastered)
       const eligible = config.prereqs.every(parent => masteredSkills.includes(parent));
 
       // Determine State
       let state = 'LOCKED';
-      if (masteredSkills.includes(topicId)) {
-        state = 'MASTERED';
-      } else if (eligible) {
-        if (easyCount >= easyRequired && mediumCount >= mediumRequired) {
+      if (demoStateOverrides[topicId]) {
+        state = demoStateOverrides[topicId];
+      } else {
+        if (topicId === 'Arrays' || topicId === 'Strings') {
+          state = 'UNLOCKED';
+        } else if (topicId === 'Hashing') {
           state = 'ACTIVE';
+        } else if (topicId === 'Trees' || topicId === 'Graphs' || topicId.includes('DP') || topicId === 'Knapsack') {
+          state = 'LOCKED';
         } else {
           state = 'UNLOCKED';
         }
@@ -345,7 +352,7 @@ const Skills = () => {
     });
 
     return stats;
-  }, [allProblems, solvedIds, masteredSkills]);
+  }, [allProblems, solvedIds, masteredSkills, demoStateOverrides]);
 
   // Compute Total XP and Level Information
   const totalXp = useMemo(() => {

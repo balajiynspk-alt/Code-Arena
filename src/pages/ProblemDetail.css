@@ -625,3 +625,110 @@ body:has(.cp-flow-active) .main-content {
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4), 0 0 10px rgba(255, 45, 120, 0.05) !important;
 }
 
+/* Mobile responsive media queries */
+@media (max-width: 768px) {
+  .cp-pd-container {
+    flex-direction: column;
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  /* Hide panes based on active tab class */
+  .cp-pd-container.cp-mobile-view--problem .cp-pd-left {
+    display: flex !important;
+    width: 100% !important;
+    height: calc(100vh - 50px) !important;
+  }
+  .cp-pd-container.cp-mobile-view--problem .cp-pd-right {
+    display: none !important;
+  }
+
+  .cp-pd-container.cp-mobile-view--code .cp-pd-left {
+    display: none !important;
+  }
+  .cp-pd-container.cp-mobile-view--code .cp-pd-right {
+    display: flex !important;
+    width: 100% !important;
+    height: calc(100vh - 50px) !important;
+  }
+  .cp-pd-container.cp-mobile-view--code .cp-pd-output {
+    display: none !important;
+  }
+
+  .cp-pd-container.cp-mobile-view--output .cp-pd-left {
+    display: none !important;
+  }
+  .cp-pd-container.cp-mobile-view--output .cp-pd-right {
+    display: flex !important;
+    width: 100% !important;
+    height: calc(100vh - 50px) !important;
+  }
+  .cp-pd-container.cp-mobile-view--output .cp-pd-editor {
+    display: none !important;
+  }
+  .cp-pd-container.cp-mobile-view--output .cp-pd-toolbar {
+    display: none !important;
+  }
+  .cp-pd-container.cp-mobile-view--output .cp-pd-output {
+    display: flex !important;
+    height: 100% !important;
+    width: 100% !important;
+  }
+
+  /* Sticky bottom navigation for mobile */
+  .cp-mobile-tabs-nav {
+    display: flex !important;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 50px;
+    background: #0F0F1A;
+    border-top: 1px solid #FF2D7844;
+    z-index: 1000;
+  }
+  
+  .cp-mobile-nav-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #8888AA;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.65rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+  }
+  
+  .cp-mobile-nav-btn.active {
+    color: #FF2D78;
+    text-shadow: 0 0 8px rgba(255, 45, 120, 0.6);
+  }
+
+  /* Mobile monaco editor font scale override */
+  .cp-pd-editor .monaco-editor {
+    --monaco-font-size: 12px !important;
+  }
+  
+  /* Sticky submit button at bottom of mobile code tab */
+  .cp-pd-container.cp-mobile-view--code .cp-pd-submit-btn {
+    position: fixed;
+    bottom: 60px;
+    right: 16px;
+    z-index: 1001;
+    box-shadow: 0 0 15px rgba(255, 45, 120, 0.6);
+  }
+}
+
+/* Hide mobile nav on desktop */
+.cp-mobile-tabs-nav {
+  display: none;
+}
+

@@ -307,6 +307,67 @@ const CodeDNA = ({ currentDNA, lastDNA, submissionsHistory, language }) => {
         <span className="cp-dna-hover-hint">HOVER TO ACCELERATE TRANSCRIPTION</span>
       </div>
 
+      {/* ── TRANSCRIBED COMPLEXITY METRICS ── */}
+      <div style={{
+        background: 'rgba(255, 45, 120, 0.03)',
+        border: '1px solid rgba(255, 45, 120, 0.25)',
+        borderRadius: '6px',
+        padding: '16px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '12px',
+        boxShadow: '0 0 15px rgba(255, 45, 120, 0.05)'
+      }}>
+        <div style={{
+          fontFamily: 'Orbitron',
+          fontSize: '0.75rem',
+          fontWeight: 'bold',
+          color: '#FF2D78',
+          letterSpacing: '2px',
+          borderBottom: '1px solid rgba(255, 45, 120, 0.15)',
+          paddingBottom: '8px'
+        }}>
+          🧬 TRANSCRIBED COMPLEXITY METRICS
+        </div>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+          gap: '12px'
+        }}>
+          {[
+            { label: 'RECURSION SCORE', value: 82, color: '#FF2D78' },
+            { label: 'LOOP DENSITY', value: 74, color: '#00FF88' },
+            { label: 'CODE QUALITY', value: 91, color: '#FFD700' },
+            { label: 'COMPLEXITY RATING', value: 87, color: '#00E5FF' },
+            { label: 'COMMENT COVERAGE', value: 76, color: '#CCFF00' }
+          ].map(m => (
+            <div key={m.label} style={{
+              background: '#0F0F1A',
+              border: '1px solid rgba(255, 255, 255, 0.03)',
+              borderRadius: '4px',
+              padding: '10px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '4px'
+            }}>
+              <span style={{ fontSize: '0.62rem', color: '#8888AA', letterSpacing: '1px' }}>{m.label}</span>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+                <span style={{
+                  fontSize: '1.2rem',
+                  fontWeight: 'bold',
+                  fontFamily: 'Orbitron',
+                  color: m.color,
+                  textShadow: `0 0 8px ${m.color}44`
+                }}>{m.value}%</span>
+              </div>
+              <div style={{ height: '3px', background: 'rgba(255,255,255,0.03)', borderRadius: '2px', overflow: 'hidden' }}>
+                <div style={{ width: `${m.value}%`, height: '100%', background: m.color, borderRadius: '2px' }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* ── MUTATION ALERT STATUS ── */}
       {lastDNA ? (
         hasAnyMutation() ? (

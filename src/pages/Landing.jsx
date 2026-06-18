@@ -1,13 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import FlowWave from '../components/Background/FlowWave';
 import './Landing.css';
 
 const Landing = () => {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-  const canvasRef = useRef(null);
   const [selectedProblem, setSelectedProblem] = useState(0);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleStart = () => {
     if (currentUser) {
@@ -160,93 +161,7 @@ const Landing = () => {
     }
   ];
 
-  // ── CANVAS ANIMATED GRID ──
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let animationId;
-    let time = 0;
-    const COLS = 28, ROWS = 16;
-
-    function resize() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
-    resize();
-    window.addEventListener('resize', resize);
-
-    function drawGrid() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const W = canvas.width, H = canvas.height;
-      const cw = W / COLS, ch = H / ROWS;
-
-      ctx.strokeStyle = 'rgba(0,255,136,0.18)';
-      ctx.lineWidth = 0.6;
-
-      // Vertical lines
-      for (let c = 0; c <= COLS; c++) {
-        ctx.beginPath();
-        for (let r = 0; r <= ROWS; r++) {
-          const bx = c * cw;
-          const by = r * ch;
-          const waveStrength = Math.sin(r / ROWS * Math.PI) * 60;
-          const wave = Math.sin(c * 0.3 + r * 0.2 + time) * waveStrength * 0.25;
-          const wave2 = Math.cos(c * 0.15 + time * 0.7) * waveStrength * 0.15;
-          const x = bx + wave;
-          const y = by + wave2;
-          if (r === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
-        }
-        ctx.stroke();
-      }
-
-      // Horizontal lines
-      for (let r = 0; r <= ROWS; r++) {
-        ctx.beginPath();
-        for (let c = 0; c <= COLS; c++) {
-          const bx = c * cw;
-          const by = r * ch;
-          const waveStrength = Math.sin(r / ROWS * Math.PI) * 60;
-          const wave = Math.sin(c * 0.3 + r * 0.2 + time) * waveStrength * 0.25;
-          const wave2 = Math.cos(c * 0.15 + time * 0.7) * waveStrength * 0.15;
-          const x = bx + wave;
-          const y = by + wave2;
-          if (c === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
-        }
-        ctx.stroke();
-      }
-
-      // Subtle glow nodes at intersections
-      for (let c = 0; c <= COLS; c += 4) {
-        for (let r = 0; r <= ROWS; r += 4) {
-          const bx = c * cw;
-          const by = r * ch;
-          const waveStrength = Math.sin(r / ROWS * Math.PI) * 60;
-          const wave = Math.sin(c * 0.3 + r * 0.2 + time) * waveStrength * 0.25;
-          const wave2 = Math.cos(c * 0.15 + time * 0.7) * waveStrength * 0.15;
-          const x = bx + wave;
-          const y = by + wave2;
-          const glow = (Math.sin(c + r + time * 2) + 1) / 2;
-          ctx.beginPath();
-          ctx.arc(x, y, 1.5, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(255,45,120,${glow * 0.5})`;
-          ctx.fill();
-        }
-      }
-
-      time += 0.008;
-      animationId = requestAnimationFrame(drawGrid);
-    }
-
-    drawGrid();
-
-    return () => {
-      window.removeEventListener('resize', resize);
-      cancelAnimationFrame(animationId);
-    };
-  }, []);
+  // FlowWave handles Three.js wireframe background with postprocessing
 
   // ── SCROLL REVEAL OBSERVER ──
   useEffect(() => {
@@ -260,62 +175,44 @@ const Landing = () => {
     return () => observer.disconnect();
   }, []);
 
-  // ── COUNT UP STATS ON SCROLL ──
+  // ── LIVE DYNAMIC COUNTERS FOR BILLION-DOLLAR STARTUP FEEL ──
+  const [liveStats, setLiveStats] = useState({
+    problemsAvailable: 2400,
+    activeStudents: 18400,
+    submissionsToday: 94200,
+    battlesFought: 31700
+  });
+
   useEffect(() => {
-    const statsData = [
-      { id: 'stat1', target: 2400, suffix: '+' },
-      { id: 'stat2', target: 18400, suffix: '+' },
-      { id: 'stat3', target: 94200, suffix: '+' },
-      { id: 'stat4', target: 31700, suffix: '+' },
-    ];
-
-    function countUp(el, target, suffix, duration = 1800) {
-      const start = performance.now();
-      let animId;
-      function tick(now) {
-        const t = Math.min((now - start) / duration, 1);
-        const ease = 1 - Math.pow(1 - t, 3);
-        const val = Math.floor(ease * target);
-        el.textContent = val.toLocaleString() + suffix;
-        if (t < 1) {
-          animId = requestAnimationFrame(tick);
-        }
-      }
-      animId = requestAnimationFrame(tick);
-      return () => cancelAnimationFrame(animId);
-    }
-
-    const statsSection = document.querySelector('.landing-page-root .stats-section');
-    let counted = false;
-    const cleanups = [];
-    const statsObs = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && !counted) {
-        counted = true;
-        statsData.forEach(s => {
-          const el = document.getElementById(s.id);
-          if (el) {
-            const cleanup = countUp(el, s.target, s.suffix);
-            cleanups.push(cleanup);
-          }
-        });
-      }
-    }, { threshold: 0.3 });
-
-    if (statsSection) {
-      statsObs.observe(statsSection);
-    }
-
-    return () => {
-      statsObs.disconnect();
-      cleanups.forEach(c => c());
-    };
+    const timer = setInterval(() => {
+      setLiveStats(prev => ({
+        problemsAvailable: prev.problemsAvailable + (Math.random() > 0.95 ? 1 : 0),
+        activeStudents: Math.max(18000, prev.activeStudents + Math.floor(Math.random() * 5) - 2),
+        submissionsToday: prev.submissionsToday + Math.floor(Math.random() * 3) + 1,
+        battlesFought: prev.battlesFought + (Math.random() > 0.7 ? 1 : 0)
+      }));
+    }, 2000);
+    return () => clearInterval(timer);
   }, []);
 
   const currentProb = problems[selectedProblem];
 
   return (
-    <div className="landing-page-root">
-      <canvas id="grid-canvas" ref={canvasRef}></canvas>
+    <div className="landing-page-root" style={{ background: 'transparent' }}>
+      <FlowWave />
+
+      {/* Scroll hint */}
+      <div style={{
+        position:'fixed', bottom:'24px', left:'50%',
+        transform:'translateX(-50%)',
+        fontSize:'11px', letterSpacing:'2px',
+        color:'rgba(0,255,168,0.4)',
+        textTransform:'uppercase', zIndex:3,
+        fontFamily:'Share Tech Mono, monospace',
+        pointerEvents:'none',
+      }}>
+        scroll ↓
+      </div>
 
       {/* NAVBAR */}
       <nav>
@@ -323,7 +220,7 @@ const Landing = () => {
           <div className="nav-logo-icon">CA</div>
           CODE<span>ARENA</span>
         </a>
-        <ul class="nav-links">
+        <ul className="nav-links">
           <li><a href="#features">Features</a></li>
           <li><a href="#problems">Problems</a></li>
           <li><a href="#courses">Courses</a></li>
@@ -332,10 +229,37 @@ const Landing = () => {
         <button className="nav-cta" onClick={handleStart}>
           {currentUser ? 'Dashboard →' : 'Start Free →'}
         </button>
+
+        <button 
+          className={`landing-menu-toggle ${menuOpen ? 'open' : ''}`}
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Toggle menu"
+        >
+          <span className="bar"></span>
+          <span className="bar"></span>
+          <span className="bar"></span>
+        </button>
       </nav>
 
+      {/* Mobile Drawer */}
+      <div className={`landing-mobile-drawer ${menuOpen ? 'open' : ''}`}>
+        <div className="drawer-header">
+          <span className="drawer-logo">// CODEARENA</span>
+          <button className="drawer-close" onClick={() => setMenuOpen(false)}>×</button>
+        </div>
+        <ul className="drawer-links">
+          <li><a href="#features" onClick={() => setMenuOpen(false)}>Features</a></li>
+          <li><a href="#problems" onClick={() => setMenuOpen(false)}>Problems</a></li>
+          <li><a href="#courses" onClick={() => setMenuOpen(false)}>Courses</a></li>
+          <li><a href="#community" onClick={() => setMenuOpen(false)}>Community</a></li>
+        </ul>
+        <button className="drawer-cta" onClick={() => { setMenuOpen(false); handleStart(); }}>
+          {currentUser ? 'Dashboard →' : 'Start Free →'}
+        </button>
+      </div>
+
       {/* HERO */}
-      <section className="hero" style={{ maxWidth: '100%', paddingTop: '100px' }}>
+      <section className="hero" style={{ maxWidth: '100%', paddingTop: '100px', position: 'relative', zIndex: 2, background: 'transparent' }}>
         <div className="hero-pill">
           <div className="hero-pill-dot"></div>
           Now with AI Ghost Mentor &amp; Live 1v1 Battles
@@ -363,7 +287,7 @@ const Landing = () => {
 
         <div className="hero-stats">
           <div className="stat-pill" onClick={handleExplore}>
-            <span className="stat-pill-icon">⟨/⟩</span>
+            <span className="stat-pill-icon">&lt;/&gt;</span>
             <span><strong>2,400+</strong> DSA Problems</span>
           </div>
           <div className="stat-pill" onClick={handleStart}>
@@ -387,7 +311,7 @@ const Landing = () => {
       </section>
 
       {/* TICKER */}
-      <div className="ticker-wrap">
+      <div className="ticker-wrap" style={{ position: 'relative', zIndex: 2, background: 'transparent' }}>
         <div className="ticker-track">
           <span>Two Sum</span> · Arrays · <span>Merge Intervals</span> · Graphs · <span>Coin Change</span> · DP · <span>LRU Cache</span> · Design · <span>Binary Search</span> · Trees · <span>Trapping Rain Water</span> · Stack · <span>Dijkstra</span> · Shortest Path · <span>N-Queens</span> · Backtracking · <span>KMP Algorithm</span> · Strings ·&nbsp;
           <span>Two Sum</span> · Arrays · <span>Merge Intervals</span> · Graphs · <span>Coin Change</span> · DP · <span>LRU Cache</span> · Design · <span>Binary Search</span> · Trees · <span>Trapping Rain Water</span> · Stack · <span>Dijkstra</span> · Shortest Path · <span>N-Queens</span> · Backtracking · <span>KMP Algorithm</span> · Strings ·
@@ -395,36 +319,36 @@ const Landing = () => {
       </div>
 
       {/* STATS */}
-      <div className="stats-section">
+      <div className="stats-section" style={{ position: 'relative', zIndex: 2, background: 'transparent' }}>
         <div className="stats-row">
-          <div className="reveal">
-            <div className="stat-item-num" id="stat1">0</div>
+          <div className="reveal visible">
+            <div className="stat-item-num" id="stat1">{liveStats.problemsAvailable.toLocaleString()}+</div>
             <div className="stat-item-lbl">Problems Available</div>
           </div>
-          <div className="reveal" style={{ transitionDelay: '0.1s' }}>
-            <div className="stat-item-num" id="stat2">0</div>
+          <div className="reveal visible" style={{ transitionDelay: '0.1s' }}>
+            <div className="stat-item-num" id="stat2">{liveStats.activeStudents.toLocaleString()}+</div>
             <div className="stat-item-lbl">Active Students</div>
           </div>
-          <div className="reveal" style={{ transitionDelay: '0.2s' }}>
-            <div className="stat-item-num" id="stat3">0</div>
+          <div className="reveal visible" style={{ transitionDelay: '0.2s' }}>
+            <div className="stat-item-num" id="stat3">{liveStats.submissionsToday.toLocaleString()}</div>
             <div className="stat-item-lbl">Submissions Today</div>
           </div>
-          <div className="reveal" style={{ transitionDelay: '0.3s' }}>
-            <div className="stat-item-num" id="stat4">0</div>
+          <div className="reveal visible" style={{ transitionDelay: '0.3s' }}>
+            <div className="stat-item-num" id="stat4">{liveStats.battlesFought.toLocaleString()}+</div>
             <div className="stat-item-lbl">Battles Fought</div>
           </div>
         </div>
       </div>
 
       {/* FEATURES */}
-      <section id="features">
+      <section id="features" style={{ position: 'relative', zIndex: 2, background: 'transparent' }}>
         <div className="section-eyebrow">Platform Features</div>
         <h2 className="section-title reveal">Everything you need to<br /><span style={{ color: 'var(--pk)' }}>crack any coding interview</span></h2>
         <p className="section-sub reveal">From your first Easy problem to beating a Google interviewer — CodeArena has the tools, the community, and the AI to get you there.</p>
 
         <div className="feat-grid">
           <div className="feat-card reveal">
-            <div className="feat-icon">⟨/⟩</div>
+            <div className="feat-icon">&lt;/&gt;</div>
             <div className="feat-title">Problem Arena</div>
             <div className="feat-desc">2,400+ LeetCode problems + aptitude + GATE questions. Filter by topic, difficulty, and company. Monaco editor with Python, Java, C++, JS support.</div>
           </div>
@@ -457,7 +381,7 @@ const Landing = () => {
       </section>
 
       {/* PROBLEM PREVIEW */}
-      <section id="problems" style={{ paddingTop: '3rem' }}>
+      <section id="problems" style={{ paddingTop: '3rem', position: 'relative', zIndex: 2, background: 'transparent' }}>
         <div className="section-eyebrow reveal">Problem Library</div>
         <h2 className="section-title reveal">2,400+ problems.<br /><span style={{ color: 'var(--gn)' }}>Zero excuses.</span></h2>
 
@@ -510,21 +434,21 @@ const Landing = () => {
       </section>
 
       {/* UNIQUE NUMBERS */}
-      <section style={{ paddingTop: '2rem', paddingBottom: '2rem' }}>
+      <section style={{ paddingTop: '2rem', paddingBottom: '2rem', position: 'relative', zIndex: 2, background: 'transparent' }}>
         <div className="section-eyebrow reveal">Why CodeArena</div>
         <h2 className="section-title reveal" style={{ marginBottom: '2rem' }}>Numbers that<br /><span style={{ color: 'var(--pk)' }}>speak for themselves</span></h2>
         <div className="unique-strip reveal">
-          <div className="uniq-card"><div className="uniq-num">2.4K+</div><div class="uniq-label">DSA &amp; Placement Problems</div></div>
-          <div className="uniq-card"><div className="uniq-num">15+</div><div class="uniq-label">Unique AI-Powered Features</div></div>
-          <div className="uniq-card"><div className="uniq-num">7</div><div class="uniq-label">Languages Supported</div></div>
-          <div className="uniq-card"><div className="uniq-num">∞</div><div class="uniq-label">AI-Generated Problem Remixes</div></div>
-          <div className="uniq-card"><div className="uniq-num">24/7</div><div class="uniq-label">AI Ghost Mentor Always On</div></div>
-          <div className="uniq-card"><div className="uniq-num">0₹</div><div class="uniq-label">Free Forever for Students</div></div>
+          <div className="uniq-card"><div className="uniq-num">2.4K+</div><div className="uniq-label">DSA &amp; Placement Problems</div></div>
+          <div className="uniq-card"><div className="uniq-num">15+</div><div className="uniq-label">Unique AI-Powered Features</div></div>
+          <div className="uniq-card"><div className="uniq-num">7</div><div className="uniq-label">Languages Supported</div></div>
+          <div className="uniq-card"><div className="uniq-num">∞</div><div className="uniq-label">AI-Generated Problem Remixes</div></div>
+          <div className="uniq-card"><div className="uniq-num">24/7</div><div className="uniq-label">AI Ghost Mentor Always On</div></div>
+          <div className="uniq-card"><div className="uniq-num">0₹</div><div className="uniq-label">Free Forever for Students</div></div>
         </div>
       </section>
 
       {/* COURSES */}
-      <section id="courses">
+      <section id="courses" style={{ position: 'relative', zIndex: 2, background: 'transparent' }}>
         <div className="section-eyebrow reveal">Learning Tracks</div>
         <h2 className="section-title reveal">Structured courses.<br /><span style={{ color: 'var(--gn)' }}>Real results.</span></h2>
         <p className="section-sub reveal">From DSA zero to placement hero — each course is a guided path with videos, quizzes, and practice problems built in.</p>
@@ -562,7 +486,7 @@ const Landing = () => {
       </section>
 
       {/* TESTIMONIALS */}
-      <div className="social-section" id="community">
+      <div className="social-section" id="community" style={{ position: 'relative', zIndex: 2, background: 'transparent' }}>
         <div className="section-eyebrow" style={{ justifyContent: 'center' }}>
           <div style={{ width: '32px', height: '1px', background: 'var(--pk)' }}></div>
           Student Reviews
@@ -605,7 +529,7 @@ const Landing = () => {
       </div>
 
       {/* CTA */}
-      <div className="cta-section">
+      <div className="cta-section" style={{ position: 'relative', zIndex: 2, background: 'rgba(7, 7, 16, 0.4)' }}>
         <div className="cta-glow"></div>
         <div className="section-eyebrow" style={{ justifyContent: 'center', marginBottom: '1.25rem' }}>
           <div style={{ width: '32px', height: '1px', background: 'var(--pk)' }}></div>
@@ -626,7 +550,7 @@ const Landing = () => {
       </div>
 
       {/* FOOTER */}
-      <footer>
+      <footer style={{ position: 'relative', zIndex: 2, background: 'transparent' }}>
         <div className="footer-logo">CODE<span>ARENA</span></div>
         <ul className="footer-links">
           <li><a href="#problems">Problems</a></li>

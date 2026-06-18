@@ -1,0 +1,1611 @@
+﻿diff --git a/src/pages/Landing.jsx b/src/pages/Landing.jsx
+index 58fe2f0..6b56aab 100644
+--- a/src/pages/Landing.jsx
++++ b/src/pages/Landing.jsx
+@@ -1,6 +1,9 @@
+ import React, { useEffect, useRef, useState } from 'react';
+ import { useNavigate } from 'react-router-dom';
+ import { useAuth } from '../context/AuthContext';
++import * as THREE from 'three';
++import { motion, AnimatePresence } from 'framer-motion';
++import CountUp from 'react-countup';
+ import './Landing.css';
+ 
+ const Landing = () => {
+@@ -21,487 +24,807 @@ const Landing = () => {
+     navigate('/problems');
+   };
+ 
+-  // ΓöÇΓöÇ PROBLEMS DATA FOR MOCK EDITOR ΓöÇΓöÇ
+-  const problems = [
++  // ΓöÇΓöÇ PROBLEMS DATA FOR INTERACTIVE PREVIEW ΓöÇΓöÇ
++  const previewProblems = [
+     {
+       num: '001',
+-      name: 'Two Sum',
+-      diff: 'Easy',
+-      diffClass: 'd-easy',
+       checked: true,
+-      verdict: { runtime: '48ms', memory: '14.2 MB', beats: '96%' },
+-      code: [
+-        { ln: 1, text: <><span className="cm"># Hash map ΓÇö O(n) time</span></> },
+-        { ln: 2, text: <><span className="kw">class </span><span className="fn">Solution</span>:</> },
+-        { ln: 3, text: <>&nbsp;&nbsp;<span className="kw">def </span><span className="fn">twoSum</span>(self, nums, target):</> },
+-        { ln: 4, text: <>&nbsp;&nbsp;&nbsp;&nbsp;seen = {"{}"}</> },
+-        { ln: 5, text: <>&nbsp;&nbsp;&nbsp;&nbsp;<span className="kw">for</span> i, n <span className="kw">in</span> <span className="fn">enumerate</span>(nums):</> },
+-        { ln: 6, text: <>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;diff = target - n</> },
+-        { ln: 7, text: <>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="kw">if</span> diff <span className="kw">in</span> seen:</> },
+-        { ln: 8, text: <>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="kw">return</span> [seen[diff], i]</> },
+-        { ln: 9, text: <>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;seen[n] = i</> }
+-      ]
++      title: 'Two Sum',
++      topic: 'Arrays',
++      difficulty: 'Easy',
++      code: `# Two Sum ΓÇö Hash Map O(n)
++class Solution:
++  def twoSum(self, nums, target):
++    seen = {}
++    for i, n in enumerate(nums):
++      diff = target - n
++      if diff in seen:
++        return [seen[diff], i]
++      seen[n] = i`,
++      verdict: 'Γ£ô ACCEPTED  48ms  14.2MB  Beats 94%'
+     },
+     {
+-      num: '003',
+-      name: 'Longest Substring Without Repeating',
+-      diff: 'Medium',
+-      diffClass: 'd-med',
+-      checked: false,
+-      verdict: { runtime: '56ms', memory: '14.4 MB', beats: '92%' },
+-      code: [
+-        { ln: 1, text: <><span className="cm"># Sliding Window - O(n)</span></> },
+-        { ln: 2, text: <><span className="kw">class </span><span className="fn">Solution</span>:</> },
+-        { ln: 3, text: <>&nbsp;&nbsp;<span className="kw">def </span><span className="fn">lengthOfLongestSubstring</span>(self, s: <span className="kw">str</span>) -&gt; <span className="kw">int</span>:</> },
+-        { ln: 4, text: <>&nbsp;&nbsp;&nbsp;&nbsp;char_map = {"{}"}</> },
+-        { ln: 5, text: <>&nbsp;&nbsp;&nbsp;&nbsp;left = max_len = <span className="num">0</span></> },
+-        { ln: 6, text: <>&nbsp;&nbsp;&nbsp;&nbsp;<span className="kw">for</span> right, char <span className="kw">in</span> <span className="fn">enumerate</span>(s):</> },
+-        { ln: 7, text: <>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="kw">if</span> char <span className="kw">in</span> char_map <span className="kw">and</span> char_map[char] &gt;= left:</> },
+-        { ln: 8, text: <>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;left = char_map[char] + <span className="num">1</span></> },
+-        { ln: 9, text: <>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char_map[char] = right</> },
+-        { ln: 10, text: <>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;max_len = <span className="fn">max</span>(max_len, right - left + <span className="num">1</span>)</> },
+-        { ln: 11, text: <>&nbsp;&nbsp;&nbsp;&nbsp;<span className="kw">return</span> max_len</> }
+-      ]
++      num: '002',
++      checked: true,
++      title: 'Longest Substring',
++      topic: 'Strings',
++      difficulty: 'Medium',
++      code: `# Longest Substring ΓÇö Sliding Window O(n)
++class Solution:
++  def lengthOfLongestSubstring(self, s):
++    char_map = {}
++    left = max_len = 0
++    for right, char in enumerate(s):
++      if char in char_map and char_map[char] >= left:
++        left = char_map[char] + 1
++      char_map[char] = right
++      max_len = max(max_len, right - left + 1)
++    return max_len`,
++      verdict: 'Γ£ô ACCEPTED  56ms  14.4MB  Beats 92%'
+     },
+     {
+-      num: '023',
+-      name: 'Merge K Sorted Lists',
+-      diff: 'Hard',
+-      diffClass: 'd-hard',
+-      checked: true,
+-      verdict: { runtime: '72ms', memory: '17.8 MB', beats: '98%' },
+-      code: [
+-        { ln: 1, text: <><span className="cm"># Min Heap - O(N log k)</span></> },
+-        { ln: 2, text: <><span className="kw">import</span> heapq</> },
+-        { ln: 3, text: <><span className="kw">class </span><span className="fn">Solution</span>:</> },
+-        { ln: 4, text: <>&nbsp;&nbsp;<span className="kw">def </span><span className="fn">mergeKLists</span>(self, lists):</> },
+-        { ln: 5, text: <>&nbsp;&nbsp;&nbsp;&nbsp;heap = []</> },
+-        { ln: 6, text: <>&nbsp;&nbsp;&nbsp;&nbsp;<span className="kw">for</span> i, lst <span className="kw">in</span> <span className="fn">enumerate</span>(lists):</> },
+-        { ln: 7, text: <>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="kw">if</span> lst: heapq.heappush(heap, (lst.val, i, lst))</> },
+-        { ln: 8, text: <>&nbsp;&nbsp;&nbsp;&nbsp;dummy = ListNode(<span className="num">0</span>)</> },
+-        { ln: 9, text: <>&nbsp;&nbsp;&nbsp;&nbsp;curr = dummy</> },
+-        { ln: 10, text: <>&nbsp;&nbsp;&nbsp;&nbsp;<span className="kw">while</span> heap:</> },
+-        { ln: 11, text: <>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;val, i, node = heapq.heappop(heap)</> },
+-        { ln: 12, text: <>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;curr.next = node</> },
+-        { ln: 13, text: <>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;curr = curr.next</> },
+-        { ln: 14, text: <>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="kw">if</span> node.next: heapq.heappush(heap, (node.next.val, i, node.next))</> },
+-        { ln: 15, text: <>&nbsp;&nbsp;&nbsp;&nbsp;<span className="kw">return</span> dummy.next</> }
+-      ]
++      num: '003',
++      checked: false,
++      title: 'Median Two Arrays',
++      topic: 'Binary',
++      difficulty: 'Hard',
++      code: `# Median of Two Sorted Arrays ΓÇö Binary Search O(log(min(m,n)))
++class Solution:
++  def findMedianSortedArrays(self, nums1, nums2):
++    A, B = nums1, nums2
++    if len(A) > len(B):
++      A, B = B, A
++    total = len(A) + len(B)
++    half = total // 2
++    l, r = 0, len(A) - 1
++    while True:
++      i = (l + r) // 2
++      j = half - i - 2
++      # ... partition binary search ...`,
++      verdict: 'Γ£ô ACCEPTED  72ms  17.8MB  Beats 98%'
+     },
+     {
+-      num: '042',
+-      name: 'Trapping Rain Water',
+-      diff: 'Hard',
+-      diffClass: 'd-hard',
++      num: '004',
+       checked: false,
+-      verdict: { runtime: '64ms', memory: '15.6 MB', beats: '95%' },
+-      code: [
+-        { ln: 1, text: <><span className="cm"># Two Pointers - O(n)</span></> },
+-        { ln: 2, text: <><span className="kw">class </span><span className="fn">Solution</span>:</> },
+-        { ln: 3, text: <>&nbsp;&nbsp;<span className="kw">def </span><span className="fn">trap</span>(self, height):</> },
+-        { ln: 4, text: <>&nbsp;&nbsp;&nbsp;&nbsp;<span className="kw">if</span> <span className="kw">not</span> height: <span className="kw">return</span> <span className="num">0</span></> },
+-        { ln: 5, text: <>&nbsp;&nbsp;&nbsp;&nbsp;l, r = <span className="num">0</span>, <span className="fn">len</span>(height) - <span className="num">1</span></> },
+-        { ln: 6, text: <>&nbsp;&nbsp;&nbsp;&nbsp;l_max, r_max = height[l], height[r]</> },
+-        { ln: 7, text: <>&nbsp;&nbsp;&nbsp;&nbsp;res = <span className="num">0</span></> },
+-        { ln: 8, text: <>&nbsp;&nbsp;&nbsp;&nbsp;<span className="kw">while</span> l &lt; r:</> },
+-        { ln: 9, text: <>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="kw">if</span> l_max &lt; r_max:</> },
+-        { ln: 10, text: <>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;l += <span className="num">1</span>; l_max = <span className="fn">max</span>(l_max, height[l])</> },
+-        { ln: 11, text: <>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;res += l_max - height[l]</> },
+-        { ln: 12, text: <>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="kw">else</span>:</> },
+-        { ln: 13, text: <>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;r -= <span className="num">1</span>; r_max = <span className="fn">max</span>(r_max, height[r])</> },
+-        { ln: 14, text: <>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;res += r_max - height[r]</> },
+-        { ln: 15, text: <>&nbsp;&nbsp;&nbsp;&nbsp;<span className="kw">return</span> res</> }
+-      ]
++      title: 'Maximum Subarray',
++      topic: 'DP',
++      difficulty: 'Medium',
++      code: `# Maximum Subarray ΓÇö Kadane's Algorithm O(n)
++class Solution:
++  def maxSubArray(self, nums):
++    max_so_far = max_ending_here = nums[0]
++    for x in nums[1:]:
++      max_ending_here = max(x, max_ending_here + x)
++      max_so_far = max(max_so_far, max_ending_here)
++    return max_so_far`,
++      verdict: 'Γ£ô ACCEPTED  64ms  15.2MB  Beats 95%'
+     },
+     {
+-      num: '146',
+-      name: 'LRU Cache',
+-      diff: 'Medium',
+-      diffClass: 'd-med',
++      num: '005',
+       checked: true,
+-      verdict: { runtime: '112ms', memory: '23.4 MB', beats: '97%' },
+-      code: [
+-        { ln: 1, text: <><span className="cm"># Ordered Map - O(1)</span></> },
+-        { ln: 2, text: <><span className="kw">from</span> collections <span className="kw">import</span> OrderedDict</> },
+-        { ln: 3, text: <><span className="kw">class </span><span className="fn">LRUCache</span>:</> },
+-        { ln: 4, text: <>&nbsp;&nbsp;<span className="kw">def </span><span className="fn">__init__</span>(self, capacity: <span className="kw">int</span>):</> },
+-        { ln: 5, text: <>&nbsp;&nbsp;&nbsp;&nbsp;self.cap = capacity</> },
+-        { ln: 6, text: <>&nbsp;&nbsp;&nbsp;&nbsp;self.cache = OrderedDict()</> },
+-        { ln: 7, text: <>&nbsp;&nbsp;<span className="kw">def </span><span className="fn">get</span>(self, key: <span className="kw">int</span>) -&gt; <span className="kw">int</span>:</> },
+-        { ln: 8, text: <>&nbsp;&nbsp;&nbsp;&nbsp;<span className="kw">if</span> key <span className="kw">not in</span> self.cache: <span className="kw">return</span> -<span className="num">1</span></> },
+-        { ln: 9, text: <>&nbsp;&nbsp;&nbsp;&nbsp;self.cache.move_to_end(key)</> },
+-        { ln: 10, text: <>&nbsp;&nbsp;&nbsp;&nbsp;<span className="kw">return</span> self.cache[key]</> },
+-        { ln: 11, text: <>&nbsp;&nbsp;<span className="kw">def </span><span className="fn">put</span>(self, key: <span className="kw">int</span>, val: <span className="kw">int</span>) -&gt; <span className="kw">None</span>:</> },
+-        { ln: 12, text: <>&nbsp;&nbsp;&nbsp;&nbsp;<span className="kw">if</span> key <span className="kw">in</span> self.cache: self.cache.move_to_end(key)</> },
+-        { ln: 13, text: <>&nbsp;&nbsp;&nbsp;&nbsp;self.cache[key] = val</> },
+-        { ln: 14, text: <>&nbsp;&nbsp;&nbsp;&nbsp;<span className="kw">if</span> <span className="fn">len</span>(self.cache) &gt; self.cap: self.cache.popitem(last=<span className="kw">False</span>)</> }
+-      ]
++      title: 'Valid Parentheses',
++      topic: 'Stack',
++      difficulty: 'Easy',
++      code: `# Valid Parentheses ΓÇö Stack O(n)
++class Solution:
++  def isValid(self, s):
++    stack = []
++    mapping = {")": "(", "}": "{", "]": "["}
++    for char in s:
++      if char in mapping:
++        top = stack.pop() if stack else '#'
++        if mapping[char] != top:
++          return False
++      else:
++        stack.append(char)
++    return not stack`,
++      verdict: 'Γ£ô ACCEPTED  32ms  13.9MB  Beats 99%'
+     },
+     {
+-      num: '200',
+-      name: 'Number of Islands',
+-      diff: 'Medium',
+-      diffClass: 'd-med',
++      num: '006',
+       checked: false,
+-      verdict: { runtime: '68ms', memory: '16.2 MB', beats: '94%' },
+-      code: [
+-        { ln: 1, text: <><span className="cm"># DFS - Grid Traversal</span></> },
+-        { ln: 2, text: <><span className="kw">class </span><span className="fn">Solution</span>:</> },
+-        { ln: 3, text: <>&nbsp;&nbsp;<span className="kw">def </span><span className="fn">numIslands</span>(self, grid):</> },
+-        { ln: 4, text: <>&nbsp;&nbsp;&nbsp;&nbsp;<span className="kw">if</span> <span className="kw">not</span> grid: <span className="kw">return</span> <span className="num">0</span></> },
+-        { ln: 5, text: <>&nbsp;&nbsp;&nbsp;&nbsp;count = <span className="num">0</span></> },
+-        { ln: 6, text: <>&nbsp;&nbsp;&nbsp;&nbsp;<span className="kw">for</span> r <span className="kw">in</span> <span className="fn">range</span>(<span className="fn">len</span>(grid)):</> },
+-        { ln: 7, text: <>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="kw">for</span> c <span className="kw">in</span> <span className="fn">range</span>(<span className="fn">len</span>(grid[<span className="num">0</span>])):</> },
+-        { ln: 8, text: <>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="kw">if</span> grid[r][c] == <span className="str">'1'</span>:</> },
+-        { ln: 9, text: <>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;self.dfs(grid, r, c)</> },
+-        { ln: 10, text: <>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;count += <span className="num">1</span></> },
+-        { ln: 11, text: <>&nbsp;&nbsp;&nbsp;&nbsp;<span className="kw">return</span> count</> }
+-      ]
++      title: 'Course Schedule',
++      topic: 'Graphs',
++      difficulty: 'Medium',
++      code: `# Course Schedule ΓÇö topological sort cycle detection O(V + E)
++class Solution:
++  def canFinish(self, numCourses, prerequisites):
++    adj = {i: [] for i in range(numCourses)}
++    for crs, pre in prerequisites:
++      adj[crs].append(pre)
++    vis = set()
++    def dfs(crs):
++      if crs in vis: return False
++      if adj[crs] == []: return True
++      vis.add(crs)
++      for pre in adj[crs]:
++        if not dfs(pre): return False
++      vis.remove(crs)
++      adj[crs] = []
++      return True
++    return all(dfs(i) for i in range(numCourses))`,
++      verdict: 'Γ£ô ACCEPTED  88ms  16.4MB  Beats 91%'
++    },
++    {
++      num: '007',
++      checked: false,
++      title: 'Trapping Rain',
++      topic: 'Two-P',
++      difficulty: 'Hard',
++      code: `# Trapping Rain Water ΓÇö Two Pointers O(n)
++class Solution:
++  def trap(self, height):
++    if not height: return 0
++    l, r = 0, len(height) - 1
++    l_max, r_max = height[l], height[r]
++    res = 0
++    while l < r:
++      if l_max < r_max:
++        l += 1
++        l_max = max(l_max, height[l])
++        res += l_max - height[l]
++      else:
++        r -= 1
++        r_max = max(r_max, height[r])
++        res += r_max - height[r]
++    return res`,
++      verdict: 'Γ£ô ACCEPTED  52ms  15.8MB  Beats 96%'
+     }
+   ];
+ 
+-  // ΓöÇΓöÇ CANVAS ANIMATED GRID ΓöÇΓöÇ
++  // Helper to highlight python code dynamically
++  const renderHighlightedCode = (codeText) => {
++    return codeText.split('\n').map((line, idx) => {
++      // Basic syntax highlighting with regex
++      // Keywords: def, class, return, for, in, if, else, not, while, import, elif
++      // Numbers, strings, comments, function names
++      const parts = [];
++      let currentStr = line;
++
++      // Check for comment
++      if (currentStr.trim().startsWith('#')) {
++        return (
++          <div key={idx} className="flex leading-6 font-mono text-xs">
++            <span className="w-8 text-slate-700 select-none text-right pr-3">{idx + 1}</span>
++            <span className="text-slate-500">{currentStr}</span>
++          </div>
++        );
++      }
++
++      // Regex parser for tokens
++      const tokenRegex = /(\bclass\b|\bdef\b|\breturn\b|\bfor\b|\bin\b|\bif\b|\belif\b|\belse\b|\bnot\b|\bwhile\b|\band\b|\bor\b|\bTrue\b|\bFalse\b|\bself\b|\bNone\b)|(\bSolution\b|\btwoSum\b|\blengthOfLongestSubstring\b|\bfindMedianSortedArrays\b|\bmaxSubArray\b|\bisValid\b|\bcanFinish\b|\btrap\b|\benumerate\b|\blen\b|\bmax\b|\bmin\b|\bappend\b|\bpop\b|\brange\b)|("[^"]*"|'[^']*')|(\b\d+\b)/g;
++      
++      let match;
++      let lastIndex = 0;
++
++      while ((match = tokenRegex.exec(line)) !== null) {
++        // Text before match
++        if (match.index > lastIndex) {
++          parts.push(line.substring(lastIndex, match.index));
++        }
++
++        if (match[1]) {
++          // Keyword: Pink
++          parts.push(<span key={match.index} className="text-[#FF2D9E] font-bold">{match[0]}</span>);
++        } else if (match[2]) {
++          // Function name/Builtin: Green
++          parts.push(<span key={match.index} className="text-[#00FFA8]">{match[0]}</span>);
++        } else if (match[3]) {
++          // String: Amber
++          parts.push(<span key={match.index} className="text-[#FFD23F]">{match[0]}</span>);
++        } else if (match[4]) {
++          // Number: Cyan
++          parts.push(<span key={match.index} className="text-[#5FFFD1]">{match[0]}</span>);
++        }
++
++        lastIndex = tokenRegex.lastIndex;
++      }
++
++      if (lastIndex < line.length) {
++        parts.push(line.substring(lastIndex));
++      }
++
++      return (
++        <div key={idx} className="flex leading-6 font-mono text-xs">
++          <span className="w-8 text-slate-600 select-none text-right pr-3">{idx + 1}</span>
++          <span className="text-[#F5F5FF] whitespace-pre">{parts.length > 0 ? parts : currentStr}</span>
++        </div>
++      );
++    });
++  };
++
++  // ΓöÇΓöÇ THREE.JS WIREFRAME TERRAIN BACKGROUND ΓöÇΓöÇ
+   useEffect(() => {
+     const canvas = canvasRef.current;
+     if (!canvas) return;
+-    const ctx = canvas.getContext('2d');
+-    let animationId;
+-    let time = 0;
+-    const COLS = 28, ROWS = 16;
+-
+-    function resize() {
+-      canvas.width = window.innerWidth;
+-      canvas.height = window.innerHeight;
+-    }
+-    resize();
+-    window.addEventListener('resize', resize);
+-
+-    function drawGrid() {
+-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+-      const W = canvas.width, H = canvas.height;
+-      const cw = W / COLS, ch = H / ROWS;
+-
+-      ctx.strokeStyle = 'rgba(0,255,136,0.18)';
+-      ctx.lineWidth = 0.6;
+-
+-      // Vertical lines
+-      for (let c = 0; c <= COLS; c++) {
+-        ctx.beginPath();
+-        for (let r = 0; r <= ROWS; r++) {
+-          const bx = c * cw;
+-          const by = r * ch;
+-          const waveStrength = Math.sin(r / ROWS * Math.PI) * 60;
+-          const wave = Math.sin(c * 0.3 + r * 0.2 + time) * waveStrength * 0.25;
+-          const wave2 = Math.cos(c * 0.15 + time * 0.7) * waveStrength * 0.15;
+-          const x = bx + wave;
+-          const y = by + wave2;
+-          if (r === 0) ctx.moveTo(x, y);
+-          else ctx.lineTo(x, y);
+-        }
+-        ctx.stroke();
+-      }
+ 
+-      // Horizontal lines
+-      for (let r = 0; r <= ROWS; r++) {
+-        ctx.beginPath();
+-        for (let c = 0; c <= COLS; c++) {
+-          const bx = c * cw;
+-          const by = r * ch;
+-          const waveStrength = Math.sin(r / ROWS * Math.PI) * 60;
+-          const wave = Math.sin(c * 0.3 + r * 0.2 + time) * waveStrength * 0.25;
+-          const wave2 = Math.cos(c * 0.15 + time * 0.7) * waveStrength * 0.15;
+-          const x = bx + wave;
+-          const y = by + wave2;
+-          if (c === 0) ctx.moveTo(x, y);
+-          else ctx.lineTo(x, y);
+-        }
+-        ctx.stroke();
++    // Renderer
++    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
++    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
++    renderer.setSize(window.innerWidth, window.innerHeight);
++
++    // Scene
++    const scene = new THREE.Scene();
++    scene.fog = new THREE.FogExp2(0x05050A, 0.022);
++
++    // Camera
++    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
++    // Low oblique angle: low camera height, looking forward slightly tilted down
++    camera.position.set(0, 9, 24);
++    camera.lookAt(0, 0, -22);
++
++    // Grid Dimensions
++    const COLS = 110;
++    const ROWS = 90;
++    const spacingX = 0.65;
++    const spacingZ = 0.65;
++    const vertexCount = COLS * ROWS;
++
++    // Create custom terrain geometry
++    const geometry = new THREE.BufferGeometry();
++    const positions = new Float32Array(vertexCount * 3);
++    const colors = new Float32Array(vertexCount * 3);
++
++    // Color definitions
++    const greenColor = new THREE.Color('#00FFA8');
++    const pinkColor = new THREE.Color('#FF2D9E');
++
++    // Generate flat grid positions
++    for (let r = 0; r < ROWS; r++) {
++      for (let c = 0; c < COLS; c++) {
++        const i = r * COLS + c;
++        // Center the grid coordinates
++        const xVal = (c - COLS / 2) * spacingX;
++        const zVal = (r - ROWS / 2) * spacingZ;
++
++        positions[i * 3] = xVal;
++        positions[i * 3 + 1] = 0; // dynamic Y
++        positions[i * 3 + 2] = zVal;
++
++        // Hotspot center-left: around x = -8, z = -10
++        const distToHotspot = Math.sqrt((xVal + 8) ** 2 + (zVal + 10) ** 2);
++        // Base intensity fades toward edges
++        const intensity = Math.max(0.1, Math.exp(-distToHotspot / 18));
++
++        // Color mix (dominant green, pink as secondary highlight)
++        const mixRatio = Math.sin(xVal * 0.1) * 0.5 + 0.5;
++        const mixedColor = new THREE.Color().copy(greenColor).lerp(pinkColor, mixRatio * 0.4);
++
++        colors[i * 3] = mixedColor.r * intensity;
++        colors[i * 3 + 1] = mixedColor.g * intensity;
++        colors[i * 3 + 2] = mixedColor.b * intensity;
+       }
++    }
+ 
+-      // Subtle glow nodes at intersections
+-      for (let c = 0; c <= COLS; c += 4) {
+-        for (let r = 0; r <= ROWS; r += 4) {
+-          const bx = c * cw;
+-          const by = r * ch;
+-          const waveStrength = Math.sin(r / ROWS * Math.PI) * 60;
+-          const wave = Math.sin(c * 0.3 + r * 0.2 + time) * waveStrength * 0.25;
+-          const wave2 = Math.cos(c * 0.15 + time * 0.7) * waveStrength * 0.15;
+-          const x = bx + wave;
+-          const y = by + wave2;
+-          const glow = (Math.sin(c + r + time * 2) + 1) / 2;
+-          ctx.beginPath();
+-          ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+-          ctx.fillStyle = `rgba(255,45,120,${glow * 0.5})`;
+-          ctx.fill();
+-        }
++    // Build Triangulated Wireframe Indices
++    const indices = [];
++    for (let r = 0; r < ROWS - 1; r++) {
++      for (let c = 0; c < COLS - 1; c++) {
++        const cur = r * COLS + c;
++        const nextCol = cur + 1;
++        const nextRow = cur + COLS;
++        const nextDiag = cur + COLS + 1;
++
++        // Triangle 1: cur -> nextCol -> nextRow
++        indices.push(cur, nextCol);
++        indices.push(nextCol, nextRow);
++        indices.push(nextRow, cur);
++
++        // Triangle 2: nextCol -> nextDiag -> nextRow
++        indices.push(nextCol, nextDiag);
++        indices.push(nextDiag, nextRow);
+       }
++    }
++
++    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
++    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
++    geometry.setIndex(indices);
+ 
+-      time += 0.008;
+-      animationId = requestAnimationFrame(drawGrid);
++    // Line material with vertex colors
++    const lineMaterial = new THREE.LineBasicMaterial({
++      vertexColors: true,
++      transparent: true,
++      opacity: 0.28,
++      blending: THREE.AdditiveBlending,
++      depthWrite: false
++    });
++
++    const terrainMesh = new THREE.LineSegments(geometry, lineMaterial);
++    scene.add(terrainMesh);
++
++    // Scattered bright glowing dots on terrain vertices
++    const dotMaterial = new THREE.PointsMaterial({
++      size: 0.14,
++      vertexColors: true,
++      transparent: true,
++      opacity: 0.7,
++      blending: THREE.AdditiveBlending,
++      depthWrite: false
++    });
++    const terrainDots = new THREE.Points(geometry, dotMaterial);
++    scene.add(terrainDots);
++
++    // Sparse floating amber/yellow particles (#FFD23F)
++    const sparkleCount = 120;
++    const sparkleGeo = new THREE.BufferGeometry();
++    const sparklePos = new Float32Array(sparkleCount * 3);
++    const sparkleOffsets = [];
++
++    for (let s = 0; s < sparkleCount; s++) {
++      // Random coordinates in space
++      sparklePos[s * 3] = (Math.random() - 0.5) * 45;
++      sparklePos[s * 3 + 1] = Math.random() * 16 - 2;
++      sparklePos[s * 3 + 2] = (Math.random() - 0.5) * 55 - 10;
++      sparkleOffsets.push(Math.random() * Math.PI * 2);
+     }
+ 
+-    drawGrid();
++    sparkleGeo.setAttribute('position', new THREE.BufferAttribute(sparklePos, 3));
++    const sparkleMat = new THREE.PointsMaterial({
++      color: new THREE.Color('#FFD23F'),
++      size: 0.18,
++      transparent: true,
++      opacity: 0.8,
++      blending: THREE.AdditiveBlending
++    });
++    const sparkles = new THREE.Points(sparkleGeo, sparkleMat);
++    scene.add(sparkles);
+ 
+-    return () => {
+-      window.removeEventListener('resize', resize);
+-      cancelAnimationFrame(animationId);
+-    };
+-  }, []);
++    // Animation Loop
++    let clock = new THREE.Clock();
++    let frameId;
+ 
+-  // ΓöÇΓöÇ SCROLL REVEAL OBSERVER ΓöÇΓöÇ
+-  useEffect(() => {
+-    const reveals = document.querySelectorAll('.landing-page-root .reveal');
+-    const observer = new IntersectionObserver(entries => {
+-      entries.forEach(e => {
+-        if (e.isIntersecting) e.target.classList.add('visible');
+-      });
+-    }, { threshold: 0.12 });
+-    reveals.forEach(el => observer.observe(el));
+-    return () => observer.disconnect();
+-  }, []);
++    const animate = () => {
++      frameId = requestAnimationFrame(animate);
++      const elapsed = clock.getElapsedTime();
+ 
+-  // ΓöÇΓöÇ COUNT UP STATS ON SCROLL ΓöÇΓöÇ
+-  useEffect(() => {
+-    const statsData = [
+-      { id: 'stat1', target: 2400, suffix: '+' },
+-      { id: 'stat2', target: 18400, suffix: '+' },
+-      { id: 'stat3', target: 94200, suffix: '+' },
+-      { id: 'stat4', target: 31700, suffix: '+' },
+-    ];
+-
+-    function countUp(el, target, suffix, duration = 1800) {
+-      const start = performance.now();
+-      let animId;
+-      function tick(now) {
+-        const t = Math.min((now - start) / duration, 1);
+-        const ease = 1 - Math.pow(1 - t, 3);
+-        const val = Math.floor(ease * target);
+-        el.textContent = val.toLocaleString() + suffix;
+-        if (t < 1) {
+-          animId = requestAnimationFrame(tick);
++      // Undulate terrain positions using sinusoidal waves
++      const posAttr = geometry.attributes.position;
++      const arr = posAttr.array;
++
++      for (let r = 0; r < ROWS; r++) {
++        const normZ = r / ROWS;
++        // Rise up in rolling hills toward the back (normZ = 0 is far, normZ = 1 is near)
++        const hillOffset = (1 - normZ) * 8.5 - 2.5;
++
++        for (let c = 0; c < COLS; c++) {
++          const i = r * COLS + c;
++          const xVal = arr[i * 3];
++          const zVal = arr[i * 3 + 2];
++
++          // Wave components
++          const w1 = Math.sin(xVal * 0.12 - elapsed * 0.8) * 1.8;
++          const w2 = Math.cos(zVal * 0.10 + elapsed * 0.6) * 1.4;
++          const w3 = Math.sin((xVal + zVal) * 0.05 + elapsed * 0.4) * 0.8;
++
++          // Combined height
++          arr[i * 3 + 1] = hillOffset + w1 + w2 + w3;
+         }
+       }
+-      animId = requestAnimationFrame(tick);
+-      return () => cancelAnimationFrame(animId);
+-    }
+ 
+-    const statsSection = document.querySelector('.landing-page-root .stats-section');
+-    let counted = false;
+-    const cleanups = [];
+-    const statsObs = new IntersectionObserver(entries => {
+-      if (entries[0].isIntersecting && !counted) {
+-        counted = true;
+-        statsData.forEach(s => {
+-          const el = document.getElementById(s.id);
+-          if (el) {
+-            const cleanup = countUp(el, s.target, s.suffix);
+-            cleanups.push(cleanup);
+-          }
+-        });
++      posAttr.needsUpdate = true;
++
++      // Animate floating sparkles
++      const sparkleAttr = sparkleGeo.attributes.position;
++      const sparkArr = sparkleAttr.array;
++      for (let s = 0; s < sparkleCount; s++) {
++        // Slow float
++        sparkArr[s * 3 + 1] += Math.sin(elapsed + sparkleOffsets[s]) * 0.006;
+       }
+-    }, { threshold: 0.3 });
++      sparkleAttr.needsUpdate = true;
+ 
+-    if (statsSection) {
+-      statsObs.observe(statsSection);
+-    }
++      renderer.render(scene, camera);
++    };
++
++    animate();
++
++    // Window Resize handler
++    const handleResize = () => {
++      camera.aspect = window.innerWidth / window.innerHeight;
++      camera.updateProjectionMatrix();
++      renderer.setSize(window.innerWidth, window.innerHeight);
++    };
++    window.addEventListener('resize', handleResize);
+ 
+     return () => {
+-      statsObs.disconnect();
+-      cleanups.forEach(c => c());
++      cancelAnimationFrame(frameId);
++      window.removeEventListener('resize', handleResize);
++      geometry.dispose();
++      lineMaterial.dispose();
++      dotMaterial.dispose();
++      sparkleGeo.dispose();
++      sparkleMat.dispose();
++      renderer.dispose();
+     };
+   }, []);
+ 
+-  const currentProb = problems[selectedProblem];
+-
+   return (
+-    <div className="landing-page-root">
+-      <canvas id="grid-canvas" ref={canvasRef}></canvas>
+-
+-      {/* NAVBAR */}
+-      <nav>
+-        <a href="#" className="nav-logo" onClick={(e) => e.preventDefault()}>
+-          <div className="nav-logo-icon">CA</div>
+-          CODE<span>ARENA</span>
++    <div className="landing-page-root relative w-full bg-[#05050A] text-[#F5F5FF] overflow-x-hidden font-sans">
++      {/* 3D fixed canvas background */}
++      <canvas
++        ref={canvasRef}
++        className="fixed inset-0 w-full h-full pointer-events-none z-0 bg-[#05050A]"
++        style={{ mixBlendMode: 'screen' }}
++      />
++
++      {/* SCANLINE EFFECTS OVERLAY */}
++      <div className="fixed inset-0 w-full h-full pointer-events-none z-50 pointer-events-none scanlines opacity-[0.02]" />
++
++      {/* FIXED NAVBAR */}
++      <nav className="fixed top-0 left-0 right-0 h-16 border-b border-[#FF2D9E]/20 bg-[#05050A]/70 backdrop-blur-md z-50 flex items-center justify-between px-6 md:px-12">
++        <a href="/" className="flex items-center gap-2 text-lg font-black tracking-widest font-orbitron">
++          <div className="w-8 h-8 bg-[#FF2D9E] flex items-center justify-center text-white text-xs polygon-nav-logo shadow-[0_0_12px_#FF2D9E]">
++            C
++          </div>
++          <span className="text-[#FF2D9E]">CODE</span>
++          <span className="text-[#00FFA8]">ARENA</span>
+         </a>
+-        <ul class="nav-links">
+-          <li><a href="#features">Features</a></li>
+-          <li><a href="#problems">Problems</a></li>
+-          <li><a href="#courses">Courses</a></li>
+-          <li><a href="#community">Community</a></li>
+-        </ul>
+-        <button className="nav-cta" onClick={handleStart}>
+-          {currentUser ? 'Dashboard ΓåÆ' : 'Start Free ΓåÆ'}
+-        </button>
+-      </nav>
+ 
+-      {/* HERO */}
+-      <section className="hero" style={{ maxWidth: '100%', paddingTop: '100px' }}>
+-        <div className="hero-pill">
+-          <div className="hero-pill-dot"></div>
+-          Now with AI Ghost Mentor &amp; Live 1v1 Battles
++        {/* Links */}
++        <div className="hidden md:flex items-center gap-8 font-orbitron text-[10px] tracking-widest uppercase">
++          <a href="/problems" className="text-[#9A9AC0] hover:text-[#00FFA8] transition-colors">Problems</a>
++          <a href="/courses" className="text-[#9A9AC0] hover:text-[#00FFA8] transition-colors">Courses</a>
++          <a href="/contest" className="text-[#9A9AC0] hover:text-[#00FFA8] transition-colors">Contests</a>
++          <a href="/leaderboard" className="text-[#9A9AC0] hover:text-[#00FFA8] transition-colors">Leaderboard</a>
++          <a href="/communities" className="text-[#9A9AC0] hover:text-[#00FFA8] transition-colors">Community</a>
+         </div>
+ 
+-        <h1 className="hero-title">
+-          <span className="line1">Compete. Learn.</span>
+-          <span className="line2">Dominate Coding</span>
+-          <span className="line3">Interviews.</span>
+-        </h1>
+-
+-        <p className="hero-sub">
+-          Practice 2,400+ DSA problems, fight live 1v1 battles, take structured courses, and crush every placement test ΓÇö all in one cyberpunk arena built for serious coders.
+-        </p>
+-
+-        <div className="hero-btns">
+-          <button className="btn-primary" onClick={handleStart}>
+-            {currentUser ? 'Go to Dashboard' : 'Start Competing'}
+-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+-              <path d="M5 12h14M12 5l7 7-7 7" />
+-            </svg>
++        {/* CTA Button */}
++        <div>
++          <button
++            onClick={handleStart}
++            className="font-orbitron text-[10px] tracking-widest uppercase py-2 px-6 bg-[#00FFA8] hover:bg-[#00e295] text-black font-bold font-mono btn-angled-clip shadow-[0_0_15px_rgba(0,255,168,0.4)] transition-all"
++          >
++            Start Free
+           </button>
+-          <button className="btn-secondary" onClick={handleExplore}>View Problems</button>
+         </div>
++      </nav>
+ 
+-        <div className="hero-stats">
+-          <div className="stat-pill" onClick={handleExplore}>
+-            <span className="stat-pill-icon">Γƒ¿/Γƒ⌐</span>
+-            <span><strong>2,400+</strong> DSA Problems</span>
+-          </div>
+-          <div className="stat-pill" onClick={handleStart}>
+-            <span className="stat-pill-icon">ΓÜö</span>
+-            <span><strong>Live</strong> 1v1 Battles</span>
+-          </div>
+-          <div className="stat-pill" onClick={handleStart}>
+-            <span className="stat-pill-icon">Γû▓</span>
+-            <span><strong>AI</strong> Ghost Mentor</span>
+-          </div>
+-          <div className="stat-pill" onClick={handleStart}>
+-            <span className="stat-pill-icon">Γùë</span>
+-            <span><strong>GATE</strong> &amp; Placement Prep</span>
+-          </div>
+-        </div>
++      {/* SECTION 1 ΓÇö HERO */}
++      <section className="relative w-full min-h-screen flex flex-col items-center justify-between pt-24 pb-12 px-6 z-10">
++        <div className="w-full flex-grow flex flex-col items-center justify-center text-center max-w-5xl mx-auto">
++          {/* Badge */}
++          <motion.div
++            initial={{ opacity: 0, y: -20 }}
++            animate={{ opacity: 1, y: 0 }}
++            transition={{ duration: 0.6 }}
++            className="inline-flex items-center gap-2 px-5 py-2 border border-[#00FFA8]/40 rounded-full bg-[#05050A]/70 text-[#00FFA8] font-mono text-xs tracking-wider mb-6 backdrop-blur-md"
++          >
++            <span className="w-2.5 h-2.5 rounded-full bg-[#00FFA8] animate-pulse shadow-[0_0_8px_#00FFA8]" />
++            Now with AI Ghost Mentor & Live 1v1 Battles
++          </motion.div>
+ 
+-        <div className="scroll-ind">
+-          <div className="scroll-line"></div>
+-          SCROLL
+-        </div>
+-      </section>
++          {/* Main Headline */}
++          <h1 className="font-orbitron font-extrabold text-[38px] md:text-[72px] leading-tight tracking-tight mb-6">
++            <motion.span
++              initial={{ opacity: 0, y: 30, filter: 'blur(10px)' }}
++              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
++              transition={{ duration: 0.6, delay: 0.1 }}
++              className="block text-white"
++            >
++              Compete. Learn.
++            </motion.span>
++            <motion.span
++              initial={{ opacity: 0, y: 30, filter: 'blur(10px)' }}
++              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
++              transition={{ duration: 0.6, delay: 0.25 }}
++              className="block bg-gradient-to-r from-[#FF2D9E] via-[#FF8C2F] to-[#00FFA8] bg-clip-text text-transparent"
++            >
++              Dominate Coding
++            </motion.span>
++            <motion.span
++              initial={{ opacity: 0, y: 30, filter: 'blur(10px)' }}
++              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
++              transition={{ duration: 0.6, delay: 0.4 }}
++              className="block text-white"
++            >
++              Interviews.
++            </motion.span>
++          </h1>
++
++          {/* Subheading */}
++          <motion.p
++            initial={{ opacity: 0, y: 20 }}
++            animate={{ opacity: 1, y: 0 }}
++            transition={{ duration: 0.8, delay: 0.55 }}
++            className="text-[#9A9AC0] font-sans text-base md:text-lg max-w-[620px] leading-relaxed mb-8 text-shadow-dark"
++          >
++            Practice 2,400+ DSA problems, fight live 1v1 battles, take structured courses, and crush every placement test ΓÇö all in one cyberpunk arena built for serious coders.
++          </motion.p>
+ 
+-      {/* TICKER */}
+-      <div className="ticker-wrap">
+-        <div className="ticker-track">
+-          <span>Two Sum</span> ┬╖ Arrays ┬╖ <span>Merge Intervals</span> ┬╖ Graphs ┬╖ <span>Coin Change</span> ┬╖ DP ┬╖ <span>LRU Cache</span> ┬╖ Design ┬╖ <span>Binary Search</span> ┬╖ Trees ┬╖ <span>Trapping Rain Water</span> ┬╖ Stack ┬╖ <span>Dijkstra</span> ┬╖ Shortest Path ┬╖ <span>N-Queens</span> ┬╖ Backtracking ┬╖ <span>KMP Algorithm</span> ┬╖ Strings ┬╖&nbsp;
+-          <span>Two Sum</span> ┬╖ Arrays ┬╖ <span>Merge Intervals</span> ┬╖ Graphs ┬╖ <span>Coin Change</span> ┬╖ DP ┬╖ <span>LRU Cache</span> ┬╖ Design ┬╖ <span>Binary Search</span> ┬╖ Trees ┬╖ <span>Trapping Rain Water</span> ┬╖ Stack ┬╖ <span>Dijkstra</span> ┬╖ Shortest Path ┬╖ <span>N-Queens</span> ┬╖ Backtracking ┬╖ <span>KMP Algorithm</span> ┬╖ Strings ┬╖
++          {/* CTA Buttons */}
++          <motion.div
++            initial={{ opacity: 0, y: 20 }}
++            animate={{ opacity: 1, y: 0 }}
++            transition={{ duration: 0.8, delay: 0.7 }}
++            className="flex flex-col sm:flex-row items-center gap-4 mb-12"
++          >
++            <button
++              onClick={handleStart}
++              className="w-full sm:w-auto font-orbitron font-bold py-3.5 px-8 rounded-lg bg-[#00FFA8] hover:bg-[#00e295] text-black tracking-wider shadow-[0_0_30px_rgba(0,255,168,0.5)] hover:shadow-[0_0_40px_rgba(0,255,168,0.75)] hover:-translate-y-[3px] transition-all flex items-center justify-center gap-3"
++            >
++              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="flex-shrink-0">
++                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
++              </svg>
++              ≡ƒÜÇ GO TO DASHBOARD ΓåÆ
++            </button>
++            <button
++              onClick={handleExplore}
++              className="w-full sm:w-auto font-orbitron font-bold py-3.5 px-8 rounded-lg border border-[#FF2D9E] text-white hover:text-white bg-transparent hover:bg-[#FF2D9E]/10 hover:shadow-[0_0_25px_rgba(255,45,158,0.4)] hover:-translate-y-[3px] transition-all"
++            >
++              VIEW PROBLEMS ΓåÆ
++            </button>
++          </motion.div>
+         </div>
+-      </div>
+ 
+-      {/* STATS */}
+-      <div className="stats-section">
+-        <div className="stats-row">
+-          <div className="reveal">
+-            <div className="stat-item-num" id="stat1">0</div>
+-            <div className="stat-item-lbl">Problems Available</div>
++        {/* Feature Cards Row */}
++        <motion.div
++          initial={{ opacity: 0, y: 40 }}
++          animate={{ opacity: 1, y: 0 }}
++          transition={{ duration: 0.8, delay: 0.85 }}
++          className="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-4 mt-8"
++        >
++          {/* Card 1 */}
++          <div className="p-5 bg-[#0D0D1E]/75 rounded-xl border border-[#00FFA8]/30 backdrop-blur-md hover:-translate-y-1 transition-transform group">
++            <div className="w-10 h-10 flex items-center justify-center rounded bg-[#00FFA8]/10 text-[#00FFA8] text-lg font-mono mb-3 group-hover:scale-110 transition-transform">
++              &lt;/&gt;
++            </div>
++            <div className="font-orbitron font-black text-xl text-[#00FFA8]">2,400+</div>
++            <div className="text-[#9A9AC0] text-sm">DSA Problems</div>
+           </div>
+-          <div className="reveal" style={{ transitionDelay: '0.1s' }}>
+-            <div className="stat-item-num" id="stat2">0</div>
+-            <div className="stat-item-lbl">Active Students</div>
++
++          {/* Card 2 */}
++          <div className="p-5 bg-[#0D0D1E]/75 rounded-xl border border-[#FF2D9E]/30 backdrop-blur-md hover:-translate-y-1 transition-transform group">
++            <div className="w-10 h-10 flex items-center justify-center rounded bg-[#FF2D9E]/10 text-[#FF2D9E] text-lg mb-3 group-hover:scale-110 transition-transform">
++              ΓÜö
++            </div>
++            <div className="font-orbitron font-black text-xl text-[#FF2D9E]">Live 1v1</div>
++            <div className="text-[#9A9AC0] text-sm">Battles</div>
+           </div>
+-          <div className="reveal" style={{ transitionDelay: '0.2s' }}>
+-            <div className="stat-item-num" id="stat3">0</div>
+-            <div className="stat-item-lbl">Submissions Today</div>
++
++          {/* Card 3 */}
++          <div className="p-5 bg-[#FFD23F]/5 rounded-xl border border-[#FFD23F]/40 backdrop-blur-md hover:-translate-y-1 transition-transform group shadow-[inset_0_0_12px_rgba(255,210,63,0.05)]">
++            <div className="w-10 h-10 flex items-center justify-center rounded bg-[#FFD23F]/10 text-[#FFD23F] text-lg mb-3 group-hover:scale-110 transition-transform">
++              ≡ƒæ╗
++            </div>
++            <div className="font-orbitron font-black text-xl text-[#FFD23F]">AI Ghost</div>
++            <div className="text-[#9A9AC0] text-sm">Mentor</div>
+           </div>
+-          <div className="reveal" style={{ transitionDelay: '0.3s' }}>
+-            <div className="stat-item-num" id="stat4">0</div>
+-            <div className="stat-item-lbl">Battles Fought</div>
++
++          {/* Card 4 */}
++          <div className="p-5 bg-[#0D0D1E]/75 rounded-xl border border-[#5FFFD1]/30 backdrop-blur-md hover:-translate-y-1 transition-transform group">
++            <div className="w-10 h-10 flex items-center justify-center rounded bg-[#5FFFD1]/10 text-[#5FFFD1] text-lg mb-3 group-hover:scale-110 transition-transform">
++              ΓùÄ
++            </div>
++            <div className="font-orbitron font-black text-xl text-[#5FFFD1]">GATE &amp;</div>
++            <div className="text-[#9A9AC0] text-sm">Placement Prep</div>
+           </div>
++        </motion.div>
++      </section>
++
++      {/* SECTION 2 ΓÇö INSPIRATION STRIP */}
++      <div className="w-full bg-[#05050A] border-y border-[#FF2D9E]/10 py-6 overflow-hidden relative z-10 select-none">
++        <div className="flex w-[200%] animate-ticker whitespace-nowrap font-mono text-sm tracking-wider items-center gap-12">
++          {Array(2).fill([
++            { num: "2,500+", label: "Problems" },
++            { label: "LeetCode-style Editor" },
++            { num: "Live 1v1", label: "Battles" },
++            { num: "AI", label: "Ghost Mentor" },
++            { label: "College Guild Wars" },
++            { num: "GATE + CAT", label: "Prep" },
++            { label: "Weekly Contests" },
++            { label: "Skill Tree RPG" },
++            { label: "Code Replay Theatre" },
++            { label: "Interview Simulator" }
++          ]).flat().map((item, idx) => (
++            <div key={idx} className="flex items-center gap-3">
++              {item.num && <span className="text-[#00FFA8] font-bold">{item.num}</span>}
++              <span className="text-[#9A9AC0]">{item.label}</span>
++              <span className="text-[#FF2D9E] mx-4 font-bold text-[10px]">ΓÇó</span>
++            </div>
++          ))}
+         </div>
+       </div>
+ 
+-      {/* FEATURES */}
+-      <section id="features">
+-        <div className="section-eyebrow">Platform Features</div>
+-        <h2 className="section-title reveal">Everything you need to<br /><span style={{ color: 'var(--pk)' }}>crack any coding interview</span></h2>
+-        <p className="section-sub reveal">From your first Easy problem to beating a Google interviewer ΓÇö CodeArena has the tools, the community, and the AI to get you there.</p>
+-
+-        <div className="feat-grid">
+-          <div className="feat-card reveal">
+-            <div className="feat-icon">Γƒ¿/Γƒ⌐</div>
+-            <div className="feat-title">Problem Arena</div>
+-            <div className="feat-desc">2,400+ LeetCode problems + aptitude + GATE questions. Filter by topic, difficulty, and company. Monaco editor with Python, Java, C++, JS support.</div>
+-          </div>
+-          <div className="feat-card green reveal" style={{ transitionDelay: '0.1s' }}>
+-            <div className="feat-icon">ΓÜö</div>
+-            <div className="feat-title">Live 1v1 Battles</div>
+-            <div className="feat-desc">Challenge any online user to a real-time coding duel. Same problem, live progress visible, first to Accepted wins. Rating updated instantly with Elo.</div>
+-          </div>
+-          <div className="feat-card amber reveal" style={{ transitionDelay: '0.2s' }}>
+-            <div className="feat-icon">Γû▓</div>
+-            <div className="feat-title">AI Ghost Mentor</div>
+-            <div className="feat-desc">Gemini AI silently watches you code. Detects when you're stuck before you ask. Whispers contextual hints without giving away the answer.</div>
++      {/* SECTION 3 ΓÇö WHY CODEARENA */}
++      <section className="relative w-full max-w-6xl mx-auto py-24 px-6 z-10">
++        <div className="text-center mb-16">
++          <span className="px-3 py-1 border border-[#FF2D9E]/30 rounded bg-[#FF2D9E]/10 text-[#FF2D9E] font-mono text-[10px] tracking-widest uppercase mb-4 inline-block">
++            WHY CODEARENA
++          </span>
++          <h2 className="font-orbitron font-bold text-3xl md:text-5xl text-white mb-4">
++            Stop Scrolling. Start Solving.
++          </h2>
++          <p className="text-[#9A9AC0] max-w-xl mx-auto font-sans text-base">
++            The gap between your current skills and your dream job is just unsolved problems. CodeArena closes that gap ΓÇö one problem at a time.
++          </p>
++        </div>
++
++        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
++          {/* Card 1 */}
++          <motion.div
++            whileInView={{ opacity: [0, 1], y: [30, 0] }}
++            viewport={{ once: true }}
++            transition={{ duration: 0.6 }}
++            className="p-8 bg-[#0D0D1E]/85 border border-[#FF2D9E]/15 rounded-xl hover:border-[#FF2D9E]/40 hover:-translate-y-1 hover:shadow-[0_15px_35px_rgba(255,45,158,0.08)] transition-all flex flex-col justify-between"
++          >
++            <div>
++              <div className="w-12 h-12 flex items-center justify-center text-2xl text-[#FF2D9E] bg-[#FF2D9E]/10 rounded-lg mb-6 shadow-[0_0_15px_rgba(255,45,158,0.15)]">
++                Γƒ¿/Γƒ⌐
++              </div>
++              <h3 className="font-orbitron font-bold text-lg text-white mb-3">Practice Like a Pro</h3>
++              <p className="text-[#9A9AC0] text-sm leading-relaxed mb-6 font-sans">
++                2,500+ problems tagged by company, topic, and difficulty. LeetCode-style editor with Monaco. Run against hidden test cases. Get accepted or debug ΓÇö no shortcuts.
++              </p>
++            </div>
++            <a href="/problems" className="text-[#00FFA8] hover:text-[#00e295] font-mono text-xs tracking-wider flex items-center gap-1 group">
++              Start Solving <span className="group-hover:translate-x-1 transition-transform">ΓåÆ</span>
++            </a>
++          </motion.div>
++
++          {/* Card 2 */}
++          <motion.div
++            whileInView={{ opacity: [0, 1], y: [30, 0] }}
++            viewport={{ once: true }}
++            transition={{ duration: 0.6, delay: 0.15 }}
++            className="p-8 bg-[#0D0D1E]/85 border border-[#00FFA8]/15 rounded-xl hover:border-[#00FFA8]/40 hover:-translate-y-1 hover:shadow-[0_15px_35px_rgba(0,255,168,0.08)] transition-all flex flex-col justify-between"
++          >
++            <div>
++              <div className="w-12 h-12 flex items-center justify-center text-2xl text-[#00FFA8] bg-[#00FFA8]/10 rounded-lg mb-6 shadow-[0_0_15px_rgba(0,255,168,0.15)]">
++                ΓÜö
++              </div>
++              <h3 className="font-orbitron font-bold text-lg text-white mb-3">Fight Like a Champion</h3>
++              <p className="text-[#9A9AC0] text-sm leading-relaxed mb-6 font-sans">
++                Challenge any online user to a 1v1 coding duel. Same problem, countdown timer, Elo rating. Climb from Initiate to Master. Weekly contests with real prizes.
++              </p>
++            </div>
++            <a href="/contest" className="text-[#FF2D9E] hover:text-[#ff1a6a] font-mono text-xs tracking-wider flex items-center gap-1 group">
++              Enter Arena <span className="group-hover:translate-x-1 transition-transform">ΓåÆ</span>
++            </a>
++          </motion.div>
++
++          {/* Card 3 */}
++          <motion.div
++            whileInView={{ opacity: [0, 1], y: [30, 0] }}
++            viewport={{ once: true }}
++            transition={{ duration: 0.6, delay: 0.3 }}
++            className="p-8 bg-[#0D0D1E]/85 border border-[#FFD23F]/15 rounded-xl hover:border-[#FFD23F]/40 hover:-translate-y-1 hover:shadow-[0_15px_35px_rgba(255,210,63,0.08)] transition-all flex flex-col justify-between"
++          >
++            <div>
++              <div className="w-12 h-12 flex items-center justify-center text-2xl text-[#FFD23F] bg-[#FFD23F]/10 rounded-lg mb-6 shadow-[0_0_15px_rgba(255,210,63,0.15)]">
++                ≡ƒºá
++              </div>
++              <h3 className="font-orbitron font-bold text-lg text-white mb-3">Learn Like You Mean It</h3>
++              <p className="text-[#9A9AC0] text-sm leading-relaxed mb-6 font-sans">
++                Structured courses for DSA, System Design, GATE CS, and Interview Prep. AI Ghost Mentor detects when you're stuck and whispers the right hint ΓÇö not the answer.
++              </p>
++            </div>
++            <a href="/courses" className="text-[#5FFFD1] hover:text-[#32ffe2] font-mono text-xs tracking-wider flex items-center gap-1 group">
++              Start Course <span className="group-hover:translate-x-1 transition-transform">ΓåÆ</span>
++            </a>
++          </motion.div>
++        </div>
++      </section>
++
++      {/* SECTION 4 ΓÇö LIVE STATS COUNTER */}
++      <section className="relative w-full bg-[#0D0D1E]/90 border-y border-[#00FFA8]/10 py-12 z-10">
++        <div className="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 divide-y md:divide-y-0 md:divide-x divide-slate-800">
++          <div className="text-center p-4">
++            <div className="font-orbitron font-bold text-3xl md:text-5xl bg-gradient-to-r from-[#FF2D9E] to-[#00FFA8] bg-clip-text text-transparent mb-2">
++              <CountUp end={12400} enableScrollSpy scrollSpyOnce suffix="+" />
++            </div>
++            <div className="text-slate-500 font-mono text-xs tracking-widest uppercase">Students Learning</div>
+           </div>
+-          <div className="feat-card cyan reveal" style={{ transitionDelay: '0.3s' }}>
+-            <div className="feat-icon">Γùë</div>
+-            <div className="feat-title">Algorithm Visualizer</div>
+-            <div className="feat-desc">Watch Bubble Sort, Binary Search, BFS, and DP animate step-by-step in your browser. See the code highlight in sync with the animation.</div>
++          <div className="text-center p-4">
++            <div className="font-orbitron font-bold text-3xl md:text-5xl bg-gradient-to-r from-[#FF2D9E] to-[#00FFA8] bg-clip-text text-transparent mb-2">
++              <CountUp end={2500} enableScrollSpy scrollSpyOnce suffix="+" />
++            </div>
++            <div className="text-slate-500 font-mono text-xs tracking-widest uppercase">Problems Available</div>
+           </div>
+-          <div className="feat-card green reveal" style={{ transitionDelay: '0.4s' }}>
+-            <div className="feat-icon">Γÿà</div>
+-            <div className="feat-title">RPG Skill Tree</div>
+-            <div className="feat-desc">Unlock DSA topics like an RPG ΓÇö solve problems to gain XP, level up, and unlock harder concepts. Hexagonal node tree with animated flows.</div>
++          <div className="text-center p-4 pt-8 md:pt-4">
++            <div className="font-orbitron font-bold text-3xl md:text-5xl bg-gradient-to-r from-[#FF2D9E] to-[#00FFA8] bg-clip-text text-transparent mb-2">
++              <CountUp end={48} enableScrollSpy scrollSpyOnce />
++            </div>
++            <div className="text-slate-500 font-mono text-xs tracking-widest uppercase">Weekly Contests</div>
+           </div>
+-          <div className="feat-card reveal" style={{ transitionDelay: '0.5s' }}>
+-            <div className="feat-icon">ΓÖª</div>
+-            <div className="feat-title">Interview Simulator</div>
+-            <div className="feat-desc">Gemini AI acts as a FAANG interviewer. Asks follow-ups, gives hints, scores your communication, and gives a post-interview report card.</div>
++          <div className="text-center p-4 pt-8 md:pt-4">
++            <div className="font-orbitron font-bold text-3xl md:text-5xl bg-gradient-to-r from-[#FF2D9E] to-[#00FFA8] bg-clip-text text-transparent mb-2">
++              <CountUp end={94} enableScrollSpy scrollSpyOnce suffix="%" />
++            </div>
++            <div className="text-slate-500 font-mono text-xs tracking-widest uppercase">Placement Success</div>
+           </div>
+         </div>
+       </section>
+ 
+-      {/* PROBLEM PREVIEW */}
+-      <section id="problems" style={{ paddingTop: '3rem' }}>
+-        <div className="section-eyebrow reveal">Problem Library</div>
+-        <h2 className="section-title reveal">2,400+ problems.<br /><span style={{ color: 'var(--gn)' }}>Zero excuses.</span></h2>
+-
+-        <div className="problem-showcase">
+-          <div className="problem-list reveal">
+-            {problems.map((prob, index) => (
+-              <div
+-                key={prob.num}
+-                className={`prob-item ${selectedProblem === index ? 'active' : ''}`}
+-                onClick={() => setSelectedProblem(index)}
+-              >
+-                <span className="prob-num">{prob.num}</span>
+-                {prob.checked ? (
+-                  <span className="prob-check">Γ£ô</span>
+-                ) : (
+-                  <span style={{ width: '12px', display: 'inline-block' }}></span>
+-                )}
+-                <span className="prob-name">{prob.name}</span>
+-                <span className={`prob-diff ${prob.diffClass}`}>{prob.diff}</span>
+-              </div>
+-            ))}
+-          </div>
++      {/* SECTION 5 ΓÇö PROBLEM PREVIEW */}
++      <section className="relative w-full max-w-6xl mx-auto py-24 px-6 z-10">
++        <div className="mb-12">
++          <span className="px-3 py-1 border border-[#00FFA8]/30 rounded bg-[#00FFA8]/10 text-[#00FFA8] font-mono text-[10px] tracking-widest uppercase mb-4 inline-block">
++            PROBLEM ARENA
++          </span>
++          <h2 className="font-orbitron font-bold text-2xl md:text-4xl text-white">
++            Every problem is a step closer to your dream job
++          </h2>
++        </div>
+ 
+-          <div className="reveal" style={{ transitionDelay: '0.2s' }}>
+-            <div className="editor-mock">
+-              <div className="editor-topbar">
+-                <div className="editor-dot" style={{ backgroundColor: '#FF5F57' }}></div>
+-                <div className="editor-dot" style={{ backgroundColor: '#FEBC2E' }}></div>
+-                <div className="editor-dot" style={{ backgroundColor: '#28C840' }}></div>
+-                <span className="editor-tab">Python 3</span>
+-                <span className="editor-langsel">{currentProb.name} ┬╖ {currentProb.diff}</span>
+-              </div>
+-              <div className="editor-body">
+-                {currentProb.code.map((line) => (
+-                  <div className="code-line" key={line.ln}>
+-                    <span className="ln">{line.ln}</span>
+-                    {line.text}
++        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
++          {/* LEFT ΓÇö Problem list panel */}
++          <div className="bg-[#0D0D1E]/95 border border-[#FF2D9E]/30 rounded-xl overflow-hidden shadow-2xl">
++            <div className="bg-[#12122b]/50 border-b border-[#FF2D9E]/20 px-6 py-4 flex items-center justify-between">
++              <span className="font-orbitron font-bold text-xs tracking-wider text-[#FF2D9E]">
++                // Problem Bank
++              </span>
++              <span className="font-mono text-[10px] text-slate-500">
++                SELECT A CHALLENGE
++              </span>
++            </div>
++            <div className="divide-y divide-slate-800">
++              {previewProblems.map((prob, idx) => (
++                <div
++                  key={prob.num}
++                  onClick={() => setSelectedProblem(idx)}
++                  className={`flex items-center justify-between px-6 py-3.5 cursor-pointer transition-all ${
++                    selectedProblem === idx
++                      ? 'bg-[#FF2D9E]/5 border-l-2 border-[#FF2D9E]'
++                      : 'hover:bg-slate-800/35'
++                  }`}
++                >
++                  <div className="flex items-center gap-4">
++                    <span className="font-mono text-xs text-slate-500">{prob.num}</span>
++                    {prob.checked ? (
++                      <span className="text-[#00FFA8] text-xs">Γ£ô</span>
++                    ) : (
++                      <span className="w-3 h-3 rounded-full border border-slate-700" />
++                    )}
++                    <span className="font-medium text-slate-200 text-sm hover:text-white transition-colors">
++                      {prob.title}
++                    </span>
+                   </div>
+-                ))}
+-              </div>
+-              <div className="editor-verdict">
+-                <span className="verdict-badge">Γ£ô ACCEPTED</span>
+-                <span className="verdict-meta">
+-                  Runtime: <span>{currentProb.verdict.runtime}</span> ┬╖ Memory: <span>{currentProb.verdict.memory}</span> ┬╖ Beats: <span>{currentProb.verdict.beats}</span>
++
++                  <div className="flex items-center gap-4">
++                    <span className="font-mono text-[10px] text-slate-500 bg-slate-800 px-2 py-0.5 rounded">
++                      {prob.topic}
++                    </span>
++                    <span
++                      className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded font-bold ${
++                        prob.difficulty === 'Easy'
++                          ? 'text-[#00FFA8] bg-[#00FFA8]/10'
++                          : prob.difficulty === 'Medium'
++                          ? 'text-[#FFD23F] bg-[#FFD23F]/10'
++                          : 'text-[#FF2D9E] bg-[#FF2D9E]/10'
++                      }`}
++                    >
++                      {prob.difficulty}
++                    </span>
++                  </div>
++                </div>
++              ))}
++            </div>
++          </div>
++
++          {/* RIGHT ΓÇö Monaco editor panel */}
++          <div className="bg-[#0D0D1E]/95 border border-[#00FFA8]/30 rounded-xl overflow-hidden shadow-2xl">
++            <div className="bg-[#12122b]/50 border-b border-[#00FFA8]/20 px-6 py-4 flex items-center justify-between">
++              <span className="font-orbitron font-bold text-xs tracking-wider text-[#00FFA8]">
++                // Monaco Editor ΓÇö Python 3
++              </span>
++              <span className="font-mono text-[10px] text-slate-500 uppercase">
++                {previewProblems[selectedProblem].title}
++              </span>
++            </div>
++
++            {/* Editor Body */}
++            <div className="p-6 bg-[#05050A] font-mono text-slate-300 min-h-[220px]">
++              {renderHighlightedCode(previewProblems[selectedProblem].code)}
++            </div>
++
++            {/* Verdict Box */}
++            <div className="p-4 bg-[#05050A] border-t border-slate-900">
++              <div className="p-3 border border-[#00FFA8] bg-[#00FFA8]/5 rounded flex items-center gap-4">
++                <span className="font-orbitron font-bold text-[10px] tracking-widest text-[#00FFA8] bg-[#00FFA8]/15 px-2.5 py-1 border border-[#00FFA8]/30 rounded">
++                  Γ£ô ACCEPTED
++                </span>
++                <span className="font-mono text-xs text-slate-300">
++                  {previewProblems[selectedProblem].verdict.replace('Γ£ô ACCEPTED  ', '')}
+                 </span>
+               </div>
+             </div>
+@@ -509,132 +832,268 @@ const Landing = () => {
+         </div>
+       </section>
+ 
+-      {/* UNIQUE NUMBERS */}
+-      <section style={{ paddingTop: '2rem', paddingBottom: '2rem' }}>
+-        <div className="section-eyebrow reveal">Why CodeArena</div>
+-        <h2 className="section-title reveal" style={{ marginBottom: '2rem' }}>Numbers that<br /><span style={{ color: 'var(--pk)' }}>speak for themselves</span></h2>
+-        <div className="unique-strip reveal">
+-          <div className="uniq-card"><div className="uniq-num">2.4K+</div><div class="uniq-label">DSA &amp; Placement Problems</div></div>
+-          <div className="uniq-card"><div className="uniq-num">15+</div><div class="uniq-label">Unique AI-Powered Features</div></div>
+-          <div className="uniq-card"><div className="uniq-num">7</div><div class="uniq-label">Languages Supported</div></div>
+-          <div className="uniq-card"><div className="uniq-num">Γê₧</div><div class="uniq-label">AI-Generated Problem Remixes</div></div>
+-          <div className="uniq-card"><div className="uniq-num">24/7</div><div class="uniq-label">AI Ghost Mentor Always On</div></div>
+-          <div className="uniq-card"><div className="uniq-num">0Γé╣</div><div class="uniq-label">Free Forever for Students</div></div>
++      {/* SECTION 6 ΓÇö SKILL PROGRESSION (RPG) */}
++      <section className="relative w-full max-w-6xl mx-auto py-24 px-6 z-10">
++        <div className="text-center mb-16">
++          <span className="px-3 py-1 border border-[#FFD23F]/30 rounded bg-[#FFD23F]/10 text-[#FFD23F] font-mono text-[10px] tracking-widest uppercase mb-4 inline-block">
++            YOUR JOURNEY
++          </span>
++          <h2 className="font-orbitron font-bold text-3xl md:text-5xl text-white mb-4">
++            Level up like an RPG ΓÇö one problem at a time
++          </h2>
+         </div>
+-      </section>
+ 
+-      {/* COURSES */}
+-      <section id="courses">
+-        <div className="section-eyebrow reveal">Learning Tracks</div>
+-        <h2 className="section-title reveal">Structured courses.<br /><span style={{ color: 'var(--gn)' }}>Real results.</span></h2>
+-        <p className="section-sub reveal">From DSA zero to placement hero ΓÇö each course is a guided path with videos, quizzes, and practice problems built in.</p>
+-
+-        <div className="course-grid">
+-          <div className="course-card reveal" onClick={() => navigate('/courses')}>
+-            <div className="course-thumb" style={{ borderColor: 'rgba(255,45,120,.2)' }}>ΓÜí</div>
+-            <div className="course-track" style={{ color: 'var(--pk)' }}>DSA Track</div>
+-            <div className="course-name">Arrays &amp; Strings Mastery</div>
+-            <div className="course-meta"><span>48 lessons</span><span style={{ color: 'var(--gn)' }}>72% complete</span></div>
+-            <div className="course-bar"><div className="course-bar-fill" style={{ width: '72%', background: 'var(--gn)' }}></div></div>
+-          </div>
+-          <div className="course-card reveal" style={{ transitionDelay: '0.1s' }} onClick={() => navigate('/courses')}>
+-            <div className="course-thumb" style={{ borderColor: 'rgba(0,255,136,.2)' }}>≡ƒî▓</div>
+-            <div className="course-track" style={{ color: 'var(--gn)' }}>DSA Track</div>
+-            <div className="course-name">Trees, Graphs &amp; BFS/DFS</div>
+-            <div className="course-meta"><span>36 lessons</span><span style={{ color: 'var(--txd)' }}>Not started</span></div>
+-            <div className="course-bar"><div className="course-bar-fill" style={{ width: '0%', background: 'var(--gn)' }}></div></div>
+-          </div>
+-          <div className="course-card reveal" style={{ transitionDelay: '0.2s' }} onClick={() => navigate('/courses')}>
+-            <div className="course-thumb" style={{ borderColor: 'rgba(255,170,0,.2)' }}>≡ƒÄ»</div>
+-            <div className="course-track" style={{ color: 'var(--am)' }}>Interview Prep</div>
+-            <div className="course-name">System Design Fundamentals</div>
+-            <div className="course-meta"><span>32 lessons</span><span style={{ color: 'var(--pk)' }}>30% complete</span></div>
+-            <div className="course-bar"><div className="course-bar-fill" style={{ width: '30%', background: 'var(--pk)' }}></div></div>
+-          </div>
+-          <div className="course-card reveal" style={{ transitionDelay: '0.3s' }} onClick={() => navigate('/courses')}>
+-            <div className="course-thumb" style={{ borderColor: 'rgba(0,204,255,.2)' }}>≡ƒôÉ</div>
+-            <div className="course-track" style={{ color: 'var(--cy)' }}>GATE Prep</div>
+-            <div className="course-name">OS, Networks &amp; DBMS</div>
+-            <div className="course-meta"><span>40 lessons</span><span style={{ color: 'var(--txd)' }}>Not started</span></div>
+-            <div className="course-bar"><div className="course-bar-fill" style={{ width: '0%', background: 'var(--cy)' }}></div></div>
++        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative">
++          {/* Step 1 */}
++          <div className="p-6 bg-[#0D0D1E]/95 border border-slate-700/40 rounded-xl relative hover:border-[#FFD23F]/30 transition-all">
++            <span className="absolute -top-3 left-6 px-2.5 py-0.5 bg-slate-800 text-slate-400 font-mono text-[9px] rounded-full border border-slate-700">
++              STEP 01
++            </span>
++            <div className="font-orbitron text-xs font-bold text-slate-400 uppercase tracking-widest mt-2 mb-3">
++              INITIATE
++            </div>
++            <p className="text-[#9A9AC0] text-xs leading-relaxed font-sans">
++              Sign up free. Auto-assigned 10 starter problems based on your level. Google login in one click.
++            </p>
+           </div>
+-        </div>
+-      </section>
+ 
+-      {/* TESTIMONIALS */}
+-      <div className="social-section" id="community">
+-        <div className="section-eyebrow" style={{ justifyContent: 'center' }}>
+-          <div style={{ width: '32px', height: '1px', background: 'var(--pk)' }}></div>
+-          Student Reviews
+-          <div style={{ width: '32px', height: '1px', background: 'var(--pk)' }}></div>
+-        </div>
+-        <h2 className="section-title reveal">Used by students at<br /><span style={{ color: 'var(--pk)' }}>top colleges across India</span></h2>
+-
+-        <div className="testimonials">
+-          <div className="testi-card reveal">
+-            <div className="testi-quote">The 1v1 battle mode is addictive. I solved more problems in one week than in the previous month. The AI hint system actually teaches you to think, not just copy solutions.</div>
+-            <div className="testi-user">
+-              <div className="testi-avatar" style={{ background: 'rgba(255,45,120,.15)', color: 'var(--pk)' }}>AK</div>
+-              <div>
+-                <div className="testi-name">Arjun Kumar</div>
+-                <div className="testi-role">IIT Bombay ┬╖ Placed at Google</div>
+-              </div>
++          {/* Step 2 */}
++          <div className="p-6 bg-[#0D0D1E]/95 border border-[#00FFA8]/30 rounded-xl relative hover:border-[#00FFA8]/60 transition-all">
++            <span className="absolute -top-3 left-6 px-2.5 py-0.5 bg-[#00FFA8]/10 text-[#00FFA8] font-mono text-[9px] rounded-full border border-[#00FFA8]/30">
++              STEP 02
++            </span>
++            <div className="font-orbitron text-xs font-bold text-[#00FFA8] uppercase tracking-widest mt-2 mb-3">
++              APPRENTICE
+             </div>
++            <p className="text-[#9A9AC0] text-xs leading-relaxed font-sans">
++              Solve Easy problems to unlock Medium. Build your Skill Tree. Earn XP, coins, and streak badges.
++            </p>
+           </div>
+-          <div className="testi-card reveal" style={{ transitionDelay: '0.1s' }}>
+-            <div className="testi-quote">The Algorithm Visualizer changed how I understand recursion and DP. I'd been struggling for weeks. Watching the animation made everything click in 10 minutes.</div>
+-            <div className="testi-user">
+-              <div className="testi-avatar" style={{ background: 'rgba(0,255,136,.1)', color: 'var(--gn)' }}>PS</div>
+-              <div>
+-                <div className="testi-name">Priya Sharma</div>
+-                <div className="testi-role">NIT Warangal ┬╖ Placed at Amazon</div>
+-              </div>
++
++          {/* Step 3 */}
++          <div className="p-6 bg-[#0D0D1E]/95 border border-[#FF2D9E]/30 rounded-xl relative hover:border-[#FF2D9E]/60 transition-all">
++            <span className="absolute -top-3 left-6 px-2.5 py-0.5 bg-[#FF2D9E]/10 text-[#FF2D9E] font-mono text-[9px] rounded-full border border-[#FF2D9E]/30">
++              STEP 03
++            </span>
++            <div className="font-orbitron text-xs font-bold text-[#FF2D9E] uppercase tracking-widest mt-2 mb-3">
++              SPECIALIST
+             </div>
++            <p className="text-[#9A9AC0] text-xs leading-relaxed font-sans">
++              Enter live contests. Fight 1v1 battles. Join your College Guild. Climb the national leaderboard.
++            </p>
+           </div>
+-          <div className="testi-card reveal" style={{ transitionDelay: '0.2s' }}>
+-            <div className="testi-quote">College Guild Wars made my entire batch start practicing. There's a healthy competition now. We all push each other to solve more. Nothing else motivates a group like this.</div>
+-            <div className="testi-user">
+-              <div className="testi-avatar" style={{ background: 'rgba(255,170,0,.1)', color: 'var(--am)' }}>RV</div>
+-              <div>
+-                <div className="testi-name">Ravi Varma</div>
+-                <div className="testi-role">BITS Pilani ┬╖ Placed at Microsoft</div>
+-              </div>
++
++          {/* Step 4 */}
++          <div className="p-6 bg-[#0D0D1E]/95 border border-[#FFD23F]/30 rounded-xl relative hover:border-[#FFD23F]/60 transition-all">
++            <span className="absolute -top-3 left-6 px-2.5 py-0.5 bg-[#FFD23F]/10 text-[#FFD23F] font-mono text-[9px] rounded-full border border-[#FFD23F]/30">
++              STEP 04
++            </span>
++            <div className="font-orbitron text-xs font-bold text-[#FFD23F] uppercase tracking-widest mt-2 mb-3">
++              MASTER
+             </div>
++            <p className="text-[#9A9AC0] text-xs leading-relaxed font-sans">
++              Share your profile ΓÇö heatmap, rating chart, badge wall ΓÇö directly with recruiters. Get hired.
++            </p>
+           </div>
+         </div>
+-      </div>
++      </section>
++
++      {/* SECTION 7 ΓÇö LEADERBOARD PREVIEW */}
++      <section className="relative w-full max-w-6xl mx-auto py-24 px-6 z-10">
++        <div className="text-center mb-16">
++          <span className="px-3 py-1 border border-[#FF2D9E]/30 rounded bg-[#FF2D9E]/10 text-[#FF2D9E] font-mono text-[10px] tracking-widest uppercase mb-4 inline-block">
++            GLOBAL LEADERBOARD
++          </span>
++          <h2 className="font-orbitron font-bold text-3xl md:text-5xl text-white mb-4">
++            Who is India's best coder this week?
++          </h2>
++        </div>
++
++        <div className="w-full bg-[#0D0D1E]/85 border border-[#FF2D9E]/15 rounded-xl overflow-hidden shadow-2xl backdrop-blur-md mb-8">
++          <table className="w-full text-left font-mono text-xs md:text-sm">
++            <thead>
++              <tr className="border-b border-[#FF2D9E]/20 text-slate-400 bg-slate-900/50">
++                <th className="py-4 px-6">Rank</th>
++                <th className="py-4 px-6">Player</th>
++                <th className="py-4 px-6 hidden sm:table-cell">Solved</th>
++                <th className="py-4 px-6">Rating</th>
++                <th className="py-4 px-6">Streak</th>
++              </tr>
++            </thead>
++            <tbody className="divide-y divide-slate-800">
++              {/* NK #1 */}
++              <tr className="hover:bg-slate-800/20 border-l-2 border-[#FFD23F]">
++                <td className="py-4 px-6 font-bold text-[#FFD23F]">≡ƒææ #1</td>
++                <td className="py-4 px-6 flex items-center gap-3">
++                  <div className="w-8 h-8 rounded-full bg-[#FFD23F]/20 text-[#FFD23F] flex items-center justify-center font-bold text-xs">
++                    NK
++                  </div>
++                  <div>
++                    <div className="font-bold text-white">NIKHIL_K</div>
++                    <div className="text-[10px] text-[#FFD23F] uppercase tracking-wider font-bold">Master</div>
++                  </div>
++                </td>
++                <td className="py-4 px-6 text-slate-300 hidden sm:table-cell">342 solved</td>
++                <td className="py-4 px-6 text-[#00FFA8] font-bold">2,341</td>
++                <td className="py-4 px-6 text-[#FF2D9E] font-bold">≡ƒöÑ 47 days</td>
++              </tr>
++
++              {/* AK #2 */}
++              <tr className="hover:bg-slate-800/20 border-l-2 border-slate-400">
++                <td className="py-4 px-6 font-bold text-slate-400">#2</td>
++                <td className="py-4 px-6 flex items-center gap-3">
++                  <div className="w-8 h-8 rounded-full bg-[#FF2D9E]/20 text-[#FF2D9E] flex items-center justify-center font-bold text-xs">
++                    AK
++                  </div>
++                  <div>
++                    <div className="font-bold text-white">ARJUN_K</div>
++                    <div className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Expert</div>
++                  </div>
++                </td>
++                <td className="py-4 px-6 text-slate-300 hidden sm:table-cell">247 solved</td>
++                <td className="py-4 px-6 text-[#00FFA8] font-bold">1,847</td>
++                <td className="py-4 px-6 text-[#FF2D9E] font-bold">≡ƒöÑ 14 days</td>
++              </tr>
++
++              {/* PR #3 */}
++              <tr className="hover:bg-slate-800/20 border-l-2 border-[#FF8C2F]">
++                <td className="py-4 px-6 font-bold text-[#FF8C2F]">#3</td>
++                <td className="py-4 px-6 flex items-center gap-3">
++                  <div className="w-8 h-8 rounded-full bg-[#00FFA8]/20 text-[#00FFA8] flex items-center justify-center font-bold text-xs">
++                    PR
++                  </div>
++                  <div>
++                    <div className="font-bold text-white">PRIYA_S</div>
++                    <div className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Expert</div>
++                  </div>
++                </td>
++                <td className="py-4 px-6 text-slate-300 hidden sm:table-cell">289 solved</td>
++                <td className="py-4 px-6 text-[#00FFA8] font-bold">1,923</td>
++                <td className="py-4 px-6 text-[#FF2D9E] font-bold">≡ƒöÑ 31 days</td>
++              </tr>
++
++              {/* RK #4 */}
++              <tr className="hover:bg-slate-800/20">
++                <td className="py-4 px-6 text-slate-400">#4</td>
++                <td className="py-4 px-6 flex items-center gap-3">
++                  <div className="w-8 h-8 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-xs">
++                    RK
++                  </div>
++                  <div>
++                    <div className="font-bold text-white">RAJ_KUMAR</div>
++                    <div className="text-[10px] text-slate-500 uppercase tracking-wider">Specialist</div>
++                  </div>
++                </td>
++                <td className="py-4 px-6 text-slate-300 hidden sm:table-cell">198 solved</td>
++                <td className="py-4 px-6 text-[#00FFA8] font-bold">1,620</td>
++                <td className="py-4 px-6 text-[#FF2D9E] font-bold">≡ƒöÑ 8 days</td>
++              </tr>
++
++              {/* SM #5 */}
++              <tr className="hover:bg-slate-800/20">
++                <td className="py-4 px-6 text-slate-400">#5</td>
++                <td className="py-4 px-6 flex items-center gap-3">
++                  <div className="w-8 h-8 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs">
++                    SM
++                  </div>
++                  <div>
++                    <div className="font-bold text-white">SNEHA_M</div>
++                    <div className="text-[10px] text-slate-500 uppercase tracking-wider">Specialist</div>
++                  </div>
++                </td>
++                <td className="py-4 px-6 text-slate-300 hidden sm:table-cell">176 solved</td>
++                <td className="py-4 px-6 text-[#00FFA8] font-bold">1,544</td>
++                <td className="py-4 px-6 text-[#FF2D9E] font-bold">≡ƒöÑ 22 days</td>
++              </tr>
++            </tbody>
++          </table>
++        </div>
+ 
+-      {/* CTA */}
+-      <div className="cta-section">
+-        <div className="cta-glow"></div>
+-        <div className="section-eyebrow" style={{ justifyContent: 'center', marginBottom: '1.25rem' }}>
+-          <div style={{ width: '32px', height: '1px', background: 'var(--pk)' }}></div>
+-          Get Started Free
+-          <div style={{ width: '32px', height: '1px', background: 'var(--pk)' }}></div>
++        <div className="text-center font-mono text-xs">
++          Your current rank: <span className="text-[#FF2D9E] font-bold">unranked</span> ΓÇö{' '}
++          <button
++            onClick={handleStart}
++            className="text-[#00FFA8] hover:underline hover:text-[#00e295] font-bold transition-all inline-flex items-center gap-1"
++          >
++            Solve 1 problem to enter the leaderboard <span className="translate-y-[1px]">ΓåÆ</span>
++          </button>
+         </div>
+-        <h2 className="cta-title reveal">Ready to enter<br />the <span>Arena</span>?</h2>
+-        <p className="cta-sub reveal">Join thousands of students already training for FAANG, GATE, and placement season. Free forever for students.</p>
+-        <div className="cta-btns reveal">
+-          <button className="btn-primary" onClick={handleStart}>
+-            {currentUser ? 'Go to Dashboard' : 'Create Free Account'}
+-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14">
+-              <path d="M5 12h14M12 5l7 7-7 7" />
+-            </svg>
++      </section>
++
++      {/* SECTION 8 ΓÇö FINAL CTA */}
++      <section className="relative w-full max-w-5xl mx-auto py-32 px-6 z-10 text-center">
++        <div className="absolute inset-0 bg-radial-glow pointer-events-none opacity-40" />
++
++        <div className="relative">
++          <span className="px-3 py-1 border border-[#00FFA8]/30 rounded bg-[#00FFA8]/10 text-[#00FFA8] font-mono text-[9px] tracking-widest uppercase mb-6 inline-block">
++            FREE FOREVER ΓÇö NO CREDIT CARD
++          </span>
++
++          <h2 className="font-orbitron font-black text-4xl md:text-7xl leading-tight mb-8">
++            Your dream job is<br />
++            one problem away.
++          </h2>
++
++          <div className="flex justify-center items-center gap-4 text-sm md:text-lg font-bold mb-8">
++            <span className="text-white">Compete. Learn.</span>
++            <span className="bg-gradient-to-r from-[#FF2D9E] to-[#00FFA8] bg-clip-text text-transparent">
++              Dominate.
++            </span>
++          </div>
++
++          <p className="text-[#9A9AC0] max-w-xl mx-auto mb-10 leading-relaxed font-sans text-sm md:text-base">
++            Join 12,400+ students already using CodeArena to crack placements, GATE, and FAANG interviews. It's completely free. Always will be.
++          </p>
++
++          <button
++            onClick={handleStart}
++            className="w-full sm:w-auto font-orbitron font-bold py-4 px-12 rounded-lg bg-[#00FFA8] hover:bg-[#00e295] text-black tracking-wider shadow-[0_0_35px_rgba(0,255,168,0.5)] hover:shadow-[0_0_45px_rgba(0,255,168,0.7)] hover:-translate-y-1 transition-all text-sm mb-8"
++          >
++            ≡ƒÜÇ Create Free Account ΓÇö Start Today ΓåÆ
+           </button>
+-          <button className="btn-secondary" onClick={handleExplore}>Explore Problems</button>
++
++          {/* Trust badges */}
++          <div className="flex flex-col sm:flex-row justify-center items-center gap-6 text-[#9A9AC0] font-mono text-xs">
++            <span className="flex items-center gap-2">
++              <span className="text-[#00FFA8]">Γ£ô</span> No credit card required
++            </span>
++            <span className="flex items-center gap-2">
++              <span className="text-[#00FFA8]">Γ£ô</span> 2,500+ problems free
++            </span>
++            <span className="flex items-center gap-2">
++              <span className="text-[#00FFA8]">Γ£ô</span> Trusted by students from IIT, NIT, BITS
++            </span>
++          </div>
+         </div>
+-      </div>
++      </section>
+ 
+       {/* FOOTER */}
+-      <footer>
+-        <div className="footer-logo">CODE<span>ARENA</span></div>
+-        <ul className="footer-links">
+-          <li><a href="#problems">Problems</a></li>
+-          <li><a href="#courses">Courses</a></li>
+-          <li><a href="#features">Features</a></li>
+-          <li><a href="#community">Community</a></li>
+-        </ul>
+-        <div className="footer-copy">┬⌐ 2025 CodeArena ┬╖ Built for students, by students</div>
++      <footer className="relative border-t border-[#FF2D9E]/10 bg-[#0D0D1E]/95 py-12 px-6 md:px-12 z-10 flex flex-col md:flex-row items-center justify-between gap-6">
++        <div className="flex flex-col items-center md:items-start gap-2">
++          <div className="font-orbitron font-black text-lg tracking-widest text-[#FF2D9E]">
++            CODE<span className="text-[#00FFA8]">ARENA</span>
++          </div>
++          <p className="text-slate-500 font-mono text-xs">
++            Built for students. Free forever.
++          </p>
++        </div>
++
++        {/* Center links */}
++        <div className="flex flex-wrap justify-center items-center gap-6 font-mono text-xs text-slate-400">
++          <a href="/problems" className="hover:text-[#00FFA8] transition-colors">Problems</a>
++          <a href="/courses" className="hover:text-[#00FFA8] transition-colors">Courses</a>
++          <a href="/contest" className="hover:text-[#00FFA8] transition-colors">Contests</a>
++          <a href="/leaderboard" className="hover:text-[#00FFA8] transition-colors">Leaderboard</a>
++          <a href="/communities" className="hover:text-[#00FFA8] transition-colors">Community</a>
++          <span className="text-slate-700 hidden md:inline">|</span>
++          <a href="#about" className="hover:text-[#FF2D9E] transition-colors">About</a>
++          <a href="#privacy" className="hover:text-[#FF2D9E] transition-colors">Privacy</a>
++        </div>
++
++        {/* Right copyright */}
++        <div className="text-slate-500 font-mono text-xs">
++          ┬⌐ 2025 CodeArena
++        </div>
+       </footer>
+     </div>
+   );

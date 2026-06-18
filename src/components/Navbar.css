@@ -426,3 +426,164 @@
   background: rgba(0, 255, 136, 0.06);
 }
 
+/* ── Hamburger Menu Toggle ── */
+.cp-menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 20px;
+  height: 16px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1001;
+  outline: none;
+}
+
+.cp-menu-bar {
+  width: 100%;
+  height: 2px;
+  background-color: #8888AA;
+  transition: all 0.3s ease;
+}
+
+.cp-menu-toggle.open .cp-menu-bar:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+  background-color: #00FF88;
+}
+
+.cp-menu-toggle.open .cp-menu-bar:nth-child(2) {
+  opacity: 0;
+}
+
+.cp-menu-toggle.open .cp-menu-bar:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+  background-color: #00FF88;
+}
+
+/* ── Mobile Drawer ── */
+.cp-mobile-drawer {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 300px;
+  height: 100vh;
+  background: rgba(15, 15, 26, 0.95);
+  backdrop-filter: blur(20px);
+  border-left: 2px solid #FF2D78;
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 24px;
+}
+
+.cp-mobile-drawer.open {
+  right: 0;
+}
+
+.cp-mobile-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 45, 120, 0.2);
+}
+
+.cp-mobile-logo {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #00FF88;
+  letter-spacing: 2px;
+}
+
+.cp-mobile-close {
+  background: transparent;
+  border: none;
+  color: #FF2D78;
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+
+.cp-mobile-nav-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.cp-mobile-nav-link {
+  display: block;
+  padding: 10px 16px;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #8888AA;
+  text-decoration: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.cp-mobile-nav-link:hover,
+.cp-mobile-nav-link.active {
+  color: #00FF88;
+  background: rgba(0, 255, 136, 0.05);
+  border-color: rgba(0, 255, 136, 0.2);
+  text-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
+}
+
+/* ── Media Queries ── */
+@media (max-width: 992px) {
+  .cp-navbar {
+    padding: 0 16px;
+    gap: 12px;
+  }
+  
+  .cp-nav-links {
+    display: none;
+  }
+  
+  .cp-menu-toggle {
+    display: flex;
+  }
+  
+  .cp-streak,
+  .cp-coins {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+  }
+  
+  .cp-streak-icon,
+  .cp-coins-icon {
+    font-size: 0.8rem;
+  }
+
+  .cp-logo-img {
+    height: 38px;
+  }
+}
+
+@media (max-width: 480px) {
+  .cp-streak,
+  .cp-coins {
+    display: none; /* Hide streak and coins on tiny screens to fit navigation controls */
+  }
+  
+  .cp-nav-right {
+    gap: 8px;
+  }
+}
+
